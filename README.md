@@ -1,5 +1,5 @@
 # bfd-ceph-swifta
-A new CEPH swift driver that build on top of Sahara-extra.
+A new CEPH swift driver that based on Sahara-extra.
 ## Usage:
 1) Replace the value of "fs.swift.impl" in core-site.xml to "org.apache.hadoop.fs.swifta.snative.SwiftNativeFileSystem".
 

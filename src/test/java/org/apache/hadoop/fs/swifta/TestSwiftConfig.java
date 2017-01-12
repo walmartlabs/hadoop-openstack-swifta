@@ -45,7 +45,7 @@ import java.net.URISyntaxException;
 public class TestSwiftConfig extends Assert {
 
 
-  public static final String SERVICE = "openstack";
+  public static final String SERVICE = "strati";
 
   @Test(expected = org.apache.hadoop.fs.swifta.exceptions.SwiftConfigurationException.class)
   public void testEmptyUrl() throws Exception {
@@ -188,7 +188,7 @@ public class TestSwiftConfig extends Assert {
   private SwiftRestClient mkInstance(Configuration configuration) throws
           IOException,
           URISyntaxException {
-    URI uri = new URI("swift://container.openstack/");
+    URI uri = new URI("swift://container." + SERVICE + "/");
     return SwiftRestClient.getInstance(uri, configuration);
   }
 }

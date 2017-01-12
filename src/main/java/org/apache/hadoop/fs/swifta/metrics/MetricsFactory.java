@@ -16,6 +16,7 @@ public class MetricsFactory {
 
   private SwiftMetric metric;
 
+  @SuppressWarnings("rawtypes")
   public static MetricsFactory getMetricsFactory(Class clazz) {
     String name = clazz.getSimpleName();
     if (!metricsMap.containsKey(name)) {

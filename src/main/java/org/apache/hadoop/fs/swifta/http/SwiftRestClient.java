@@ -576,7 +576,7 @@ public final class SwiftRestClient {
    * @throws FileNotFoundException if nothing is at the end of the URI -that is, the directory is
    *         empty
    */
-  public byte[] findObjectsByPrefix(SwiftObjectPath path, final Header... requestHeaders)
+  private byte[] findObjectsByPrefix(SwiftObjectPath path, final Header... requestHeaders)
       throws IOException {
     preRemoteCommand("findObjectsByPrefix");
     URI uri;
@@ -910,6 +910,7 @@ public final class SwiftRestClient {
       };
     }
 
+    @SuppressWarnings("unused")
     @Override
     public AccessToken extractResult(AuthPostMethod method) throws IOException {
       // initial check for failure codes leading to authentication failures

@@ -399,6 +399,7 @@ public class SwiftNativeFileSystem extends FileSystem {
    * @return boolean file is created; false: no need to create
    * @throws IOException if specified path is file instead of directory
    */
+  @SuppressWarnings("unused")
   private boolean mkdir(Path path) throws IOException {
     Path directory = makeAbsolute(path);
 

@@ -576,6 +576,7 @@ public final class SwiftRestClient {
    * @throws FileNotFoundException if nothing is at the end of the URI -that is, the directory is
    *         empty
    */
+  @SuppressWarnings("unused")
   private byte[] findObjectsByPrefix(SwiftObjectPath path, final Header... requestHeaders)
       throws IOException {
     preRemoteCommand("findObjectsByPrefix");

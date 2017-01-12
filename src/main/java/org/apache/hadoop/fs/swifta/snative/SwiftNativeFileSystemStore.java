@@ -882,6 +882,7 @@ public class SwiftNativeFileSystemStore {
       int prefixStripCount = srcURI.length() + 1;
       Map<String, Future<Boolean>> copies = new HashMap<String, Future<Boolean>>();
       ThreadManager tm = new ThreadManager();
+      tm.createThreadManager();
       for (FileStatus fileStatus : childStats) {
         final Path copySourcePath = fileStatus.getPath();
         String copySourceURI = copySourcePath.toUri().toString();

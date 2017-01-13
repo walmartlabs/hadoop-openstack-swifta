@@ -23,7 +23,8 @@ public class ThreadManager {
   }
 
   public void createThreadManager() {
-    int processes = Runtime.getRuntime().availableProcessors() * 5;
+    // TODO: Make this able to config.
+    int processes = Runtime.getRuntime().availableProcessors() * 20;
     // final ThreadFactory threadFactory =
     // new ThreadFactoryBuilder().setNameFormat("swifta-thread-%d").setDaemon(true).build();
     ThreadPoolExecutor pool = this.createThreadManager(processes, processes, null);

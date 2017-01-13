@@ -399,12 +399,11 @@ public class SwiftNativeFileSystem extends FileSystem {
    * @return boolean file is created; false: no need to create
    * @throws IOException if specified path is file instead of directory
    */
-  @SuppressWarnings("unused")
-  private boolean mkdir(Path path) throws IOException {
+  public boolean mkdir(Path path) throws IOException {
     Path directory = makeAbsolute(path);
 
     if (!directory.getName().endsWith("/")) {
-      directory.suffix("/");
+      directory = directory.suffix("/");
     }
 
     // if directory is already the container root, create the container
@@ -446,11 +445,11 @@ public class SwiftNativeFileSystem extends FileSystem {
    */
   private boolean shouldCreate(Path directory) throws IOException {
     FileStatus fileStatus;
-    boolean shouldCreate;
+    boolean shouldCreate = false;
     if (isRoot(directory)) {
       // If the directory is the container root
       // its the base dir, bail out immediately
-      return false;
+      return shouldCreate;
     }
     try {
       // find out about the path

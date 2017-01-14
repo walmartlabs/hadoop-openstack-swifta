@@ -858,7 +858,7 @@ public class SwiftNativeFileSystemStore {
       }
 
 
-      LOG.info("mv  " + srcObject + " " + targetPath);
+      LOG.info("moving  " + srcObject + " " + targetPath);
 
       logDirectory("Directory to copy ", srcObject, childStats);
 

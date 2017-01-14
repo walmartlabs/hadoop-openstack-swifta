@@ -797,14 +797,10 @@ public class SwiftNativeFileSystemStore {
       // source is a simple file OR a partitioned file
       // outcomes:
       // #1 dest exists and is file: fail
-      // #2 dest exists and is dir: destination path becomes under dest dir
-      // #3 dest does not exist: use dest as name
+      // #2 dest is a dir or doesn't exist: use dest as name
+      destPath = toObjectPath(dst);
       if (destExists) {
-
-        if (destIsDir) {
-          // outcome #2 -move to subdir of dest
-          destPath = toObjectPath(new Path(dst, src.getName()));
-        } else {
+        if (!destIsDir) {
           // outcome #1 dest it's a file: fail if differeent
           if (!renamingOnToSelf) {
             throw new SwiftOperationFailedException(
@@ -815,9 +811,6 @@ public class SwiftNativeFileSystemStore {
             return;
           }
         }
-      } else {
-        // outcome #3 -new entry
-        destPath = toObjectPath(dst);
       }
       int childCount = childStats.size();
       // here there is one of:
@@ -844,9 +837,8 @@ public class SwiftNativeFileSystemStore {
       // here the source exists and is a directory
       // outcomes (given we know the parent dir exists if we get this far)
       // #1 destination is a file: fail
-      // #2 destination is a directory: create a new dir under that one
-      // #3 destination doesn't exist: create a new dir with that name
-      // #3 and #4 are only allowed if the dest path is not == or under src
+      // #2 destination is a dir or doesn't exist: use dest as name
+      // #3 if the dest path is not == or under src: fail
 
 
       if (destExists && !destIsDir) {
@@ -855,13 +847,9 @@ public class SwiftNativeFileSystemStore {
             "the source is a directory, but not the destination");
       }
       Path targetPath;
-      if (destExists) {
-        // #2 destination is a directory: create a new dir under that one
-        targetPath = new Path(dst, src.getName());
-      } else {
-        // #3 destination doesn't exist: create a new dir with that name
-        targetPath = dst;
-      }
+      // #2 destination is a dir or doesn't exist: use dest as name
+      targetPath = dst;
+
       SwiftObjectPath targetObjectPath = toObjectPath(targetPath);
       // final check for any recursive operations
       if (srcObject.isEqualToOrParentOf(targetObjectPath)) {

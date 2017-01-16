@@ -77,6 +77,7 @@ public class SwiftNativeFileSystemStore {
   private static final Log LOG = LogFactory.getLog(SwiftNativeFileSystemStore.class);
   private static final MetricsFactory metric =
       MetricsFactory.getMetricsFactory(SwiftNativeFileSystemStore.class);
+  private static final int MAX_LIMIT = 10000;
   private URI uri;
   private SwiftRestClient swiftRestClient;
   private DNSToSwitchMapping dnsToSwitchMapping;
@@ -499,7 +500,9 @@ public class SwiftNativeFileSystemStore {
 
         return files;
       }
-      marker = fileStatusList.get(fileStatusList.size() - 1).getName();
+      if (fileStatusList.size() == MAX_LIMIT) {
+        marker = fileStatusList.get(fileStatusList.size() - 1).getName();
+      }
       if (LOG.isDebugEnabled()) {
         LOG.debug("Marker:" + marker);
       }
@@ -799,18 +802,17 @@ public class SwiftNativeFileSystemStore {
       // #1 dest exists and is file: fail
       // #2 dest is a dir or doesn't exist: use dest as name
       destPath = toObjectPath(dst);
-      if (destExists) {
-        if (!destIsDir) {
-          // outcome #1 dest it's a file: fail if differeent
-          if (!renamingOnToSelf) {
-            throw new SwiftOperationFailedException(
-                "cannot rename a file over one that already exists");
-          } else {
-            // is mv self self where self is a file. this becomes a no-op
-            LOG.debug("Renaming file onto self: no-op => success");
-            return;
-          }
+      if (destExists && !destIsDir) {
+        // outcome #1 dest it's a file: fail if differeent
+        if (!renamingOnToSelf) {
+          throw new SwiftOperationFailedException(
+              "cannot rename a file over one that already exists");
+        } else {
+          // is mv self self where self is a file. this becomes a no-op
+          LOG.debug("Renaming file onto self: no-op => success");
+          return;
         }
+
       }
       int childCount = childStats.size();
       // here there is one of:

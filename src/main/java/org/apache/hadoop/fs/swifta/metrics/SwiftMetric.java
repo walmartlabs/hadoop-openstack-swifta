@@ -17,7 +17,7 @@ public interface SwiftMetric {
   public String name();
 
   /**
-   * +1 the total count.
+   * Increase the instance number.
    * 
    * @param objects
    * @return
@@ -25,7 +25,7 @@ public interface SwiftMetric {
   public int increase(Object... objects) throws SwiftMetricWrongParametersException;
 
   /**
-   * -1 the total count.
+   * Decrease the instance number.
    * 
    * @param objects
    * @return

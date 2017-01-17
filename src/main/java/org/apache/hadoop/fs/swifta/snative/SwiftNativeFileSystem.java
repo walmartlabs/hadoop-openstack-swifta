@@ -135,7 +135,6 @@ public class SwiftNativeFileSystem extends FileSystem {
    */
   @Override
   public URI getUri() {
-
     return uri;
   }
 
@@ -509,7 +508,9 @@ public class SwiftNativeFileSystem extends FileSystem {
   @Override
   public FSDataOutputStream append(Path f, int bufferSize, Progressable progress)
       throws IOException {
-    LOG.debug("SwiftFileSystem.append");
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("SwiftFileSystem.append");
+    }
     throw new SwiftUnsupportedFeatureException("Not supported: append()");
   }
 
@@ -519,7 +520,9 @@ public class SwiftNativeFileSystem extends FileSystem {
   @Override
   public FSDataOutputStream create(Path file, FsPermission permission, boolean overwrite,
       int bufferSize, short replication, long blockSize, Progressable progress) throws IOException {
-    LOG.debug("SwiftFileSystem.create");
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("SwiftFileSystem.create");
+    }
 
     FileStatus fileStatus = null;
     Path absolutePath = makeAbsolute(file);

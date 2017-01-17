@@ -271,36 +271,38 @@ public class SwiftNativeFileSystemStore {
     return new SwiftFileStatus(length, isDir, 1, getBlocksize(), lastModified, correctSwiftPath);
   }
 
+  private Header[] handleCache(LRUCache<Header[]> lru, String path) {
+    Header[] headers = null;
+    if (!swiftRestClient.getClientConfig().isUseHeaderCache()) {
+      return null;
+    }
+    headers = lru.get(path);
+    if (LOG.isDebugEnabled() && headers != null) {
+      LOG.debug("[stat:newest]Found cache for " + path + "; cache size is " + lru1.getSize());
+    }
+    return headers;
+  }
+
+  private void setCache(LRUCache<Header[]> lru, String path, Header[] headers) {
+    if (swiftRestClient.getClientConfig().isUseHeaderCache() && headers != null) {
+      lru.set(path, headers);
+    }
+  }
+
   private Header[] stat(SwiftObjectPath objectPath, boolean newest) throws IOException {
     Header[] headers = null;
     if (newest) {
-      if (swiftRestClient.getClientConfig().isUseHeaderCache()) {
-        headers = lru1.get(objectPath.toUriPath());
-      }
+      headers = this.handleCache(lru1, objectPath.toUriPath());
       if (headers == null) {
         headers = swiftRestClient.headRequest("getObjectMetadata-newest", objectPath,
             SwiftRestClient.NEWEST);
-        if (swiftRestClient.getClientConfig().isUseHeaderCache() && headers != null)
-          lru1.set(objectPath.toUriPath(), headers);
-      } else {
-        if (swiftRestClient.getClientConfig().isUseHeaderCache()) {
-          LOG.debug("[stat:newest]Found cache for " + objectPath.toUriPath() + ";cache size is "
-              + lru1.getSize());
-        }
+        this.setCache(lru1, objectPath.toUriPath(), headers);
       }
     } else {
-      if (swiftRestClient.getClientConfig().isUseHeaderCache()) {
-        headers = lru2.get(objectPath.toUriPath());
-      }
+      headers = this.handleCache(lru2, objectPath.toUriPath());
       if (headers == null) {
         headers = swiftRestClient.headRequest("getObjectMetadata", objectPath);
-        if (swiftRestClient.getClientConfig().isUseHeaderCache() && headers != null)
-          lru2.set(objectPath.toUriPath(), headers);
-      } else {
-        if (swiftRestClient.getClientConfig().isUseHeaderCache()) {
-          LOG.debug("[stat]Found cache for " + objectPath.toUriPath() + ";cache size is "
-              + lru2.getSize());
-        }
+        this.setCache(lru2, objectPath.toUriPath(), headers);
       }
     }
     return headers;

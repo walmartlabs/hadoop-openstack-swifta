@@ -22,12 +22,8 @@ public class ThreadManager {
         new LinkedBlockingQueue<Runnable>(), factory);
   }
 
-  public void createThreadManager() {
-    // TODO: Make this able to config.
-    int processes = Runtime.getRuntime().availableProcessors() * 20;
-    // final ThreadFactory threadFactory =
-    // new ThreadFactoryBuilder().setNameFormat("swifta-thread-%d").setDaemon(true).build();
-    ThreadPoolExecutor pool = this.createThreadManager(processes, processes, null);
+  public void createThreadManager(int maxThread) {
+    ThreadPoolExecutor pool = this.createThreadManager(maxThread, maxThread, null);
     pool.allowCoreThreadTimeOut(true);
     threadPool = pool;
   }

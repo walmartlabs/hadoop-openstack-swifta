@@ -17,6 +17,7 @@ package org.apache.hadoop.fs.swifta.auth.entities;
 
 import org.apache.hadoop.fs.swifta.auth.Roles;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.List;
 
@@ -46,7 +47,8 @@ public class User {
   /**
    * links to user roles
    */
-  private List<Object> roles_links;
+  @JsonProperty("roles_links")
+  private List<Object> rolesLinks;
 
   /**
    * human readable username in Keystone
@@ -100,15 +102,15 @@ public class User {
   /**
    * @return user roles links
    */
-  public List<Object> getRoles_links() {
-    return roles_links;
+  public List<Object> getRolesLinks() {
+    return rolesLinks;
   }
 
   /**
    * @param roles_links user roles links
    */
-  public void setRoles_links(List<Object> roles_links) {
-    this.roles_links = roles_links;
+  public void setRolesLinks(List<Object> rolesLinks) {
+    this.rolesLinks = rolesLinks;
   }
 
   /**

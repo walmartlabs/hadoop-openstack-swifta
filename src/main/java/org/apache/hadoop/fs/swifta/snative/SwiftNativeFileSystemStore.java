@@ -654,7 +654,7 @@ public class SwiftNativeFileSystemStore {
   public void deleteObjects(FileStatus[] statuses) throws IOException {
     Map<String, Future<Boolean>> deletes = new HashMap<String, Future<Boolean>>();
     ThreadManager tm = new ThreadManager();
-    tm.createThreadManager();
+    tm.createThreadManager(this.swiftRestClient.getClientConfig().getMaxThreadsInPool());
     for (FileStatus entryStatus : statuses) {
       final Path entryPath = entryStatus.getPath();
       // boolean deleted = deleteObject(entryPath);
@@ -884,7 +884,7 @@ public class SwiftNativeFileSystemStore {
       int prefixStripCount = srcURI.length() + 1;
       Map<String, Future<Boolean>> copies = new HashMap<String, Future<Boolean>>();
       ThreadManager tm = new ThreadManager();
-      tm.createThreadManager();
+      tm.createThreadManager(this.swiftRestClient.getClientConfig().getMaxThreadsInPool());
       for (FileStatus fileStatus : childStats) {
         final Path copySourcePath = fileStatus.getPath();
         String copySourceURI = copySourcePath.toUri().toString();

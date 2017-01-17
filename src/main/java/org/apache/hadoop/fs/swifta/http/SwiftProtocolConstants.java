@@ -196,6 +196,11 @@ public class SwiftProtocolConstants {
    */
   public static final String SWIFT_MAX_HOST_CONNECTIONS = FS_SWIFT + ".connections.max.host";
 
+  /**
+   * The pool size for thread manager.
+   */
+  public static final String SWIFT_MAX_CONNECTIONS_IN_POOL = FS_SWIFT + ".connections.max.pool";
+
   public static final String HEADER_USER_AGENT = "User-Agent";
 
   /**

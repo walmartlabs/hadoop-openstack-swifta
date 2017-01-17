@@ -19,6 +19,7 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_CONT
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_INPUT_STREAM_BUFFER_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_LAZY_SEEK;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_LOCATION_AWARE_PROPERTY;
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_CONNECTIONS_IN_POOL;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_HOST_CONNECTIONS;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_TOTAL_CONNECTIONS;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_PARTITION_SIZE;
@@ -199,6 +200,11 @@ public class SwiftClientConfig {
   private Configuration conf;
   private Properties props;
 
+  /**
+   * Max threads for thread manager.
+   */
+  private int maxThreadsInPool = 0;
+
 
 
   /**
@@ -234,20 +240,27 @@ public class SwiftClientConfig {
     maxCoreConnections = conf.getInt(SWIFT_MAX_HOST_CONNECTIONS, 0);
 
     maxTotalConnections = conf.getInt(SWIFT_MAX_TOTAL_CONNECTIONS, 0);
+    int defaultConnections = Runtime.getRuntime().availableProcessors() * 20;
     /**
      * Default thread pool number for http client.
      */
     if (maxCoreConnections < 1) {
-      maxCoreConnections = Runtime.getRuntime().availableProcessors() * 20;
+      maxCoreConnections = defaultConnections;
     }
     if (maxTotalConnections < 1) {
-      maxTotalConnections = Runtime.getRuntime().availableProcessors() * 20;
+      maxTotalConnections = defaultConnections;
     }
     lruCacheSize = conf.getInt(LRU_SIZE, DEFAULT_LRU_SIZE);
     this.fileLen = new LRUCache<Long>(lruCacheSize);
     // Default set to false.
     isLazySeek = conf.getBoolean(SWIFT_LAZY_SEEK, Boolean.FALSE);
     useHeaderCache = conf.getBoolean(USE_HEADER_CACHE, Boolean.TRUE);
+
+    maxThreadsInPool = conf.getInt(SWIFT_MAX_CONNECTIONS_IN_POOL, 0);
+
+    if (maxThreadsInPool < 1) {
+      maxThreadsInPool = defaultConnections;
+    }
 
     if (apiKey == null && password == null) {
       throw new SwiftConfigurationException("Configuration for " + filesystemURI
@@ -601,6 +614,10 @@ public class SwiftClientConfig {
 
   public void setLazySeek(boolean isLazySeek) {
     this.isLazySeek = isLazySeek;
+  }
+
+  public int getMaxThreadsInPool() {
+    return maxThreadsInPool;
   }
 
 }

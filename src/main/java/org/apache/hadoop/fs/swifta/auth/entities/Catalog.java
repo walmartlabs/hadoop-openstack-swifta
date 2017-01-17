@@ -16,6 +16,7 @@
 package org.apache.hadoop.fs.swifta.auth.entities;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.List;
 
@@ -34,7 +35,8 @@ public class Catalog {
    * endpoint links are additional information description which aren't used in Hadoop and Swift
    * integration scope
    */
-  private List<Object> endpoints_links;
+  @JsonProperty("endpoints_links")
+  private List<Object> endpointsLinks;
   /**
    * Openstack REST service name. In our case name = "keystone"
    */
@@ -62,15 +64,15 @@ public class Catalog {
   /**
    * @return list of endpoint links
    */
-  public List<Object> getEndpoints_links() {
-    return endpoints_links;
+  public List<Object> getEndpointsLinks() {
+    return endpointsLinks;
   }
 
   /**
    * @param endpoints_links list of endpoint links
    */
-  public void setEndpoints_links(List<Object> endpoints_links) {
-    this.endpoints_links = endpoints_links;
+  public void setEndpointsLinks(List<Object> endpointsLinks) {
+    this.endpointsLinks = endpointsLinks;
   }
 
   /**

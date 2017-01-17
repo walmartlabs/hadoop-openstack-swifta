@@ -203,7 +203,7 @@ public class SwiftClientConfig {
   /**
    * Max threads for thread manager.
    */
-  private int maxThreadsInPool = 0;
+  private int maxThreadsInPool;
 
 
 

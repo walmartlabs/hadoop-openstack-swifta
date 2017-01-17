@@ -1,6 +1,7 @@
 package org.apache.hadoop.fs.swifta.snative;
 
-import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * LRU Cache for reduce HEAD requests.
@@ -54,7 +55,7 @@ public class LRUCache<T> {
     return res;
   }
 
-  private Hashtable<String, DLinkedNode> cache = new Hashtable<String, DLinkedNode>();
+  private Map<String, DLinkedNode> cache = new ConcurrentHashMap<String, DLinkedNode>();
   private int count;
   private int capacity;
   private DLinkedNode head, tail;
@@ -84,6 +85,16 @@ public class LRUCache<T> {
     this.moveToHead(node);
 
     return node.value;
+  }
+
+  public boolean remove(String key) {
+
+    DLinkedNode node = cache.get(key);
+    if (node == null) {
+      return Boolean.FALSE; // should raise exception here.
+    }
+    this.removeNode(node);
+    return Boolean.TRUE;
   }
 
   public int getSize() {

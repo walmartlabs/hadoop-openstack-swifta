@@ -625,6 +625,7 @@ public class SwiftNativeFileSystemStore {
   public boolean deleteObject(Path path) throws IOException {
     SwiftObjectPath swiftObjectPath = toObjectPath(path);
     // if (!SwiftUtils.isRootDir(swiftObjectPath)) {
+    this.clearCache(path.toUri().getPath());
     return swiftRestClient.delete(swiftObjectPath);
     // } else {
     // if (LOG.isDebugEnabled()) {
@@ -632,6 +633,16 @@ public class SwiftNativeFileSystemStore {
     // }
     // return true;
     // }
+  }
+
+  private void clearCache(String path) {
+    if (swiftRestClient.getClientConfig().isUseHeaderCache()) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("LRU cache: Deleting path " + path);
+      }
+      lru1.remove(path);
+      lru2.remove(path);
+    }
   }
 
   /**
@@ -650,6 +661,7 @@ public class SwiftNativeFileSystemStore {
       deletes.put(entryPath.toString(), tm.getPool().submit(new Callable<Boolean>() {
         public Boolean call() throws Exception {
           SwiftObjectPath swiftObjectPath = toObjectPath(entryPath);
+          clearCache(swiftObjectPath.toUriPath());
           return swiftRestClient.delete(swiftObjectPath);
         }
       }));

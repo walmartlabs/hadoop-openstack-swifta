@@ -104,7 +104,7 @@ public class LRUCache<T> {
       this.remove(key);
       return null;
     }
-    // move the accessed node to the head;
+    // Move the accessed node to the head.
     this.moveToHead(node);
     node.value.setAccessTime(System.currentTimeMillis());
     return node.value.getValue();
@@ -150,6 +150,8 @@ public class LRUCache<T> {
       node.value = new CacheObject<T>(value);
       this.moveToHead(node);
     }
-
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("LRU cache size " + cache.size());
+    }
   }
 }

@@ -201,6 +201,13 @@ public class SwiftProtocolConstants {
    */
   public static final String SWIFT_MAX_CONNECTIONS_IN_POOL = FS_SWIFT + ".connections.max.pool";
 
+  public static final String LRU_SIZE = FS_SWIFT + ".cache.size";
+
+  /**
+   * In milliseconds.
+   */
+  public static final String LRU_LIVE_TIME = FS_SWIFT + ".cache.live.time";
+
   public static final String HEADER_USER_AGENT = "User-Agent";
 
   /**
@@ -213,8 +220,6 @@ public class SwiftProtocolConstants {
    * Key for passing the service name as a property -not read from the configuration : {@value}
    */
   public static final String DOT_SERVICE = ".SERVICE-NAME";
-
-  public static final String LRU_SIZE = ".LRU-SIZE";
 
 
   /**

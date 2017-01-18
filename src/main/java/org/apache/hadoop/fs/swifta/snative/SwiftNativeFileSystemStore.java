@@ -104,10 +104,12 @@ public class SwiftNativeFileSystemStore {
     metric.increase(this);
     metric.report();
     if (lru1 == null) {
-      lru1 = new LRUCache<Header[]>(swiftRestClient.getClientConfig().getLruCacheSize());
+      lru1 = new LRUCache<Header[]>(swiftRestClient.getClientConfig().getLruCacheSize(),
+          swiftRestClient.getClientConfig().getCacheLiveTime());
     }
     if (lru2 == null) {
-      lru2 = new LRUCache<Header[]>(swiftRestClient.getClientConfig().getLruCacheSize());
+      lru2 = new LRUCache<Header[]>(swiftRestClient.getClientConfig().getLruCacheSize(),
+          swiftRestClient.getClientConfig().getCacheLiveTime());
     }
 
   }

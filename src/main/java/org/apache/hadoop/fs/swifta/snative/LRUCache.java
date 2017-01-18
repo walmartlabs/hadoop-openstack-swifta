@@ -1,5 +1,8 @@
 package org.apache.hadoop.fs.swifta.snative;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -8,9 +11,18 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 public class LRUCache<T> {
+
+
+  private final static Log LOG = LogFactory.getLog(LRUCache.class);
+  private final Map<String, DLinkedNode> cache = new ConcurrentHashMap<String, DLinkedNode>();
+  private int count;
+  private int capacity;
+  private DLinkedNode head, tail;
+  private long liveTime;
+
   class DLinkedNode {
     String key;
-    T value;
+    CacheObject<T> value;
     DLinkedNode pre;
     DLinkedNode post;
   }
@@ -30,6 +42,7 @@ public class LRUCache<T> {
    * Remove an existing node from the linked list.
    */
   private void removeNode(DLinkedNode node) {
+    String key = node.key;
     DLinkedNode pre = node.pre;
     DLinkedNode post = node.post;
     if (pre != null) {
@@ -38,6 +51,7 @@ public class LRUCache<T> {
     if (post != null) {
       post.pre = pre;
     }
+    cache.remove(key);
   }
 
   /**
@@ -48,19 +62,13 @@ public class LRUCache<T> {
     this.addNode(node);
   }
 
-  // pop the current tail.
   private DLinkedNode popTail() {
     DLinkedNode res = tail.pre;
     this.removeNode(res);
     return res;
   }
 
-  private Map<String, DLinkedNode> cache = new ConcurrentHashMap<String, DLinkedNode>();
-  private int count;
-  private int capacity;
-  private DLinkedNode head, tail;
-
-  public LRUCache(int capacity) {
+  private void init(int capacity) {
     this.count = 0;
     this.capacity = capacity;
 
@@ -74,24 +82,39 @@ public class LRUCache<T> {
     tail.pre = head;
   }
 
+  public LRUCache(int capacity, long liveTime) {
+    this.init(capacity);
+    this.liveTime = liveTime;
+  }
+
   public T get(String key) {
 
     DLinkedNode node = cache.get(key);
     if (node == null) {
-      return null; // should raise exception here.
+      return null;
     }
 
+    /**
+     * Only expires cache when use.
+     */
+    if (node.value == null || node.value.isExpired(liveTime)) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Expiring cache entry " + key);
+      }
+      this.remove(key);
+      return null;
+    }
     // move the accessed node to the head;
     this.moveToHead(node);
-
-    return node.value;
+    node.value.setAccessTime(System.currentTimeMillis());
+    return node.value.getValue();
   }
 
   public boolean remove(String key) {
 
     DLinkedNode node = cache.get(key);
     if (node == null) {
-      return Boolean.FALSE; // should raise exception here.
+      return Boolean.FALSE;
     }
     this.removeNode(node);
     return Boolean.TRUE;
@@ -108,7 +131,7 @@ public class LRUCache<T> {
 
       DLinkedNode newNode = new DLinkedNode();
       newNode.key = key;
-      newNode.value = value;
+      newNode.value = new CacheObject<T>(value);
 
       this.cache.put(key, newNode);
       this.addNode(newNode);
@@ -124,7 +147,7 @@ public class LRUCache<T> {
       }
     } else {
       // update the value.
-      node.value = value;
+      node.value = new CacheObject<T>(value);
       this.moveToHead(node);
     }
 

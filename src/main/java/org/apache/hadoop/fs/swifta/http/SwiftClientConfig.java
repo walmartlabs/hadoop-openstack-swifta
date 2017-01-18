@@ -9,6 +9,7 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SW
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SWIFT_PARTITION_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SWIFT_REQUEST_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_THROTTLE_DELAY;
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.LRU_LIVE_TIME;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.LRU_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_APIKEY_PROPERTY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_AUTH_ENDPOINT_PREFIX;
@@ -49,7 +50,6 @@ import org.apache.hadoop.fs.swifta.auth.KeystoneApiKeyCredentials;
 import org.apache.hadoop.fs.swifta.auth.PasswordAuthenticationRequest;
 import org.apache.hadoop.fs.swifta.auth.PasswordCredentials;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftConfigurationException;
-import org.apache.hadoop.fs.swifta.snative.LRUCache;
 import org.apache.hadoop.fs.swifta.util.DurationStatsTable;
 
 import java.net.URI;
@@ -62,6 +62,11 @@ public class SwiftClientConfig {
   private final static Log LOG = LogFactory.getLog(SwiftClientConfig.class);
 
   private final static int DEFAULT_LRU_SIZE = 100;
+
+  /**
+   * In milliseconds.
+   */
+  private final static long DEFAULT_EXPIRES_TIME = 10 * 60 * 1000;
 
   /**
    * the authentication endpoint as supplied in the configuration
@@ -187,12 +192,12 @@ public class SwiftClientConfig {
    */
   private int lruCacheSize;
 
-  private boolean useHeaderCache;
-
   /**
-   * Cache for file size
+   * How long the LRU cache lives
    */
-  private LRUCache<Long> fileLen;
+  private long cacheLiveTime;
+
+  private boolean useHeaderCache;
 
   private DurationStatsTable durationStats = new DurationStatsTable();
 
@@ -251,7 +256,7 @@ public class SwiftClientConfig {
       maxTotalConnections = defaultConnections;
     }
     lruCacheSize = conf.getInt(LRU_SIZE, DEFAULT_LRU_SIZE);
-    this.fileLen = new LRUCache<Long>(lruCacheSize);
+    this.cacheLiveTime = conf.getLong(LRU_LIVE_TIME, DEFAULT_EXPIRES_TIME);
     // Default set to false.
     isLazySeek = conf.getBoolean(SWIFT_LAZY_SEEK, Boolean.FALSE);
     useHeaderCache = conf.getBoolean(USE_HEADER_CACHE, Boolean.TRUE);
@@ -588,14 +593,6 @@ public class SwiftClientConfig {
     this.useHeaderCache = useHeaderCache;
   }
 
-  public LRUCache<Long> getFileLen() {
-    return fileLen;
-  }
-
-  public void setFileLen(LRUCache<Long> fileLen) {
-    this.fileLen = fileLen;
-  }
-
   public DurationStatsTable getDurationStats() {
     return durationStats;
   }
@@ -618,6 +615,10 @@ public class SwiftClientConfig {
 
   public int getMaxThreadsInPool() {
     return maxThreadsInPool;
+  }
+
+  public long getCacheLiveTime() {
+    return cacheLiveTime;
   }
 
 }

@@ -627,7 +627,7 @@ public class SwiftNativeFileSystemStore {
   public boolean deleteObject(Path path) throws IOException {
     SwiftObjectPath swiftObjectPath = toObjectPath(path);
     // if (!SwiftUtils.isRootDir(swiftObjectPath)) {
-    this.clearCache(path.toUri().getPath());
+    this.clearCache(swiftObjectPath.toUriPath());
     return swiftRestClient.delete(swiftObjectPath);
     // } else {
     // if (LOG.isDebugEnabled()) {

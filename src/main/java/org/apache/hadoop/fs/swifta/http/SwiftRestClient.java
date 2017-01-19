@@ -105,8 +105,6 @@ import java.util.List;
  */
 public final class SwiftRestClient {
 
-
-
   private static final Log LOG = LogFactory.getLog(SwiftRestClient.class);
 
 
@@ -446,7 +444,7 @@ public final class SwiftRestClient {
         super.setup(method);
         method.addRequestHeader(NEWEST);
       }
-    }, 0);
+    });
   }
 
   /**
@@ -535,7 +533,7 @@ public final class SwiftRestClient {
             protected void setup(GetMethod method) throws SwiftInternalStateException {
               setHeaders(method, requestHeaders);
             }
-          }, 0);
+          });
     } catch (IOException e) {
       LOG.warn("Failed to get the location of " + path + ": " + e, e);
       return null;
@@ -616,7 +614,7 @@ public final class SwiftRestClient {
       protected void setup(GetMethod method) throws SwiftInternalStateException {
         setHeaders(method, requestHeaders);
       }
-    }, 0);
+    });
   }
 
   /**
@@ -704,7 +702,7 @@ public final class SwiftRestClient {
       protected void setup(GetMethod method) throws SwiftInternalStateException {
         setHeaders(method, requestHeaders);
       }
-    }, 0);
+    });
   }
 
   /**
@@ -735,7 +733,7 @@ public final class SwiftRestClient {
         setHeaders(method, headers);
         method.addRequestHeader(HEADER_DESTINATION, dst.toUriPath());
       }
-    }, 0);
+    });
   }
 
   /**
@@ -765,7 +763,7 @@ public final class SwiftRestClient {
           method.setRequestEntity(new InputStreamRequestEntity(data, length));
           setHeaders(method, requestHeaders);
         }
-      }, 0);
+      });
     } finally {
       data.close();
     }
@@ -795,7 +793,7 @@ public final class SwiftRestClient {
       protected void setup(DeleteMethod method) throws SwiftInternalStateException {
         setHeaders(method, requestHeaders);
       }
-    }, 0);
+    });
   }
 
   /**
@@ -828,7 +826,7 @@ public final class SwiftRestClient {
       protected void setup(HeadMethod method) throws SwiftInternalStateException {
         setHeaders(method, requestHeaders);
       }
-    }, 0);
+    });
   }
 
   /**
@@ -868,7 +866,7 @@ public final class SwiftRestClient {
    *
    * @return authenticated access token
    */
-  public AccessToken authenticate(int exeCount) throws IOException {
+  public AccessToken authenticate() throws IOException {
     final AuthenticationRequest authenticationRequest;
     if (useKeystoneAuthentication) {
       authenticationRequest = this.clientConfig.getKeystoneAuthRequest();
@@ -878,11 +876,7 @@ public final class SwiftRestClient {
 
     LOG.debug("started authentication");
     return perform("authentication", this.clientConfig.getAuthUri(),
-        new AuthenticationPost(authenticationRequest), exeCount);
-  }
-
-  public AccessToken authenticate() throws IOException {
-    return this.authenticate(0);
+        new AuthenticationPost(authenticationRequest));
   }
 
   private class AuthenticationPost extends AuthMethodProcessor<AccessToken> {
@@ -1066,7 +1060,7 @@ public final class SwiftRestClient {
    */
   private void authIfNeeded() throws IOException {
     if (getEndpointURI() == null) {
-      authenticate(0);
+      authenticate();
     }
   }
 
@@ -1106,7 +1100,7 @@ public final class SwiftRestClient {
   private <M extends HttpMethod, R> R perform(URI uri, HttpMethodProcessor<M, R> processor)
       throws IOException, SwiftBadRequestException, SwiftInternalStateException,
       SwiftInvalidResponseException, FileNotFoundException {
-    return perform("", uri, processor, 0);
+    return perform("", uri, processor);
   }
 
   /**
@@ -1127,9 +1121,8 @@ public final class SwiftRestClient {
    * @throws FileNotFoundException a 404 response was returned
    */
   private <M extends HttpMethod, R> R perform(String reason, URI uri,
-      HttpMethodProcessor<M, R> processor, int exeCount)
-      throws IOException, SwiftBadRequestException, SwiftInternalStateException,
-      SwiftInvalidResponseException, FileNotFoundException {
+      HttpMethodProcessor<M, R> processor) throws IOException, SwiftBadRequestException,
+      SwiftInternalStateException, SwiftInvalidResponseException, FileNotFoundException {
     checkNotNull(uri);
     checkNotNull(processor);
 
@@ -1148,9 +1141,9 @@ public final class SwiftRestClient {
     try {
       int statusCode = 0;
       try {
-        statusCode = exec(method, exeCount);
+        statusCode = exec(method);
       } catch (IOException e) {
-        e.printStackTrace();
+        // e.printStackTrace();
         // rethrow with extra diagnostics and wiki links
         throw ExceptionDiags.wrapException(uri.toString(), method.getName(), e);
       }
@@ -1274,7 +1267,7 @@ public final class SwiftRestClient {
       protected void setup(GetMethod method) throws SwiftInternalStateException {
         setHeaders(method, requestHeaders);
       }
-    }, 0);
+    });
   }
 
   /**
@@ -1379,14 +1372,36 @@ public final class SwiftRestClient {
    * @return the status code
    * @throws IOException on any failure
    */
-  private <M extends HttpMethod> int exec(M method, int exeCount) throws IOException {
+  private <M extends HttpMethod> int exec(M method) throws IOException {
     final HttpClient client = initHttpClient(this.clientConfig);
     if (clientConfig.getProxyHost() != null) {
       client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
           new HttpHost(clientConfig.getProxyHost(), clientConfig.getProxyPort()));
     }
 
-    int statusCode = execWithDebugOutput(method, client);
+    int statusCode = -1;
+    int retry = 0;
+    do {
+      if (retry > 0) {
+        // re-auth, this may recurse into the same dir
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("Reauthenticating");
+        }
+        try {
+          Thread.sleep(200);
+        } catch (InterruptedException e) {
+          break;
+        }
+        authenticate();
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("Retrying original request");
+        }
+        // PGPBFDO-13963
+        setAuthToken((HttpMethodBase) method, getToken());
+      }
+      statusCode = execWithDebugOutput(method, client);
+      retry++;
+    } while (statusCode == HttpStatus.SC_UNAUTHORIZED && retry < clientConfig.getRetryAuth());
 
     if ((statusCode == HttpStatus.SC_UNAUTHORIZED || statusCode == HttpStatus.SC_BAD_REQUEST)
         && method instanceof AuthPostMethod && !useKeystoneAuthentication) {
@@ -1405,23 +1420,18 @@ public final class SwiftRestClient {
     if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
       // unauthed -or the auth uri rejected it.
       // DTBFDTECH-261
-      if (method instanceof AuthPostMethod || exeCount > clientConfig.getRetryAuth()) {
-        // unauth response from the AUTH URI itself.
-        throw new SwiftAuthenticationFailedException(clientConfig.getAuthRequest().toString(),
-            "auth", clientConfig.getAuthUri(), method);
-      }
+      // if (method instanceof AuthPostMethod) {
+      // unauth response from the AUTH URI itself.
+      throw new SwiftAuthenticationFailedException(clientConfig.getAuthRequest().toString(), "auth",
+          clientConfig.getAuthUri(), method);
+      // }
       // any other URL: try again
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Reauthenticating");
-      }
-      // re-auth, this may recurse into the same dir
-      authenticate(++exeCount);
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Retrying original request");
-      }
-      // PGPBFDO-13963
-      setAuthToken((HttpMethodBase) method, getToken());
-      statusCode = execWithDebugOutput(method, client);
+      /**
+       * if (LOG.isDebugEnabled()) { LOG.debug("Reauthenticating"); } // re-auth, this may recurse
+       * into the same dir authenticate(++exeCount); if (LOG.isDebugEnabled()) { LOG.debug("Retrying
+       * original request"); } // PGPBFDO-13963 setAuthToken((HttpMethodBase) method, getToken());
+       * statusCode = execWithDebugOutput(method, client);
+       **/
     }
     return statusCode;
   }

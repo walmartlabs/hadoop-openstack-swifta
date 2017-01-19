@@ -284,7 +284,7 @@ public class SwiftProtocolConstants {
   /**
    * Default number of attempts to retry an re-authentication request: {@value}
    */
-  static final int DEFAULT_RETRY_AUTH_COUNT = 7;
+  static final int DEFAULT_RETRY_AUTH_COUNT = 9;
   /**
    * Default timeout in milliseconds for connection requests: {@value}
    */

@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
 
 /**
  * Various utility classes for SwiftFS support.
@@ -193,6 +194,14 @@ public final class SwiftUtils {
    * @param separator separator after every entry
    * @return a stringified set
    */
+  public static String fileStatsToString(List<FileStatus> stats, String separator) {
+    StringBuilder buf = new StringBuilder(stats.size() * 128);
+    for (int i = 0; i < stats.size(); i++) {
+      buf.append(String.format("[%02d] %s", i, stats.get(i))).append(separator);
+    }
+    return buf.toString();
+  }
+
   public static String fileStatsToString(FileStatus[] stats, String separator) {
     StringBuilder buf = new StringBuilder(stats.length * 128);
     for (int i = 0; i < stats.length; i++) {

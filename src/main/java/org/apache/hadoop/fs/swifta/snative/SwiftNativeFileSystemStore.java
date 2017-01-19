@@ -54,7 +54,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -539,12 +538,10 @@ public class SwiftNativeFileSystemStore {
    * @throws IOException on IO problems
    * @throws FileNotFoundException if the path is nonexistent
    */
-  public FileStatus[] listSubPaths(Path path, boolean recursive, boolean newest)
+  public List<FileStatus> listSubPaths(Path path, boolean recursive, boolean newest)
       throws IOException {
-    final Collection<FileStatus> fileStatuses;
     path = getCorrectSwiftPath(path);
-    fileStatuses = listDirectory(toDirPath(path), recursive, newest);
-    return fileStatuses.toArray(new FileStatus[fileStatuses.size()]);
+    return listDirectory(toDirPath(path), recursive, newest);
   }
 
   /**
@@ -655,7 +652,7 @@ public class SwiftNativeFileSystemStore {
    * @param path path to delete
    * @throws IOException on a failure
    */
-  public void deleteObjects(FileStatus[] statuses) throws IOException {
+  public void deleteObjects(List<FileStatus> statuses) throws IOException {
     Map<String, Future<Boolean>> deletes = new HashMap<String, Future<Boolean>>();
     ThreadManager tm = new ThreadManager();
     tm.createThreadManager(this.swiftRestClient.getClientConfig().getMaxThreadsInPool());
@@ -842,7 +839,7 @@ public class SwiftNativeFileSystemStore {
             "Source file appears to be partitioned." + " copying file and deleting children");
 
         copyObject(srcObject, destPath);
-        deleteObjects(childStats.toArray(new FileStatus[childStats.size()]));
+        deleteObjects(childStats);
         // for (FileStatus stat : childStats) {
         // SwiftUtils.debug(LOG, "Deleting partitioned file %s ", stat);
         // deleteObject(stat.getPath());
@@ -930,6 +927,8 @@ public class SwiftNativeFileSystemStore {
           Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
           LOG.info("Skipping rename of " + key);
+        } finally {
+          future.cancel(Boolean.FALSE);
         }
       }
 
@@ -1137,14 +1136,14 @@ public class SwiftNativeFileSystemStore {
     // don't mind if the directory has changed
     // list all entries under this directory.
     // this will throw FileNotFoundException if the file isn't there
-    FileStatus[] statuses = listSubPaths(absolutePath, true, askForNewest);
+    List<FileStatus> statuses = listSubPaths(absolutePath, true, askForNewest);
     if (statuses == null) {
       // the directory went away during the non-atomic stages of the operation.
       // Return false as it was not this thread doing the deletion.
       SwiftUtils.debug(LOG, "Path '%s' has no status -it has 'gone away'", absolutePath, recursive);
       return false;
     }
-    int filecount = statuses.length;
+    int filecount = statuses.size();
     SwiftUtils.debug(LOG, "Path '%s' %d status entries'", absolutePath, filecount);
 
     if (filecount == 0) {
@@ -1157,7 +1156,7 @@ public class SwiftNativeFileSystemStore {
       SwiftUtils.debug(LOG, SwiftUtils.fileStatsToString(statuses, "\n"));
     }
 
-    if (filecount == 1 && swiftPath.equals(statuses[0].getPath())) {
+    if (filecount == 1 && swiftPath.equals(statuses.get(0).getPath())) {
       // 1 entry => simple file and it is the target
       // simple file: delete it
       SwiftUtils.debug(LOG, "Deleting simple file %s", absolutePath);

@@ -368,7 +368,6 @@ public final class SwiftRestClient {
     return new HttpClient(HttpClientManager.getHttpManager(clientConfig));
   }
 
-
   /**
    * Make an HTTP GET request to Swift to get a range of data in the object.
    *

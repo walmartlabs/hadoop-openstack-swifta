@@ -51,7 +51,9 @@ public class LRUCache<T> {
     if (post != null) {
       post.pre = pre;
     }
-    cache.remove(key);
+    if (key != null) {
+      cache.remove(key);
+    }
   }
 
   /**

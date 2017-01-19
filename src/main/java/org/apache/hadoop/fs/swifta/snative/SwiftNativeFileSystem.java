@@ -260,12 +260,12 @@ public class SwiftNativeFileSystem extends FileSystem {
     // final FileStatus[] listOfFileBlocks = store.listSubPaths(file.getPath(),
     // false,
     // true);
-    FileStatus[] listOfFileBlocks = null;
+    List<FileStatus> listOfFileBlocks = null;
     if (file.getLen() == 0) {
       listOfFileBlocks = store.listSubPaths(file.getPath(), false, true);
     }
     List<URI> locations = new ArrayList<URI>();
-    if (listOfFileBlocks != null && listOfFileBlocks.length > 1) {
+    if (listOfFileBlocks != null && listOfFileBlocks.size() > 1) {
       for (FileStatus fileStatus : listOfFileBlocks) {
         if (SwiftObjectPath.fromPath(uri, fileStatus.getPath())
             .equals(SwiftObjectPath.fromPath(uri, file.getPath()))) {
@@ -499,7 +499,8 @@ public class SwiftNativeFileSystem extends FileSystem {
     if (LOG.isDebugEnabled()) {
       LOG.debug("SwiftFileSystem.listStatus for: " + path);
     }
-    return store.listSubPaths(makeAbsolute(path), false, true);
+    final List<FileStatus> result = store.listSubPaths(makeAbsolute(path), false, true);
+    return result.toArray(new FileStatus[result.size()]);
   }
 
   /**
@@ -706,7 +707,8 @@ public class SwiftNativeFileSystem extends FileSystem {
    */
   @InterfaceAudience.Private
   public FileStatus[] listRawFileStatus(Path path, boolean newest) throws IOException {
-    return store.listSubPaths(makeAbsolute(path), true, newest);
+    final List<FileStatus> result = store.listSubPaths(makeAbsolute(path), true, newest);
+    return result.toArray(new FileStatus[result.size()]);
   }
 
   /**

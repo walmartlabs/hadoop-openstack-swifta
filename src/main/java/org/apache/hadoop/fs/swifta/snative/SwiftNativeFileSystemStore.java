@@ -1177,6 +1177,7 @@ public class SwiftNativeFileSystemStore {
     // now delete self
     SwiftUtils.debug(LOG, "Deleting base entry %s", absolutePath);
     deleteObject(absolutePath);
+    statuses.clear();
     statuses = null;
     return true;
   }

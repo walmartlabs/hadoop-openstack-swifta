@@ -61,6 +61,8 @@ public class SwiftClientConfig {
 
   private final static Log LOG = LogFactory.getLog(SwiftClientConfig.class);
 
+  private final static int DEFAULT_CONNECTIONS = 0; // Default set to 0.
+
   private final static int DEFAULT_LRU_SIZE = 100;
 
   /**
@@ -242,22 +244,10 @@ public class SwiftClientConfig {
     String isPubProp = props.getProperty(SWIFT_PUBLIC_PROPERTY, "false");
     usePublicURL = "true".equals(isPubProp);
     authEndpointPrefix = getOption(props, SWIFT_AUTH_ENDPOINT_PREFIX);
-    maxCoreConnections = conf.getInt(SWIFT_MAX_HOST_CONNECTIONS, 0);
+    maxCoreConnections = conf.getInt(SWIFT_MAX_HOST_CONNECTIONS, DEFAULT_CONNECTIONS);
 
-    maxTotalConnections = conf.getInt(SWIFT_MAX_TOTAL_CONNECTIONS, 0);
-    int defaultConnections = Runtime.getRuntime().availableProcessors() * 15;
-    if (defaultConnections == 0) {
-      defaultConnections = 1; // Barely happen.
-    }
-    /**
-     * Default thread pool number for http client.
-     */
-    if (maxCoreConnections < 1) {
-      maxCoreConnections = defaultConnections;
-    }
-    if (maxTotalConnections < 1) {
-      maxTotalConnections = defaultConnections;
-    }
+    maxTotalConnections = conf.getInt(SWIFT_MAX_TOTAL_CONNECTIONS, DEFAULT_CONNECTIONS);
+
     if (LOG.isDebugEnabled()) {
       LOG.debug(
           "Max total threads " + maxTotalConnections + "; max core threads " + maxCoreConnections);
@@ -268,11 +258,7 @@ public class SwiftClientConfig {
     isLazySeek = conf.getBoolean(SWIFT_LAZY_SEEK, Boolean.FALSE);
     useHeaderCache = conf.getBoolean(USE_HEADER_CACHE, Boolean.TRUE);
 
-    maxThreadsInPool = conf.getInt(SWIFT_MAX_CONNECTIONS_IN_POOL, 0);
-
-    if (maxThreadsInPool < 1) {
-      maxThreadsInPool = defaultConnections;
-    }
+    maxThreadsInPool = conf.getInt(SWIFT_MAX_CONNECTIONS_IN_POOL, DEFAULT_CONNECTIONS);
 
     if (apiKey == null && password == null) {
       throw new SwiftConfigurationException("Configuration for " + filesystemURI

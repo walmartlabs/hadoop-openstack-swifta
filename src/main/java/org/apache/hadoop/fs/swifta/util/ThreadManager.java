@@ -27,6 +27,9 @@ public class ThreadManager {
   }
 
   public void createThreadManager(int maxThread) {
+    if (maxThread < 1) {
+      maxThread = ThreadUtils.getMaxThread();
+    }
     if (LOG.isDebugEnabled()) {
       LOG.debug("Create pool with threads " + maxThread);
     }

@@ -3,6 +3,7 @@ package org.apache.hadoop.fs.swifta.http;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
+import org.apache.hadoop.fs.swifta.util.ThreadUtils;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -33,9 +34,16 @@ public class HttpClientManager {
   private static void initConnectionManager(SwiftClientConfig clientConfig) {
     connectionManager = new MultiThreadedHttpConnectionManager();
     connParam = new HttpConnectionManagerParams();
-    connParam.setMaxConnectionsPerHost(HostConfiguration.ANY_HOST_CONFIGURATION,
-        clientConfig.getMaxCoreConnections());
-    connParam.setMaxTotalConnections(clientConfig.getMaxTotalConnections());
+    int coreThreads = clientConfig.getMaxCoreConnections();
+    if (coreThreads < 1) {
+      coreThreads = ThreadUtils.getMaxThread();
+    }
+    connParam.setMaxConnectionsPerHost(HostConfiguration.ANY_HOST_CONFIGURATION, coreThreads);
+    int totalThreads = clientConfig.getMaxTotalConnections();
+    if (totalThreads < 1) {
+      totalThreads = ThreadUtils.getMaxThread();
+    }
+    connParam.setMaxTotalConnections(totalThreads);
     connParam.setSoTimeout(clientConfig.getSocketTimeout());
     connParam.setConnectionTimeout(clientConfig.getConnectTimeout());
     connParam.setTcpNoDelay(Boolean.TRUE);

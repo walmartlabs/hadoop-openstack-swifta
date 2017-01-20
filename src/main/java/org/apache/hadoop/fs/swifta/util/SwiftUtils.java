@@ -32,6 +32,14 @@ import java.util.List;
  */
 public final class SwiftUtils {
 
+  private static final String PATTERN = ".*\\s+.*";
+  private static final String ENCODE = "UTF-8";
+  private static final String SLASH = "/";
+  private static final String COLON = ":";
+  private static final String PLUS = "\\+";
+  private static final String COLON_ENCODE = "%3A";
+  private static final String SLASH_ENCODE = "%2F";
+  private static final String SPACE_ENCODE = "%20";
   public static final String READ = "read(buffer, offset, length)";
 
   /**
@@ -45,13 +53,13 @@ public final class SwiftUtils {
     StringBuilder result = new StringBuilder(path1.length() + path2.length() + 1);
     result.append(path1);
     boolean insertSlash = true;
-    if (path1.endsWith("/")) {
+    if (path1.endsWith(SLASH)) {
       insertSlash = false;
-    } else if (path2.startsWith("/")) {
+    } else if (path2.startsWith(SLASH)) {
       insertSlash = false;
     }
     if (insertSlash) {
-      result.append("/");
+      result.append(SLASH);
     }
     result.append(path2);
     return result.toString();
@@ -85,7 +93,7 @@ public final class SwiftUtils {
    * @return true iff the object refers to the root
    */
   public static boolean isRootDir(SwiftObjectPath swiftObject) {
-    return swiftObject.objectMatches("") || swiftObject.objectMatches("/");
+    return swiftObject.objectMatches("") || swiftObject.objectMatches(SLASH);
   }
 
   /**
@@ -97,10 +105,11 @@ public final class SwiftUtils {
    * @throws SwiftException if the URL cannot be encoded
    */
   public static String encodeUrl(String url) throws SwiftException {
-    if (url.matches(".*\\s+.*")) {
+    if (url.matches(PATTERN)) {
       try {
-        url = URLEncoder.encode(url, "UTF-8");
-        url = url.replaceAll("\\+", "%20").replaceAll("%2F", "/").replace("%3A", ":");
+        url = URLEncoder.encode(url, ENCODE);
+        url = url.replaceAll(PLUS, SPACE_ENCODE).replaceAll(SLASH_ENCODE, SLASH)
+            .replace(COLON_ENCODE, COLON);
       } catch (UnsupportedEncodingException e) {
         throw new SwiftException("failed to encode URI", e);
       }
@@ -173,7 +182,7 @@ public final class SwiftUtils {
   public static String ls(FileSystem fileSystem, Path path) throws IOException {
     if (path == null) {
       // surfaces when someone calls getParent() on something at the top of the path
-      return "/";
+      return SLASH;
     }
     FileStatus[] stats;
     String pathtext = "ls " + path;

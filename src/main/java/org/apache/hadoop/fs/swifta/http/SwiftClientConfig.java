@@ -245,7 +245,7 @@ public class SwiftClientConfig {
     maxCoreConnections = conf.getInt(SWIFT_MAX_HOST_CONNECTIONS, 0);
 
     maxTotalConnections = conf.getInt(SWIFT_MAX_TOTAL_CONNECTIONS, 0);
-    int defaultConnections = Runtime.getRuntime().availableProcessors() * 20;
+    int defaultConnections = Runtime.getRuntime().availableProcessors() * 15;
     /**
      * Default thread pool number for http client.
      */

@@ -540,8 +540,7 @@ public class SwiftNativeFileSystemStore {
    */
   public List<FileStatus> listSubPaths(Path path, boolean recursive, boolean newest)
       throws IOException {
-    path = getCorrectSwiftPath(path);
-    return listDirectory(toDirPath(path), recursive, newest);
+    return listDirectory(toDirPath(getCorrectSwiftPath(path)), recursive, newest);
   }
 
   /**
@@ -1023,10 +1022,8 @@ public class SwiftNativeFileSystemStore {
    */
   public Path getCorrectSwiftPath(Path path) throws SwiftException {
     try {
-      final URI fullUri = new URI(uri.getScheme(), uri.getAuthority(),
-          SwiftUtils.encodeUrl(path.toUri().getPath()), null, null);
-
-      return new Path(fullUri);
+      return new Path(new URI(uri.getScheme(), uri.getAuthority(),
+          SwiftUtils.encodeUrl(path.toUri().getPath()), null, null));
     } catch (URISyntaxException e) {
       throw new SwiftException("Specified path " + path + " is incorrect", e);
     }
@@ -1180,7 +1177,7 @@ public class SwiftNativeFileSystemStore {
     // now delete self
     SwiftUtils.debug(LOG, "Deleting base entry %s", absolutePath);
     deleteObject(absolutePath);
-
+    statuses = null;
     return true;
   }
 

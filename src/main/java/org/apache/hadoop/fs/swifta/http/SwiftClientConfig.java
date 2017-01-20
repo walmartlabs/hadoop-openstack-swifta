@@ -248,10 +248,6 @@ public class SwiftClientConfig {
 
     maxTotalConnections = conf.getInt(SWIFT_MAX_TOTAL_CONNECTIONS, DEFAULT_CONNECTIONS);
 
-    if (LOG.isDebugEnabled()) {
-      LOG.debug(
-          "Max total threads " + maxTotalConnections + "; max core threads " + maxCoreConnections);
-    }
     lruCacheSize = conf.getInt(LRU_SIZE, DEFAULT_LRU_SIZE);
     this.cacheLiveTime = conf.getLong(LRU_LIVE_TIME, DEFAULT_EXPIRES_TIME);
     // Default set to false.

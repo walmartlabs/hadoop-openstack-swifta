@@ -3,6 +3,8 @@ package org.apache.hadoop.fs.swifta.http;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.swifta.util.ThreadUtils;
 
 import java.util.concurrent.Executors;
@@ -12,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 public class HttpClientManager {
 
+  private static final Log LOG = LogFactory.getLog(HttpClientManager.class);
   private static final int INITAL_DELAY = 5;
   private static final int PERIOD = 300;
   private static final String THREAD_NAME = "Swift-Httpclient-Monitor";
@@ -36,12 +39,15 @@ public class HttpClientManager {
     connParam = new HttpConnectionManagerParams();
     int coreThreads = clientConfig.getMaxCoreConnections();
     if (coreThreads < 1) {
-      coreThreads = ThreadUtils.getMaxThread();
+      coreThreads = ThreadUtils.getMaxThread() * 6; // Get six times httpclient threads as default.
     }
     connParam.setMaxConnectionsPerHost(HostConfiguration.ANY_HOST_CONFIGURATION, coreThreads);
     int totalThreads = clientConfig.getMaxTotalConnections();
     if (totalThreads < 1) {
       totalThreads = ThreadUtils.getMaxThread();
+    }
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Max total threads " + totalThreads + "; max core threads " + coreThreads);
     }
     connParam.setMaxTotalConnections(totalThreads);
     connParam.setSoTimeout(clientConfig.getSocketTimeout());

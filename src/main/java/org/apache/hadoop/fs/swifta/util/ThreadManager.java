@@ -31,7 +31,7 @@ public class ThreadManager {
       maxThread = ThreadUtils.getMaxThread();
     }
     if (LOG.isDebugEnabled()) {
-      LOG.debug("Create pool with threads " + maxThread);
+      LOG.debug("Max threads in pool is " + maxThread);
     }
     ThreadPoolExecutor pool = this.createThreadManager(maxThread, maxThread, null);
     pool.allowCoreThreadTimeOut(true);

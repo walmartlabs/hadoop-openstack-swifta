@@ -25,6 +25,8 @@ import java.util.Date;
  */
 
 class SwiftObjectFileStatus {
+
+  private static final String SLASH = "/";
   private long bytes;
   @JsonProperty("content_type")
   private String contentType;
@@ -104,10 +106,10 @@ class SwiftObjectFileStatus {
       return null;
     }
 
-    if (path.startsWith("/")) {
+    if (path.startsWith(SLASH)) {
       return path;
     }
 
-    return "/".concat(path);
+    return SLASH.concat(path);
   }
 }

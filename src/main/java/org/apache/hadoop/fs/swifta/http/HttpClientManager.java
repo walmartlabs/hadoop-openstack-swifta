@@ -37,18 +37,25 @@ public class HttpClientManager {
   private static void initConnectionManager(SwiftClientConfig clientConfig) {
     connectionManager = new MultiThreadedHttpConnectionManager();
     connParam = new HttpConnectionManagerParams();
+    int totalThreads = clientConfig.getMaxTotalConnections();
+
+    /**
+     * Get six times httpclient threads as default.
+     */
+    int connections = ThreadUtils.getMaxThread() * 6;
+    if (totalThreads < 1) {
+      totalThreads = connections;
+    }
+
     int coreThreads = clientConfig.getMaxCoreConnections();
     if (coreThreads < 1) {
-      coreThreads = ThreadUtils.getMaxThread() * 6; // Get six times httpclient threads as default.
-    }
-    connParam.setMaxConnectionsPerHost(HostConfiguration.ANY_HOST_CONFIGURATION, coreThreads);
-    int totalThreads = clientConfig.getMaxTotalConnections();
-    if (totalThreads < 1) {
-      totalThreads = ThreadUtils.getMaxThread();
+      coreThreads = connections;
     }
     if (LOG.isDebugEnabled()) {
       LOG.debug("Max total threads " + totalThreads + "; max core threads " + coreThreads);
     }
+
+    connParam.setMaxConnectionsPerHost(HostConfiguration.ANY_HOST_CONFIGURATION, coreThreads);
     connParam.setMaxTotalConnections(totalThreads);
     connParam.setSoTimeout(clientConfig.getSocketTimeout());
     connParam.setConnectionTimeout(clientConfig.getConnectTimeout());

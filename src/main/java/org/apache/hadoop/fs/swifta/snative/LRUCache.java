@@ -119,6 +119,7 @@ public class LRUCache<T> {
       return Boolean.FALSE;
     }
     this.removeNode(node);
+    --count;
     return Boolean.TRUE;
   }
 

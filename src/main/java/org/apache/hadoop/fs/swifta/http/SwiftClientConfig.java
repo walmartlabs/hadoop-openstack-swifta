@@ -246,6 +246,9 @@ public class SwiftClientConfig {
 
     maxTotalConnections = conf.getInt(SWIFT_MAX_TOTAL_CONNECTIONS, 0);
     int defaultConnections = Runtime.getRuntime().availableProcessors() * 15;
+    if (defaultConnections == 0) {
+      defaultConnections = 1; // Barely happen.
+    }
     /**
      * Default thread pool number for http client.
      */
@@ -254,6 +257,10 @@ public class SwiftClientConfig {
     }
     if (maxTotalConnections < 1) {
       maxTotalConnections = defaultConnections;
+    }
+    if (LOG.isDebugEnabled()) {
+      LOG.debug(
+          "Max total threads " + maxTotalConnections + "; max core threads " + maxCoreConnections);
     }
     lruCacheSize = conf.getInt(LRU_SIZE, DEFAULT_LRU_SIZE);
     this.cacheLiveTime = conf.getLong(LRU_LIVE_TIME, DEFAULT_EXPIRES_TIME);

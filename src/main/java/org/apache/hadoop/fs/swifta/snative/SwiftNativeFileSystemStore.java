@@ -505,6 +505,8 @@ public class SwiftNativeFileSystemStore {
       }
       if (fileStatusList.size() == MAX_LIMIT) {
         marker = fileStatusList.get(fileStatusList.size() - 1).getName();
+      } else {
+        marker = null;
       }
       if (LOG.isDebugEnabled()) {
         LOG.debug("Marker:" + marker);
@@ -654,45 +656,47 @@ public class SwiftNativeFileSystemStore {
   public void deleteObjects(List<FileStatus> statuses) throws IOException {
     Map<String, Future<Boolean>> deletes = new HashMap<String, Future<Boolean>>();
     ThreadManager tm = new ThreadManager();
-    tm.createThreadManager(this.swiftRestClient.getClientConfig().getMaxThreadsInPool());
-    for (FileStatus entryStatus : statuses) {
-      final Path entryPath = entryStatus.getPath();
-      // boolean deleted = deleteObject(entryPath);
-      deletes.put(entryPath.toString(), tm.getPool().submit(new Callable<Boolean>() {
-        public Boolean call() throws Exception {
-          SwiftObjectPath swiftObjectPath = toObjectPath(entryPath);
-          clearCache(swiftObjectPath.toUriPath());
-          return swiftRestClient.delete(swiftObjectPath);
-        }
-      }));
-      // throttle();
-    }
-
-    tm.shutdown();
-    Set<Map.Entry<String, Future<Boolean>>> entrySet = deletes.entrySet();
-    for (Map.Entry<String, Future<Boolean>> entry : entrySet) {
-      String key = entry.getKey();
-      Future<Boolean> future = entry.getValue();
-      try {
-        if (!future.get()) {
-          SwiftUtils.debug(LOG, "Failed to delete entry '%s'; continuing", key);
-        }
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-      } catch (ExecutionException e) {
-        // the path went away -race conditions.
-        // do not fail, as the outcome is still OK.
-        SwiftUtils.debug(LOG, "Path '%s' may no longer present; continuing", key);
-      } finally {
-        future.cancel(Boolean.FALSE);
+    try {
+      tm.createThreadManager(this.swiftRestClient.getClientConfig().getMaxThreadsInPool());
+      for (FileStatus entryStatus : statuses) {
+        final Path entryPath = entryStatus.getPath();
+        // boolean deleted = deleteObject(entryPath);
+        deletes.put(entryPath.toString(), tm.getPool().submit(new Callable<Boolean>() {
+          public Boolean call() throws Exception {
+            SwiftObjectPath swiftObjectPath = toObjectPath(entryPath);
+            clearCache(swiftObjectPath.toUriPath());
+            return swiftRestClient.delete(swiftObjectPath);
+          }
+        }));
+        // throttle();
       }
-    }
 
-    // free memory
-    tm.cleanup();
-    tm = null;
-    deletes.clear();
-    deletes = null;
+      tm.shutdown();
+      Set<Map.Entry<String, Future<Boolean>>> entrySet = deletes.entrySet();
+      for (Map.Entry<String, Future<Boolean>> entry : entrySet) {
+        String key = entry.getKey();
+        Future<Boolean> future = entry.getValue();
+        try {
+          if (!future.get()) {
+            SwiftUtils.debug(LOG, "Failed to delete entry '%s'; continuing", key);
+          }
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+        } catch (ExecutionException e) {
+          // the path went away -race conditions.
+          // do not fail, as the outcome is still OK.
+          SwiftUtils.debug(LOG, "Path '%s' may no longer present; continuing", key);
+        } finally {
+          future.cancel(Boolean.FALSE);
+        }
+      }
+    } finally {
+      // free memory
+      tm.cleanup();
+      tm = null;
+      deletes.clear();
+      deletes = null;
+    }
   }
 
   /**
@@ -884,58 +888,62 @@ public class SwiftNativeFileSystemStore {
       int prefixStripCount = srcURI.length() + 1;
       Map<String, Future<Boolean>> copies = new HashMap<String, Future<Boolean>>();
       ThreadManager tm = new ThreadManager();
-      tm.createThreadManager(this.swiftRestClient.getClientConfig().getMaxThreadsInPool());
-      for (FileStatus fileStatus : childStats) {
-        final Path copySourcePath = fileStatus.getPath();
-        String copySourceURI = copySourcePath.toUri().toString();
+      try {
+        tm.createThreadManager(this.swiftRestClient.getClientConfig().getMaxThreadsInPool());
+        for (FileStatus fileStatus : childStats) {
+          final Path copySourcePath = fileStatus.getPath();
+          String copySourceURI = copySourcePath.toUri().toString();
 
-        String copyDestSubPath = copySourceURI.substring(prefixStripCount);
+          String copyDestSubPath = copySourceURI.substring(prefixStripCount);
 
-        Path copyDestPath = new Path(targetPath, copyDestSubPath);
-        if (LOG.isTraceEnabled()) {
-          // trace to debug some low-level rename path problems; retained
-          // in case they ever come back.
-          LOG.trace("srcURI=" + srcURI + "; copySourceURI=" + copySourceURI + "; copyDestSubPath="
-              + copyDestSubPath + "; copyDestPath=" + copyDestPath);
-        }
-        final SwiftObjectPath copyDestination = toObjectPath(copyDestPath);
+          Path copyDestPath = new Path(targetPath, copyDestSubPath);
+          if (LOG.isTraceEnabled()) {
+            // trace to debug some low-level rename path problems; retained
+            // in case they ever come back.
+            LOG.trace("srcURI=" + srcURI + "; copySourceURI=" + copySourceURI + "; copyDestSubPath="
+                + copyDestSubPath + "; copyDestPath=" + copyDestPath);
+          }
+          final SwiftObjectPath copyDestination = toObjectPath(copyDestPath);
 
-        copies.put(srcURI, tm.getPool().submit(new Callable<Boolean>() {
-          public Boolean call() throws Exception {
-            try {
-              copyThenDeleteObject(toObjectPath(copySourcePath), copyDestination);
-              return true;
-            } catch (IOException e) {
-              return false;
+          copies.put(srcURI, tm.getPool().submit(new Callable<Boolean>() {
+            public Boolean call() throws Exception {
+              try {
+                copyThenDeleteObject(toObjectPath(copySourcePath), copyDestination);
+                return true;
+              } catch (IOException e) {
+                return false;
+              }
             }
-          }
-        }));
-        // add a throttle delay
-        throttle();
-      }
-      tm.shutdown();
-      Set<Map.Entry<String, Future<Boolean>>> entrySet = copies.entrySet();
-      for (Map.Entry<String, Future<Boolean>> entry : entrySet) {
-        String key = entry.getKey();
-        Future<Boolean> future = entry.getValue();
-        try {
-          if (!future.get()) {
-            LOG.info("Skipping rename of " + key);
-          }
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-        } catch (ExecutionException e) {
-          LOG.info("Skipping rename of " + key);
-        } finally {
-          future.cancel(Boolean.FALSE);
+          }));
+          // add a throttle delay
+          throttle();
         }
+        tm.shutdown();
+        Set<Map.Entry<String, Future<Boolean>>> entrySet = copies.entrySet();
+        for (Map.Entry<String, Future<Boolean>> entry : entrySet) {
+          String key = entry.getKey();
+          Future<Boolean> future = entry.getValue();
+          try {
+            if (!future.get()) {
+              LOG.info("Skipping rename of " + key);
+            }
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+          } catch (ExecutionException e) {
+            LOG.info("Skipping rename of " + key);
+          } finally {
+            future.cancel(Boolean.FALSE);
+          }
+        }
+      } finally {
+        // free memory
+        tm.cleanup();
+        tm = null;
+        copies.clear();
+        copies = null;
+        childStats.clear();
+        childStats = null;
       }
-
-      // free memory
-      tm.cleanup();
-      tm = null;
-      copies.clear();
-      copies = null;
       // now rename self. If missing, create the dest directory and warn
       if (!SwiftUtils.isRootDir(srcObject)) {
         try {
@@ -1134,52 +1142,56 @@ public class SwiftNativeFileSystemStore {
     // list all entries under this directory.
     // this will throw FileNotFoundException if the file isn't there
     List<FileStatus> statuses = listSubPaths(absolutePath, true, askForNewest);
-    if (statuses == null) {
-      // the directory went away during the non-atomic stages of the operation.
-      // Return false as it was not this thread doing the deletion.
-      SwiftUtils.debug(LOG, "Path '%s' has no status -it has 'gone away'", absolutePath, recursive);
-      return false;
-    }
-    int filecount = statuses.size();
-    SwiftUtils.debug(LOG, "Path '%s' %d status entries'", absolutePath, filecount);
+    try {
+      if (statuses == null) {
+        // the directory went away during the non-atomic stages of the operation.
+        // Return false as it was not this thread doing the deletion.
+        SwiftUtils.debug(LOG, "Path '%s' has no status -it has 'gone away'", absolutePath,
+            recursive);
+        return false;
+      }
+      int filecount = statuses.size();
+      SwiftUtils.debug(LOG, "Path '%s' %d status entries'", absolutePath, filecount);
 
-    if (filecount == 0) {
-      // it's an empty directory or a path
-      rmdir(absolutePath);
-      return true;
-    }
+      if (filecount == 0) {
+        // it's an empty directory or a path
+        rmdir(absolutePath);
+        return true;
+      }
 
-    if (LOG.isDebugEnabled()) {
-      SwiftUtils.debug(LOG, SwiftUtils.fileStatsToString(statuses, "\n"));
-    }
+      if (LOG.isDebugEnabled()) {
+        SwiftUtils.debug(LOG, SwiftUtils.fileStatsToString(statuses, "\n"));
+      }
 
-    if (filecount == 1 && swiftPath.equals(statuses.get(0).getPath())) {
-      // 1 entry => simple file and it is the target
-      // simple file: delete it
-      SwiftUtils.debug(LOG, "Deleting simple file %s", absolutePath);
+      if (filecount == 1 && swiftPath.equals(statuses.get(0).getPath())) {
+        // 1 entry => simple file and it is the target
+        // simple file: delete it
+        SwiftUtils.debug(LOG, "Deleting simple file %s", absolutePath);
+        deleteObject(absolutePath);
+        return true;
+      }
+
+      // >1 entry implies directory with children. Run through them,
+      // but first check for the recursive flag and reject it *unless it looks
+      // like a partitioned file (len > 0 && has children)
+      if (!fileStatus.isDir()) {
+        LOG.debug("Multiple child entries but entry has data: assume partitioned");
+      } else if (!recursive) {
+        // if there are children, unless this is a recursive operation, fail immediately
+        throw new SwiftOperationFailedException("Directory " + fileStatus + " is not empty: "
+            + SwiftUtils.fileStatsToString(statuses, "; "));
+      }
+
+      // delete the entries. including ourself.
+      this.deleteObjects(statuses);
+      // now delete self
+      SwiftUtils.debug(LOG, "Deleting base entry %s", absolutePath);
       deleteObject(absolutePath);
       return true;
+    } finally {
+      statuses.clear();
+      statuses = null;
     }
-
-    // >1 entry implies directory with children. Run through them,
-    // but first check for the recursive flag and reject it *unless it looks
-    // like a partitioned file (len > 0 && has children)
-    if (!fileStatus.isDir()) {
-      LOG.debug("Multiple child entries but entry has data: assume partitioned");
-    } else if (!recursive) {
-      // if there are children, unless this is a recursive operation, fail immediately
-      throw new SwiftOperationFailedException("Directory " + fileStatus + " is not empty: "
-          + SwiftUtils.fileStatsToString(statuses, "; "));
-    }
-
-    // delete the entries. including ourself.
-    this.deleteObjects(statuses);
-    // now delete self
-    SwiftUtils.debug(LOG, "Deleting base entry %s", absolutePath);
-    deleteObject(absolutePath);
-    statuses.clear();
-    statuses = null;
-    return true;
   }
 
   public boolean isLazyseek() {

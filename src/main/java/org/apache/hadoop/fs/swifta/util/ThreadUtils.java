@@ -5,7 +5,7 @@ public class ThreadUtils {
    * Timeout for thread to die.
    */
   private static final int TIMEOUT = 1000;
-  private static final int THREADS_PER_PROCESSOR = 15;
+  private static final int THREADS_PER_PROCESSOR = 5;
 
   public static boolean terminate(Thread thread) {
     return ThreadUtils.terminate(thread, TIMEOUT);

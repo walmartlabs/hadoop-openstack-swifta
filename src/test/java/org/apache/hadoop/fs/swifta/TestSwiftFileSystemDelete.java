@@ -60,8 +60,8 @@ public class TestSwiftFileSystemDelete extends SwiftFileSystemBaseTest {
     Path testFile = path("/test");
     createFile(testFile);
     assertTrue("rm(/) returned false", fs.delete(root, true));
-    assertExists("Root dir is missing", root);
     assertPathDoesNotExist("test file not deleted", testFile);
+    assertPathDoesNotExist("Root dir is not deleted", root);
   }
 
 }

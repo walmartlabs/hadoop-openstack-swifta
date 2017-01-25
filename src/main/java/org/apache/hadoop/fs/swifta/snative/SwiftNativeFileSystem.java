@@ -32,6 +32,8 @@ import org.apache.hadoop.fs.swifta.exceptions.SwiftPathExistsException;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftUnsupportedFeatureException;
 import org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants;
 import org.apache.hadoop.fs.swifta.metrics.MetricsFactory;
+import org.apache.hadoop.fs.swifta.model.ListObjectsRequest;
+import org.apache.hadoop.fs.swifta.model.ObjectsList;
 import org.apache.hadoop.fs.swifta.util.DurationStats;
 import org.apache.hadoop.fs.swifta.util.SwiftObjectPath;
 import org.apache.hadoop.fs.swifta.util.SwiftUtils;
@@ -42,6 +44,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -260,9 +263,13 @@ public class SwiftNativeFileSystem extends FileSystem {
     // final FileStatus[] listOfFileBlocks = store.listSubPaths(file.getPath(),
     // false,
     // true);
-    List<FileStatus> listOfFileBlocks = null;
+    List<FileStatus> listOfFileBlocks = new ArrayList<FileStatus>();
     if (file.getLen() == 0) {
-      listOfFileBlocks = store.listSubPaths(file.getPath(), false, true);
+      ListObjectsRequest request = new ListObjectsRequest(file.getPath(), false, true, store);
+      Iterator<ObjectsList> ite = request.iterator();
+      while (ite.hasNext()) {
+        listOfFileBlocks.addAll(ite.next().getFiles());
+      }
     }
     List<URI> locations = new ArrayList<URI>();
     if (listOfFileBlocks != null && listOfFileBlocks.size() > 1) {
@@ -499,7 +506,12 @@ public class SwiftNativeFileSystem extends FileSystem {
     if (LOG.isDebugEnabled()) {
       LOG.debug("SwiftFileSystem.listStatus for: " + path);
     }
-    final List<FileStatus> result = store.listSubPaths(makeAbsolute(path), false, true);
+    final List<FileStatus> result = new ArrayList<FileStatus>();
+    ListObjectsRequest request = new ListObjectsRequest(makeAbsolute(path), false, true, store);
+    Iterator<ObjectsList> ite = request.iterator();
+    while (ite.hasNext()) {
+      result.addAll(ite.next().getFiles());
+    }
     return result.toArray(new FileStatus[result.size()]);
   }
 
@@ -707,7 +719,12 @@ public class SwiftNativeFileSystem extends FileSystem {
    */
   @InterfaceAudience.Private
   public FileStatus[] listRawFileStatus(Path path, boolean newest) throws IOException {
-    final List<FileStatus> result = store.listSubPaths(makeAbsolute(path), true, newest);
+    ListObjectsRequest request = new ListObjectsRequest(makeAbsolute(path), true, newest, store);
+    Iterator<ObjectsList> ite = request.iterator();
+    final List<FileStatus> result = new ArrayList<FileStatus>();
+    while (ite.hasNext()) {
+      result.addAll(ite.next().getFiles());
+    }
     return result.toArray(new FileStatus[result.size()]);
   }
 

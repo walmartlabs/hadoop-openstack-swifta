@@ -31,6 +31,8 @@ import org.apache.hadoop.fs.swifta.http.HttpBodyContent;
 import org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants;
 import org.apache.hadoop.fs.swifta.http.SwiftRestClient;
 import org.apache.hadoop.fs.swifta.metrics.MetricsFactory;
+import org.apache.hadoop.fs.swifta.model.ListObjectsRequest;
+import org.apache.hadoop.fs.swifta.model.ObjectsList;
 import org.apache.hadoop.fs.swifta.util.DurationStats;
 import org.apache.hadoop.fs.swifta.util.JsonUtil;
 import org.apache.hadoop.fs.swifta.util.SwiftObjectPath;
@@ -57,6 +59,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -437,97 +440,97 @@ public class SwiftNativeFileSystemStore {
    * @param path working path
    * @param listDeep ask for all the data
    * @param newest ask for the newest data
+   * @param newest where to start listing
    * @return Collection of file statuses
    * @throws IOException IO problems
    * @throws FileNotFoundException if the path does not exist
    */
-  private List<FileStatus> listDirectory(SwiftObjectPath path, boolean listDeep, boolean newest)
-      throws IOException {
+  public ObjectsList listDirectory(SwiftObjectPath path, boolean listDeep, boolean newest,
+      String marker) throws IOException {
+    final ObjectsList objects = new ObjectsList();
     final ArrayList<FileStatus> files = new ArrayList<FileStatus>();
     final Path correctSwiftPath = getCorrectSwiftPath(path);
-    String marker = null; // Where to start listing.
-    boolean loop = true;
-    do {
-      byte[] bytes = null;
-      try {
-        bytes = swiftRestClient.listDeepObjectsInDirectory(path, listDeep, marker);
-      } catch (FileNotFoundException e) {
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("" + "File/Directory not found " + path);
-        }
-        if (SwiftUtils.isRootDir(path)) {
-          return Collections.emptyList();
-        } else {
-          throw e;
-        }
-      } catch (SwiftInvalidResponseException e) {
-        // bad HTTP error code
-        if (e.getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-          // this can come back on a root list if the container is empty
-          if (SwiftUtils.isRootDir(path)) {
-            return Collections.emptyList();
-          } else {
-            // NO_CONTENT returned on something other than the root directory;
-            // see if it is there, and convert to empty list or not found
-            // depending on whether the entry exists.
-            FileStatus stat = getObjectMetadata(correctSwiftPath, newest);
-
-            if (stat.isDir()) {
-              // it's an empty directory. state that
-              return Collections.emptyList();
-            } else {
-              // it's a file -return that as the status
-              files.add(stat);
-              return files;
-            }
-          }
-        } else {
-          // a different status code: rethrow immediately
-          throw e;
-        }
+    // boolean loop = true;
+    // do {
+    byte[] bytes = null;
+    try {
+      bytes = swiftRestClient.listDeepObjectsInDirectory(path, listDeep, marker);
+    } catch (FileNotFoundException e) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("" + "File/Directory not found " + path);
       }
-
-      final CollectionType collectionType = JsonUtil.getJsonMapper().getTypeFactory()
-          .constructCollectionType(List.class, SwiftObjectFileStatus.class);
-
-      final List<SwiftObjectFileStatus> fileStatusList =
-          JsonUtil.toObject(new String(bytes), collectionType);
-
-      // this can happen if user lists file /data/files/file
-      // in this case swift will return empty array
-      if (fileStatusList.isEmpty()) {
-        SwiftFileStatus objectMetadata = getObjectMetadata(correctSwiftPath, newest);
-        if (objectMetadata.isFile()) {
-          files.add(objectMetadata);
-        }
-
-        return files;
-      }
-      if (fileStatusList.size() == MAX_LIMIT) {
-        marker = fileStatusList.get(fileStatusList.size() - 1).getName();
+      if (SwiftUtils.isRootDir(path)) {
+        return objects;
       } else {
-        marker = null;
+        throw e;
       }
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Marker:" + marker);
-      }
-      for (SwiftObjectFileStatus status : fileStatusList) {
-        if (status.getName() != null) {
-          files.add(new SwiftFileStatus(status.getBytes(), status.getBytes() == 0, 1,
-              getBlocksize(), status.getLastModified().getTime(),
-              getCorrectSwiftPath(new Path(status.getName()))));
-        }
-      }
-      // stop when no paging
-      if (marker == null) {
-        loop = false;
-      }
-      if (LOG.isDebugEnabled()) {
-        LOG.debug(fileStatusList.size() + " = page size. The marker is " + marker);
-      }
-    } while (loop);
+    } catch (SwiftInvalidResponseException e) {
+      // bad HTTP error code
+      if (e.getStatusCode() == HttpStatus.SC_NO_CONTENT) {
+        // this can come back on a root list if the container is empty
+        if (SwiftUtils.isRootDir(path)) {
+          return objects;
+        } else {
+          // NO_CONTENT returned on something other than the root directory;
+          // see if it is there, and convert to empty list or not found
+          // depending on whether the entry exists.
+          FileStatus stat = getObjectMetadata(correctSwiftPath, newest);
 
-    return files;
+          if (stat.isDir()) {
+            // it's an empty directory. state that
+            return null;
+          } else {
+            // it's a file -return that as the status
+            files.add(stat);
+            objects.setFiles(files);
+            return objects;
+          }
+        }
+      } else {
+        // a different status code: rethrow immediately
+        throw e;
+      }
+    }
+
+    final CollectionType collectionType = JsonUtil.getJsonMapper().getTypeFactory()
+        .constructCollectionType(List.class, SwiftObjectFileStatus.class);
+
+    final List<SwiftObjectFileStatus> fileStatusList =
+        JsonUtil.toObject(new String(bytes), collectionType);
+
+    // this can happen if user lists file /data/files/file
+    // in this case swift will return empty array
+    if (fileStatusList.isEmpty()) {
+      SwiftFileStatus objectMetadata = getObjectMetadata(correctSwiftPath, newest);
+      if (objectMetadata.isFile()) {
+        files.add(objectMetadata);
+        objects.setFiles(files);
+      }
+
+      return objects;
+    }
+    if (fileStatusList.size() == MAX_LIMIT) {
+      marker = fileStatusList.get(fileStatusList.size() - 1).getName();
+    } else {
+      marker = null;
+    }
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Marker:" + marker);
+    }
+    for (SwiftObjectFileStatus status : fileStatusList) {
+      if (status.getName() != null) {
+        files.add(new SwiftFileStatus(status.getBytes(), status.getBytes() == 0, 1, getBlocksize(),
+            status.getLastModified().getTime(), getCorrectSwiftPath(new Path(status.getName()))));
+      }
+    }
+    if (LOG.isDebugEnabled()) {
+      LOG.debug(fileStatusList.size() + " = page size. The marker is " + marker);
+    }
+    // } while (loop);
+
+    objects.setFiles(files);
+    objects.setMarker(marker);
+    return objects;
   }
 
   /**
@@ -540,9 +543,9 @@ public class SwiftNativeFileSystemStore {
    * @throws IOException on IO problems
    * @throws FileNotFoundException if the path is nonexistent
    */
-  public List<FileStatus> listSubPaths(Path path, boolean recursive, boolean newest)
+  public ObjectsList listSubPaths(Path path, boolean recursive, boolean newest, String marker)
       throws IOException {
-    return listDirectory(toDirPath(getCorrectSwiftPath(path)), recursive, newest);
+    return listDirectory(toDirPath(getCorrectSwiftPath(path)), recursive, newest, marker);
   }
 
   /**
@@ -592,7 +595,7 @@ public class SwiftNativeFileSystemStore {
     swiftRestClient.putRequest(swiftObjectPath);
   }
 
-  private SwiftObjectPath toDirPath(Path path) throws SwiftConfigurationException {
+  public SwiftObjectPath toDirPath(Path path) throws SwiftConfigurationException {
     return SwiftObjectPath.fromPath(uri, path, false);
   }
 
@@ -808,151 +811,158 @@ public class SwiftNativeFileSystemStore {
     // calculate the destination
     SwiftObjectPath destPath;
 
+    SwiftObjectPath targetObjectPath = null;
+    ListObjectsRequest request = new ListObjectsRequest(srcObject, true, true, this);
     // enum the child entries and everything underneath
-    List<FileStatus> childStats = listDirectory(srcObject, true, true);
-    boolean srcIsFile = !srcMetadata.isDir();
-    if (srcIsFile) {
+    Iterator<ObjectsList> ite = request.iterator();
+    while (ite.hasNext()) {
+      ObjectsList object = ite.next();
+      List<FileStatus> childStats = object.getFiles();
+      boolean srcIsFile = !srcMetadata.isDir();
+      if (srcIsFile) {
 
-      // source is a simple file OR a partitioned file
-      // outcomes:
-      // #1 dest exists and is file: fail
-      // #2 dest is a dir or doesn't exist: use dest as name
-      destPath = toObjectPath(dst);
-      if (destExists && !destIsDir) {
-        // outcome #1 dest it's a file: fail if differeent
-        if (!renamingOnToSelf) {
-          throw new SwiftOperationFailedException(
-              "cannot rename a file over one that already exists");
+        // source is a simple file OR a partitioned file
+        // outcomes:
+        // #1 dest exists and is file: fail
+        // #2 dest is a dir or doesn't exist: use dest as name
+        destPath = toObjectPath(dst);
+        if (destExists && !destIsDir) {
+          // outcome #1 dest it's a file: fail if differeent
+          if (!renamingOnToSelf) {
+            throw new SwiftOperationFailedException(
+                "cannot rename a file over one that already exists");
+          } else {
+            // is mv self self where self is a file. this becomes a no-op
+            LOG.debug("Renaming file onto self: no-op => success");
+            return;
+          }
+
+        }
+        int childCount = childStats.size();
+        // here there is one of:
+        // - a single object ==> standard file
+        // ->
+        if (childCount == 0) {
+          copyThenDeleteObject(srcObject, destPath);
         } else {
-          // is mv self self where self is a file. this becomes a no-op
-          LOG.debug("Renaming file onto self: no-op => success");
-          return;
-        }
+          // do the copy
+          SwiftUtils.debug(LOG,
+              "Source file appears to be partitioned." + " copying file and deleting children");
 
-      }
-      int childCount = childStats.size();
-      // here there is one of:
-      // - a single object ==> standard file
-      // ->
-      if (childCount == 0) {
-        copyThenDeleteObject(srcObject, destPath);
+          copyObject(srcObject, destPath);
+          deleteObjects(childStats);
+          // for (FileStatus stat : childStats) {
+          // SwiftUtils.debug(LOG, "Deleting partitioned file %s ", stat);
+          // deleteObject(stat.getPath());
+          // }
+
+          swiftRestClient.delete(srcObject);
+        }
       } else {
-        // do the copy
-        SwiftUtils.debug(LOG,
-            "Source file appears to be partitioned." + " copying file and deleting children");
 
-        copyObject(srcObject, destPath);
-        deleteObjects(childStats);
-        // for (FileStatus stat : childStats) {
-        // SwiftUtils.debug(LOG, "Deleting partitioned file %s ", stat);
-        // deleteObject(stat.getPath());
-        // }
-
-        swiftRestClient.delete(srcObject);
-      }
-    } else {
-
-      // here the source exists and is a directory
-      // outcomes (given we know the parent dir exists if we get this far)
-      // #1 destination is a file: fail
-      // #2 destination is a dir or doesn't exist: use dest as name
-      // #3 if the dest path is not == or under src: fail
-
-
-      if (destExists && !destIsDir) {
+        // here the source exists and is a directory
+        // outcomes (given we know the parent dir exists if we get this far)
         // #1 destination is a file: fail
-        throw new SwiftOperationFailedException(
-            "the source is a directory, but not the destination");
-      }
-      Path targetPath;
-      // #2 destination is a dir or doesn't exist: use dest as name
-      targetPath = dst;
-
-      SwiftObjectPath targetObjectPath = toObjectPath(targetPath);
-      // final check for any recursive operations
-      if (srcObject.isEqualToOrParentOf(targetObjectPath)) {
-        // you can't rename a directory onto itself
-        throw new SwiftOperationFailedException("cannot move a directory under itself");
-      }
+        // #2 destination is a dir or doesn't exist: use dest as name
+        // #3 if the dest path is not == or under src: fail
 
 
-      LOG.info("moving  " + srcObject + " " + targetPath);
-
-      logDirectory("Directory to copy ", srcObject, childStats);
-
-      // iterative copy of everything under the directory.
-      // by listing all children this can be done iteratively
-      // rather than recursively -everything in this list is either a file
-      // or a 0-byte-len file pretending to be a directory.
-      String srcURI = src.toUri().toString();
-      int prefixStripCount = srcURI.length() + 1;
-      Map<String, Future<Boolean>> copies = new HashMap<String, Future<Boolean>>();
-      ThreadManager tm = new ThreadManager();
-      try {
-        tm.createThreadManager(this.swiftRestClient.getClientConfig().getMaxThreadsInPool());
-        for (FileStatus fileStatus : childStats) {
-          final Path copySourcePath = fileStatus.getPath();
-          String copySourceURI = copySourcePath.toUri().toString();
-
-          String copyDestSubPath = copySourceURI.substring(prefixStripCount);
-
-          Path copyDestPath = new Path(targetPath, copyDestSubPath);
-          if (LOG.isTraceEnabled()) {
-            // trace to debug some low-level rename path problems; retained
-            // in case they ever come back.
-            LOG.trace("srcURI=" + srcURI + "; copySourceURI=" + copySourceURI + "; copyDestSubPath="
-                + copyDestSubPath + "; copyDestPath=" + copyDestPath);
-          }
-          final SwiftObjectPath copyDestination = toObjectPath(copyDestPath);
-
-          copies.put(srcURI, tm.getPool().submit(new Callable<Boolean>() {
-            public Boolean call() throws Exception {
-              try {
-                copyThenDeleteObject(toObjectPath(copySourcePath), copyDestination);
-                return true;
-              } catch (IOException e) {
-                return false;
-              }
-            }
-          }));
-          // add a throttle delay
-          throttle();
+        if (destExists && !destIsDir) {
+          // #1 destination is a file: fail
+          throw new SwiftOperationFailedException(
+              "the source is a directory, but not the destination");
         }
-        tm.shutdown();
-        Set<Map.Entry<String, Future<Boolean>>> entrySet = copies.entrySet();
-        for (Map.Entry<String, Future<Boolean>> entry : entrySet) {
-          String key = entry.getKey();
-          Future<Boolean> future = entry.getValue();
-          try {
-            if (!future.get()) {
-              LOG.info("Skipping rename of " + key);
-            }
-          } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-          } catch (ExecutionException e) {
-            LOG.info("Skipping rename of " + key);
-          } finally {
-            future.cancel(Boolean.FALSE);
-          }
+        Path targetPath;
+        // #2 destination is a dir or doesn't exist: use dest as name
+        targetPath = dst;
+
+        targetObjectPath = toObjectPath(targetPath);
+        // final check for any recursive operations
+        if (srcObject.isEqualToOrParentOf(targetObjectPath)) {
+          // you can't rename a directory onto itself
+          throw new SwiftOperationFailedException("cannot move a directory under itself");
         }
-      } finally {
-        // free memory
-        tm.cleanup();
-        tm = null;
-        copies.clear();
-        copies = null;
-        childStats.clear();
-        childStats = null;
-      }
-      // now rename self. If missing, create the dest directory and warn
-      if (!SwiftUtils.isRootDir(srcObject)) {
+
+
+        LOG.info("moving  " + srcObject + " " + targetPath);
+
+        logDirectory("Directory to copy ", srcObject, childStats);
+
+        // iterative copy of everything under the directory.
+        // by listing all children this can be done iteratively
+        // rather than recursively -everything in this list is either a file
+        // or a 0-byte-len file pretending to be a directory.
+        String srcURI = src.toUri().toString();
+        int prefixStripCount = srcURI.length() + 1;
+        Map<String, Future<Boolean>> copies = new HashMap<String, Future<Boolean>>();
+        ThreadManager tm = new ThreadManager();
         try {
-          copyThenDeleteObject(srcObject, targetObjectPath);
-        } catch (FileNotFoundException e) {
-          // create the destination directory
-          LOG.warn("Source directory deleted during rename", e);
-          innerCreateDirectory(destObject);
+          tm.createThreadManager(this.swiftRestClient.getClientConfig().getMaxThreadsInPool());
+          for (FileStatus fileStatus : childStats) {
+            final Path copySourcePath = fileStatus.getPath();
+            String copySourceURI = copySourcePath.toUri().toString();
+
+            String copyDestSubPath = copySourceURI.substring(prefixStripCount);
+
+            Path copyDestPath = new Path(targetPath, copyDestSubPath);
+            if (LOG.isTraceEnabled()) {
+              // trace to debug some low-level rename path problems; retained
+              // in case they ever come back.
+              LOG.trace("srcURI=" + srcURI + "; copySourceURI=" + copySourceURI
+                  + "; copyDestSubPath=" + copyDestSubPath + "; copyDestPath=" + copyDestPath);
+            }
+            final SwiftObjectPath copyDestination = toObjectPath(copyDestPath);
+
+            copies.put(srcURI, tm.getPool().submit(new Callable<Boolean>() {
+              public Boolean call() throws Exception {
+                try {
+                  copyThenDeleteObject(toObjectPath(copySourcePath), copyDestination);
+                  return true;
+                } catch (IOException e) {
+                  return false;
+                }
+              }
+            }));
+            // add a throttle delay
+            // throttle();
+          }
+          tm.shutdown();
+          Set<Map.Entry<String, Future<Boolean>>> entrySet = copies.entrySet();
+          for (Map.Entry<String, Future<Boolean>> entry : entrySet) {
+            String key = entry.getKey();
+            Future<Boolean> future = entry.getValue();
+            try {
+              if (!future.get()) {
+                LOG.info("Skipping rename of " + key);
+              }
+            } catch (InterruptedException e) {
+              Thread.currentThread().interrupt();
+            } catch (ExecutionException e) {
+              LOG.info("Skipping rename of " + key);
+            } finally {
+              future.cancel(Boolean.FALSE);
+            }
+          }
+        } finally {
+          // free memory
+          tm.cleanup();
+          tm = null;
+          copies.clear();
+          copies = null;
+          childStats.clear();
+          childStats = null;
         }
+
+      }
+    }
+    // now rename self. If missing, create the dest directory and warn
+    if (targetObjectPath != null && !SwiftUtils.isRootDir(srcObject)) {
+      try {
+        copyThenDeleteObject(srcObject, targetObjectPath);
+      } catch (FileNotFoundException e) {
+        // create the destination directory
+        LOG.warn("Source directory deleted during rename", e);
+        innerCreateDirectory(destObject);
       }
     }
   }
@@ -1137,61 +1147,71 @@ public class SwiftNativeFileSystemStore {
     boolean askForNewest = true;
     SwiftFileStatus fileStatus = getObjectMetadata(swiftPath, askForNewest);
 
+    ListObjectsRequest request = new ListObjectsRequest(absolutePath, true, true, this);
+
     // ask for the file/dir status, but don't demand the newest, as we
     // don't mind if the directory has changed
     // list all entries under this directory.
     // this will throw FileNotFoundException if the file isn't there
-    List<FileStatus> statuses = listSubPaths(absolutePath, true, askForNewest);
-    try {
-      if (statuses == null) {
-        // the directory went away during the non-atomic stages of the operation.
-        // Return false as it was not this thread doing the deletion.
-        SwiftUtils.debug(LOG, "Path '%s' has no status -it has 'gone away'", absolutePath,
-            recursive);
-        return false;
+    Iterator<ObjectsList> ite = request.iterator();
+    while (ite.hasNext()) {
+      ObjectsList object = ite.next();
+      List<FileStatus> statuses = null;
+      if (object != null) {
+        statuses = object.getFiles();
       }
-      int filecount = statuses.size();
-      SwiftUtils.debug(LOG, "Path '%s' %d status entries'", absolutePath, filecount);
+      try {
+        if (statuses == null) {
+          // the directory went away during the non-atomic stages of the operation.
+          // Return false as it was not this thread doing the deletion.
+          SwiftUtils.debug(LOG, "Path '%s' has no status -it has 'gone away'", absolutePath,
+              recursive);
+          return false;
+        }
+        int filecount = statuses.size();
+        SwiftUtils.debug(LOG, "Path '%s' %d status entries'", absolutePath, filecount);
 
-      if (filecount == 0) {
-        // it's an empty directory or a path
-        rmdir(absolutePath);
-        return true;
+        if (filecount == 0) {
+          // it's an empty directory or a path
+          rmdir(absolutePath);
+          return true;
+        }
+
+        if (LOG.isDebugEnabled()) {
+          SwiftUtils.debug(LOG, SwiftUtils.fileStatsToString(statuses, "\n"));
+        }
+
+        if (filecount == 1 && swiftPath.equals(statuses.get(0).getPath())) {
+          // 1 entry => simple file and it is the target
+          // simple file: delete it
+          SwiftUtils.debug(LOG, "Deleting simple file %s", absolutePath);
+          deleteObject(absolutePath);
+          return true;
+        }
+
+        // >1 entry implies directory with children. Run through them,
+        // but first check for the recursive flag and reject it *unless it looks
+        // like a partitioned file (len > 0 && has children)
+        if (!fileStatus.isDir()) {
+          LOG.debug("Multiple child entries but entry has data: assume partitioned");
+        } else if (!recursive) {
+          // if there are children, unless this is a recursive operation, fail immediately
+          throw new SwiftOperationFailedException("Directory " + fileStatus + " is not empty: "
+              + SwiftUtils.fileStatsToString(statuses, "; "));
+        }
+
+        // delete the entries. including ourself.
+        this.deleteObjects(statuses);
+      } finally {
+        statuses.clear();
+        statuses = null;
       }
-
-      if (LOG.isDebugEnabled()) {
-        SwiftUtils.debug(LOG, SwiftUtils.fileStatsToString(statuses, "\n"));
-      }
-
-      if (filecount == 1 && swiftPath.equals(statuses.get(0).getPath())) {
-        // 1 entry => simple file and it is the target
-        // simple file: delete it
-        SwiftUtils.debug(LOG, "Deleting simple file %s", absolutePath);
-        deleteObject(absolutePath);
-        return true;
-      }
-
-      // >1 entry implies directory with children. Run through them,
-      // but first check for the recursive flag and reject it *unless it looks
-      // like a partitioned file (len > 0 && has children)
-      if (!fileStatus.isDir()) {
-        LOG.debug("Multiple child entries but entry has data: assume partitioned");
-      } else if (!recursive) {
-        // if there are children, unless this is a recursive operation, fail immediately
-        throw new SwiftOperationFailedException("Directory " + fileStatus + " is not empty: "
-            + SwiftUtils.fileStatsToString(statuses, "; "));
-      }
-
-      // delete the entries. including ourself.
-      this.deleteObjects(statuses);
-      // now delete self
-      SwiftUtils.debug(LOG, "Deleting base entry %s", absolutePath);
-      deleteObject(absolutePath);
-      return true;
-    } finally {
-      statuses.clear();
-      statuses = null;
     }
+
+    // now delete self
+    SwiftUtils.debug(LOG, "Deleting base entry %s", absolutePath);
+    deleteObject(absolutePath);
+    return true;
   }
 
   public boolean isLazyseek() {

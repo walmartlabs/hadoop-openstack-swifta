@@ -321,7 +321,7 @@ public class SwiftNativeFileSystemStore {
    * @throws FileNotFoundException path doesn't resolve to an object
    */
   public HttpBodyContent getObject(Path path) throws IOException {
-    List<String> locations = getDataLocalEndpoints(path);
+    final List<String> locations = getDataLocalEndpoints(path);
 
     for (String url : locations) {
       if (LOG.isDebugEnabled()) {
@@ -450,8 +450,6 @@ public class SwiftNativeFileSystemStore {
     final ObjectsList objects = new ObjectsList();
     final ArrayList<FileStatus> files = new ArrayList<FileStatus>();
     final Path correctSwiftPath = getCorrectSwiftPath(path);
-    // boolean loop = true;
-    // do {
     byte[] bytes = null;
     try {
       bytes = swiftRestClient.listDeepObjectsInDirectory(path, listDeep, marker);
@@ -526,7 +524,6 @@ public class SwiftNativeFileSystemStore {
     if (LOG.isDebugEnabled()) {
       LOG.debug(fileStatusList.size() + " = page size. The marker is " + marker);
     }
-    // } while (loop);
 
     objects.setFiles(files);
     objects.setMarker(marker);
@@ -786,7 +783,7 @@ public class SwiftNativeFileSystemStore {
       dstMetadata = getObjectMetadata(dst);
     } catch (FileNotFoundException e) {
       // destination does not exist.
-      LOG.error("Destination does not exist");
+      LOG.error("Destination does not exist:" + dst);
       dstMetadata = null;
     }
 

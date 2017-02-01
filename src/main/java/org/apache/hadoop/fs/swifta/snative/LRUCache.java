@@ -66,7 +66,10 @@ public class LRUCache<T> {
     if (cache.containsKey(key)) {
       DLinkedNode oldNode = cache.get(key);
       // Update the value
-      oldNode.value = new CacheObject<T>(value);
+      if (oldNode.value != null) {
+        oldNode.value.setValue(value);
+        oldNode.value.setAccessTime(System.currentTimeMillis());  
+      }
       removeNode(oldNode);
       insertHeadNode(oldNode);
     } else {
@@ -112,13 +115,13 @@ public class LRUCache<T> {
   }
   
   public boolean remove(String key) {
-	  if (cache.containsKey(key)) {
-		  DLinkedNode oldNode = cache.get(key);
-		  removeNode(oldNode);
-		  return true;
-	  } else {
-		  return false;
-	  }
+    if (cache.containsKey(key)) {
+      DLinkedNode oldNode = cache.get(key);
+	  removeNode(oldNode);
+	  return true;
+	} else {
+      return false;
+	}
   }
 
 

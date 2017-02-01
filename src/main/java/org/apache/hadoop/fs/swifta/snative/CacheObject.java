@@ -13,6 +13,10 @@ public class CacheObject<T> {
   public T getValue() {
     return value;
   }
+  
+  public void setValue(T value) {
+	this.value = value;
+  }
 
   public long getAccessTime() {
     return accessTime;

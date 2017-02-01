@@ -50,6 +50,14 @@ class SwiftNativeInputStream extends FSInputStream {
    */
   private final SwiftNativeFileSystemStore nativeStore;
 
+
+  private final boolean isLazy;
+
+  /**
+   * File path.
+   */
+  private final Path path;
+
   /**
    * Hadoop statistics. Used to get info about number of reads, writes, etc.
    */
@@ -59,11 +67,6 @@ class SwiftNativeInputStream extends FSInputStream {
    * Data input stream.
    */
   private HttpInputStreamWithRelease httpStream;
-
-  /**
-   * File path.
-   */
-  private final Path path;
 
   /**
    * Current position.
@@ -86,8 +89,6 @@ class SwiftNativeInputStream extends FSInputStream {
   private long rangeOffset = 0;
 
   private long nextReadPosition = 0;
-
-  private boolean isLazy = false;
 
   public SwiftNativeInputStream(SwiftNativeFileSystemStore storeNative,
       FileSystem.Statistics statistics, Path path) throws IOException {
@@ -220,7 +221,7 @@ class SwiftNativeInputStream extends FSInputStream {
         if (LOG.isDebugEnabled()) {
           LOG.debug("Closing HTTP input stream : " + reason);
         }
-        httpStream.close();
+        // httpStream.close();
         IOUtils.closeStream(httpStream);
       }
     } finally {
@@ -275,7 +276,7 @@ class SwiftNativeInputStream extends FSInputStream {
    * @throws IOException IO problems
    * @throws SwiftException if a read returned -1.
    */
-  private synchronized int chompBytes(long bytes) throws IOException {
+  private int chompBytes(long bytes) throws IOException {
     int count = 0;
     if (httpStream != null) {
       int result;

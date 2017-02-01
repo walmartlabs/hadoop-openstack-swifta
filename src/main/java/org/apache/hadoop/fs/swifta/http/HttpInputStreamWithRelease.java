@@ -19,7 +19,6 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftConnectionClosedException;
-import org.apache.hadoop.fs.swifta.metrics.MetricsFactory;
 import org.apache.hadoop.fs.swifta.util.SwiftUtils;
 import org.apache.hadoop.io.IOUtils;
 
@@ -42,10 +41,8 @@ import java.util.Objects;
 public class HttpInputStreamWithRelease extends InputStream {
 
   private static final Log LOG = LogFactory.getLog(HttpInputStreamWithRelease.class);
-  private static final MetricsFactory metric =
-      MetricsFactory.getMetricsFactory(HttpInputStreamWithRelease.class);
   private final URI uri;
-  private HttpMethod method;
+  private final HttpMethod method;
   // flag to say the stream is released -volatile so that read operations
   // pick it up even while unsynchronized.
   private volatile boolean released;
@@ -54,7 +51,7 @@ public class HttpInputStreamWithRelease extends InputStream {
   private InputStream oldInStream;
 
   // Optimize performance.
-  BufferedInputStream inStream;
+  private BufferedInputStream inStream;
   /**
    * In debug builds, this is filled in with the construction-time stack, which is then included in
    * logs from the finalize(), method.
@@ -66,7 +63,8 @@ public class HttpInputStreamWithRelease extends InputStream {
    */
   private String reasonClosed = "unopened";
 
-  public HttpInputStreamWithRelease(URI uri, HttpMethod method, int bufferSize) throws IOException {
+  public HttpInputStreamWithRelease(final URI uri, final HttpMethod method, final int bufferSize)
+      throws IOException {
     this.uri = uri;
     this.method = method;
     constructionStack = LOG.isDebugEnabled() ? new Exception("stack") : null;
@@ -80,9 +78,6 @@ public class HttpInputStreamWithRelease extends InputStream {
       oldInStream = new ByteArrayInputStream(new byte[] {});
       inStream = new BufferedInputStream(oldInStream, bufferSize);
       throw releaseAndRethrow("getResponseBodyAsStream() in constructor -" + e, e);
-    } finally {
-      metric.increase(uri.getPath(), this);
-      metric.report();
     }
   }
 
@@ -112,26 +107,24 @@ public class HttpInputStreamWithRelease extends InputStream {
           }
           method.releaseConnection();
         }
-        if (inStream != null) {
-          // this guard may seem un-needed, but a stack trace seen
-          // on the JetS3t predecessor implied that it
-          // is useful
-          IOUtils.closeStream(inStream);
-          IOUtils.closeStream(oldInStream);
-        }
+
         return true;
       } finally {
+        if (inStream != null) {
+          IOUtils.closeStream(inStream);
+        }
+        if (oldInStream != null) {
+          IOUtils.closeStream(oldInStream);
+        }
         // if something went wrong here, we do not want the release() operation
         // to try and do anything in advance.
         released = true;
         dataConsumed = true;
-        metric.remove(this);
-        metric.report();
         inStream = null;
+        oldInStream = null;
       }
-    } else {
-      return false;
     }
+    return false;
   }
 
   /**
@@ -145,7 +138,9 @@ public class HttpInputStreamWithRelease extends InputStream {
     try {
       release(operation, ex);
     } catch (IOException ioe) {
-      LOG.debug("Exception during release: " + operation + " - " + ioe, ioe);
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Exception during release: " + operation + " - " + ioe, ioe);
+      }
       // make this the exception if there was none before
       if (ex == null) {
         ex = ioe;

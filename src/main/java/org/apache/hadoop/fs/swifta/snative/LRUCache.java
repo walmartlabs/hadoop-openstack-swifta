@@ -7,126 +7,136 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * LRU Cache to reduce HEAD requests.
+ * LRU Cache for reduce HEAD requests.
  *
  */
 public class LRUCache<T> {
 
-
   private final static Log LOG = LogFactory.getLog(LRUCache.class);
   private final Map<String, DLinkedNode> cache = new ConcurrentHashMap<String, DLinkedNode>();
-  private DLinkedNode head, tail;
   private int capacity;
+  private DLinkedNode head, tail;
   private long liveTime;
 
   class DLinkedNode {
-	String key;
+    String key;
     CacheObject<T> value;
     DLinkedNode pre;
     DLinkedNode post;
   }
 
-  // Insert the node before the current head and set the head to the node
-  private void insertHeadNode(DLinkedNode node) {
-	node.post = head;
-	node.pre = null;
-	if (head != null) {
-	  head.pre = node; 
-	}
-	head = node;
-	if (tail == null) {
-	  tail = node;
-	}
+  /**
+   * Always add the new node right after head;
+   */
+  private void addNode(DLinkedNode node) {
+    node.pre = head;
+    node.post = head.post;
+
+    head.post.pre = node;
+    head.post = node;
   }
-  
-  private void removeNode(DLinkedNode node) {	
+
+  /**
+   * Remove an existing node from the linked list. The null pointer check can be removed in future.
+   */
+  private void removeNode(DLinkedNode node, boolean isRemove) {
+    String key = node.key;
     DLinkedNode pre = node.pre;
     DLinkedNode post = node.post;
     if (pre != null) {
       pre.post = post;
-    } else {
-      head = post;
     }
     if (post != null) {
       post.pre = pre;
-    } else {
-      tail = pre;
     }
+    if (isRemove && key != null) {
+      cache.remove(key);
+    }
+  }
+
+  /**
+   * Move certain node in between to the head.
+   */
+  private void moveToHead(DLinkedNode node) {
+    this.removeNode(node, Boolean.FALSE);
+    this.addNode(node);
+  }
+
+  private void init(int capacity) {
+    this.capacity = capacity;
+
+    head = new DLinkedNode();
+    head.pre = null;
+
+    tail = new DLinkedNode();
+    tail.post = null;
+
+    head.post = tail;
+    tail.pre = head;
   }
 
   public LRUCache(int capacity, long liveTime) {
-	this.capacity = capacity;
+    this.init(capacity);
     this.liveTime = liveTime;
-    this.head = null;
-    this.tail = null;
   }
 
- 
-  public void set(String key, T value) {
-    if (cache.containsKey(key)) {
-      DLinkedNode oldNode = cache.get(key);
-      // Update the value
-      if (oldNode.value != null) {
-        oldNode.value.setValue(value);
-        oldNode.value.setAccessTime(System.currentTimeMillis());  
+  public T get(String key) {
+
+    DLinkedNode node = cache.get(key);
+    if (node == null) {
+      return null;
+    }
+
+    /**
+     * Only expires cache when use.
+     */
+    if (node.value == null || node.value.isExpired(liveTime)) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Expiring cache entry " + key);
       }
-      removeNode(oldNode);
-      insertHeadNode(oldNode);
-    } else {
+      this.removeNode(node, Boolean.TRUE);
+      return null;
+    }
+    // Move the accessed node to the head.
+    this.moveToHead(node);
+    node.value.setAccessTime(System.currentTimeMillis());
+    return node.value.getValue();
+  }
+
+  public boolean remove(String key) {
+
+    DLinkedNode node = cache.get(key);
+    if (node == null) {
+      return Boolean.FALSE;
+    }
+    this.removeNode(node, Boolean.TRUE);
+    return Boolean.TRUE;
+  }
+
+  public int getSize() {
+    return cache.size();
+  }
+
+  public void set(String key, T value) {
+    DLinkedNode node = cache.get(key);
+
+    if (node == null) {
+
       DLinkedNode newNode = new DLinkedNode();
       newNode.key = key;
       newNode.value = new CacheObject<T>(value);
-      if (cache.size() >= capacity) {
-    	cache.remove(tail.key);
-    	removeNode(tail);
-    	insertHeadNode(newNode);
-      } else {
-    	insertHeadNode(newNode);
+
+      this.cache.put(key, newNode);
+      this.addNode(newNode);
+
+      if (cache.size() > capacity) {
+        this.removeNode(tail.pre, Boolean.TRUE);
       }
-      cache.put(key, newNode);
+    } else {
+      // update the value.
+      node.value.setValue(value);
+      node.value.setAccessTime(System.currentTimeMillis());
+      this.moveToHead(node);
     }
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("LRU cache size " + cache.size());
-    }
   }
-  
-  public T get(String key) {
-	if (cache.containsKey(key)) {
-	  DLinkedNode oldNode = cache.get(key);
-		
-	  /**
-	   * If the value expired remove the entry
-	   */
-	  if (oldNode.value == null || oldNode.value.isExpired(liveTime)) {
-        if (LOG.isDebugEnabled()) {
-		  LOG.debug("Expiring cache entry " + key);
-		}
-		removeNode(oldNode);
-		return null;
-	  }
-		
-	  removeNode(oldNode);
-	  oldNode.value.setAccessTime(System.currentTimeMillis());
-	  insertHeadNode(oldNode);
-	  return oldNode.value.getValue();
-	} else {
-	  return null;
-	}
-  }
-  
-  public boolean remove(String key) {
-    if (cache.containsKey(key)) {
-      DLinkedNode oldNode = cache.get(key);
-	  removeNode(oldNode);
-	  return true;
-	} else {
-      return false;
-	}
-  }
-
-
-  public int getSize() {
-	return cache.size();
-  }
-  
 }

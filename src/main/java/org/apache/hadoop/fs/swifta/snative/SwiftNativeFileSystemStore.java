@@ -1,16 +1,12 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
- * agreements. See the NOTICE file distributed with this work for additional information regarding
- * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License. You may obtain a
- * copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
+ * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 
@@ -77,8 +73,7 @@ public class SwiftNativeFileSystemStore {
   private static final Pattern URI_PATTERN = Pattern.compile("\"\\S+?\"");
   private static final String PATTERN = "EEE, d MMM yyyy hh:mm:ss zzz";
   private static final Log LOG = LogFactory.getLog(SwiftNativeFileSystemStore.class);
-  private static final MetricsFactory metric =
-      MetricsFactory.getMetricsFactory(SwiftNativeFileSystemStore.class);
+  private static final MetricsFactory metric = MetricsFactory.getMetricsFactory(SwiftNativeFileSystemStore.class);
   private static final int MAX_LIMIT = 10000;
   private URI uri;
   private SwiftRestClient swiftRestClient;
@@ -92,26 +87,21 @@ public class SwiftNativeFileSystemStore {
   /**
    * Initialize the filesystem store -this creates the REST client binding.
    *
-   * @param fsURI URI of the filesystem, which is used to map to the filesystem-specific options in
-   *        the configuration file
+   * @param fsURI URI of the filesystem, which is used to map to the filesystem-specific options in the configuration file
    * @param configuration configuration
    * @throws IOException on any failure.
    */
   public void initialize(URI fsURI, final Configuration configuration) throws IOException {
     this.uri = fsURI;
-    dnsToSwitchMapping =
-        ReflectionUtils.newInstance(configuration.getClass("topology.node.switch.mapping.impl",
-            ScriptBasedMapping.class, DNSToSwitchMapping.class), configuration);
+    dnsToSwitchMapping = ReflectionUtils.newInstance(configuration.getClass("topology.node.switch.mapping.impl", ScriptBasedMapping.class, DNSToSwitchMapping.class), configuration);
     this.swiftRestClient = SwiftRestClient.getInstance(fsURI, configuration);
     metric.increase(this);
     metric.report();
     if (lru1 == null) {
-      lru1 = new LRUCache<Header[]>(swiftRestClient.getClientConfig().getLruCacheSize(),
-          swiftRestClient.getClientConfig().getCacheLiveTime());
+      lru1 = new LRUCache<Header[]>(swiftRestClient.getClientConfig().getLruCacheSize(), swiftRestClient.getClientConfig().getCacheLiveTime());
     }
     if (lru2 == null) {
-      lru2 = new LRUCache<Header[]>(swiftRestClient.getClientConfig().getLruCacheSize(),
-          swiftRestClient.getClientConfig().getCacheLiveTime());
+      lru2 = new LRUCache<Header[]>(swiftRestClient.getClientConfig().getLruCacheSize(), swiftRestClient.getClientConfig().getCacheLiveTime());
     }
 
   }
@@ -124,8 +114,7 @@ public class SwiftNativeFileSystemStore {
   /**
    * Get the default blocksize of this (bound) filesystem
    * 
-   * @return the blocksize returned for all FileStatus queries, which is used by the MapReduce
-   *         splitter.
+   * @return the blocksize returned for all FileStatus queries, which is used by the MapReduce splitter.
    */
   public long getBlocksize() {
     return 1024L * swiftRestClient.getClientConfig().getBlocksizeKB();
@@ -164,8 +153,7 @@ public class SwiftNativeFileSystemStore {
    * @param length length of the data
    * @throws IOException on a problem
    */
-  public void uploadFilePart(Path path, int partNumber, InputStream inputStream, long length)
-      throws IOException {
+  public void uploadFilePart(Path path, int partNumber, InputStream inputStream, long length) throws IOException {
 
     String stringPath = path.toUri().toString();
     String partitionFilename = SwiftUtils.partitionFilenameFromNumber(partNumber);
@@ -175,13 +163,11 @@ public class SwiftNativeFileSystemStore {
       stringPath = stringPath.concat("/").concat(partitionFilename);
     }
 
-    swiftRestClient.upload(new SwiftObjectPath(toDirPath(path).getContainer(), stringPath),
-        inputStream, length);
+    swiftRestClient.upload(new SwiftObjectPath(toDirPath(path).getContainer(), stringPath), inputStream, length);
   }
 
   /**
-   * Tell the Swift server to expect a multi-part upload by submitting a 0-byte file with the
-   * X-Object-Manifest header.
+   * Tell the Swift server to expect a multi-part upload by submitting a 0-byte file with the X-Object-Manifest header.
    *
    * @param path path of final final
    * @throws IOException
@@ -195,8 +181,7 @@ public class SwiftNativeFileSystemStore {
       pathString = pathString.substring(1);
     }
 
-    swiftRestClient.upload(toObjectPath(path), new ByteArrayInputStream(new byte[0]), 0,
-        new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString));
+    swiftRestClient.upload(toObjectPath(path), new ByteArrayInputStream(new byte[0]), 0, new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString));
   }
 
   /**
@@ -220,8 +205,7 @@ public class SwiftNativeFileSystemStore {
    * @throws IOException IO problem
    * @throws FileNotFoundException if there is nothing at the end
    */
-  public Header[] getObjectHeaders(Path path, boolean newest)
-      throws IOException, FileNotFoundException {
+  public Header[] getObjectHeaders(Path path, boolean newest) throws IOException, FileNotFoundException {
     SwiftObjectPath objectPath = toObjectPath(path);
     return stat(objectPath, newest);
   }
@@ -235,8 +219,7 @@ public class SwiftNativeFileSystemStore {
    * @throws IOException on a problem
    * @throws FileNotFoundException if there is nothing at the end
    */
-  public SwiftFileStatus getObjectMetadata(Path path, boolean newest)
-      throws IOException, FileNotFoundException {
+  public SwiftFileStatus getObjectMetadata(Path path, boolean newest) throws IOException, FileNotFoundException {
 
     SwiftObjectPath objectPath = toObjectPath(path);
     final Header[] headers = stat(objectPath, newest);
@@ -250,8 +233,7 @@ public class SwiftNativeFileSystemStore {
     long lastModified = 0;
     for (Header header : headers) {
       String headerName = header.getName();
-      if (headerName.equals(SwiftProtocolConstants.X_CONTAINER_OBJECT_COUNT)
-          || headerName.equals(SwiftProtocolConstants.X_CONTAINER_BYTES_USED)) {
+      if (headerName.equals(SwiftProtocolConstants.X_CONTAINER_OBJECT_COUNT) || headerName.equals(SwiftProtocolConstants.X_CONTAINER_BYTES_USED)) {
         length = 0;
         isDir = true;
       }
@@ -298,8 +280,7 @@ public class SwiftNativeFileSystemStore {
     if (newest) {
       headers = this.handleCache(lru1, objectPath.toUriPath());
       if (headers == null) {
-        headers = swiftRestClient.headRequest("getObjectMetadata-newest", objectPath,
-            SwiftRestClient.NEWEST);
+        headers = swiftRestClient.headRequest("getObjectMetadata-newest", objectPath, SwiftRestClient.NEWEST);
         this.setCache(lru1, objectPath.toUriPath(), headers);
       }
     } else {
@@ -342,8 +323,7 @@ public class SwiftNativeFileSystemStore {
   }
 
   /**
-   * Returns list of endpoints for given swift path that are local for the host. List is returned in
-   * order of preference.
+   * Returns list of endpoints for given swift path that are local for the host. List is returned in order of preference.
    */
   private List<String> getDataLocalEndpoints(Path path) throws IOException {
     final String hostRack = getHostRack();
@@ -373,8 +353,7 @@ public class SwiftNativeFileSystemStore {
   }
 
   /**
-   * Returns similarity index for two racks. Bigger numbers correspond to closer location. Zero
-   * corresponds to different racks.
+   * Returns similarity index for two racks. Bigger numbers correspond to closer location. Zero corresponds to different racks.
    *
    * @param rack1 path to rack1
    * @param rack2 path to rack2
@@ -445,8 +424,7 @@ public class SwiftNativeFileSystemStore {
    * @throws IOException IO problems
    * @throws FileNotFoundException if the path does not exist
    */
-  public ObjectsList listDirectory(SwiftObjectPath path, boolean listDeep, boolean newest,
-      String marker) throws IOException {
+  public ObjectsList listDirectory(SwiftObjectPath path, boolean listDeep, boolean newest, String marker) throws IOException {
     final ObjectsList objects = new ObjectsList();
     final ArrayList<FileStatus> files = new ArrayList<FileStatus>();
     final Path correctSwiftPath = getCorrectSwiftPath(path);
@@ -490,11 +468,9 @@ public class SwiftNativeFileSystemStore {
       }
     }
 
-    final CollectionType collectionType = JsonUtil.getJsonMapper().getTypeFactory()
-        .constructCollectionType(List.class, SwiftObjectFileStatus.class);
+    final CollectionType collectionType = JsonUtil.getJsonMapper().getTypeFactory().constructCollectionType(List.class, SwiftObjectFileStatus.class);
 
-    final List<SwiftObjectFileStatus> fileStatusList =
-        JsonUtil.toObject(new String(bytes), collectionType);
+    final List<SwiftObjectFileStatus> fileStatusList = JsonUtil.toObject(new String(bytes), collectionType);
 
     // this can happen if user lists file /data/files/file
     // in this case swift will return empty array
@@ -517,8 +493,7 @@ public class SwiftNativeFileSystemStore {
     }
     for (SwiftObjectFileStatus status : fileStatusList) {
       if (status.getName() != null) {
-        files.add(new SwiftFileStatus(status.getBytes(), status.getBytes() == 0, 1, getBlocksize(),
-            status.getLastModified().getTime(), getCorrectSwiftPath(new Path(status.getName()))));
+        files.add(new SwiftFileStatus(status.getBytes(), status.getBytes() == 0, 1, getBlocksize(), status.getLastModified().getTime(), getCorrectSwiftPath(new Path(status.getName()))));
       }
     }
     if (LOG.isDebugEnabled()) {
@@ -540,8 +515,7 @@ public class SwiftNativeFileSystemStore {
    * @throws IOException on IO problems
    * @throws FileNotFoundException if the path is nonexistent
    */
-  public ObjectsList listSubPaths(Path path, boolean recursive, boolean newest, String marker)
-      throws IOException {
+  public ObjectsList listSubPaths(Path path, boolean recursive, boolean newest, String marker) throws IOException {
     return listDirectory(toDirPath(getCorrectSwiftPath(path)), recursive, newest, marker);
   }
 
@@ -582,8 +556,7 @@ public class SwiftNativeFileSystemStore {
   }
 
   /**
-   * The inner directory creation option. This only creates the dir at the given path, not any
-   * parent dirs.
+   * The inner directory creation option. This only creates the dir at the given path, not any parent dirs.
    * 
    * @param swiftObjectPath swift object path at which a 0-byte blob should be put
    * @throws IOException IO problems
@@ -724,8 +697,7 @@ public class SwiftNativeFileSystemStore {
    *
    * @param path object path
    * @return true if the metadata of an object could be retrieved
-   * @throws IOException IO problems other than FileNotFound, which is downgraded to an object does
-   *         not exist return code
+   * @throws IOException IO problems other than FileNotFound, which is downgraded to an object does not exist return code
    */
   public boolean objectExists(Path path) throws IOException {
     return objectExists(toObjectPath(path));
@@ -736,8 +708,7 @@ public class SwiftNativeFileSystemStore {
    *
    * @param path swift object path
    * @return true if the metadata of an object could be retrieved
-   * @throws IOException IO problems other than FileNotFound, which is downgraded to an object does
-   *         not exist return code
+   * @throws IOException IO problems other than FileNotFound, which is downgraded to an object does not exist return code
    */
   public boolean objectExists(SwiftObjectPath path) throws IOException {
     try {
@@ -750,8 +721,7 @@ public class SwiftNativeFileSystemStore {
   }
 
   /**
-   * Rename through copy-and-delete. this is a consequence of the Swift filesystem using the path as
-   * the hash into the Distributed Hash Table, "the ring" of filenames.
+   * Rename through copy-and-delete. this is a consequence of the Swift filesystem using the path as the hash into the Distributed Hash Table, "the ring" of filenames.
    * <p/>
    * Because of the nature of the operation, it is not atomic.
    *
@@ -759,11 +729,9 @@ public class SwiftNativeFileSystemStore {
    * @param dst destination
    * @throws IOException IO failure
    * @throws SwiftOperationFailedException if the rename failed
-   * @throws FileNotFoundException if the source directory is missing, or the parent directory of
-   *         the destination
+   * @throws FileNotFoundException if the source directory is missing, or the parent directory of the destination
    */
-  public void rename(Path src, Path dst)
-      throws FileNotFoundException, SwiftOperationFailedException, IOException {
+  public void rename(Path src, Path dst) throws FileNotFoundException, SwiftOperationFailedException, IOException {
     if (LOG.isDebugEnabled()) {
       LOG.debug("mv " + src + " " + dst);
     }
@@ -783,7 +751,7 @@ public class SwiftNativeFileSystemStore {
       dstMetadata = getObjectMetadata(dst);
     } catch (FileNotFoundException e) {
       // destination does not exist.
-      LOG.error("Destination does not exist:" + dst);
+      // LOG.error("Destination does not exist:" + dst);
       dstMetadata = null;
     }
 
@@ -821,19 +789,23 @@ public class SwiftNativeFileSystemStore {
         // source is a simple file OR a partitioned file
         // outcomes:
         // #1 dest exists and is file: fail
-        // #2 dest is a dir or doesn't exist: use dest as name
+        // #2 dest is a dir: fail
+        // #3 doesn't exist: use dest as name
         destPath = toObjectPath(dst);
-        if (destExists && !destIsDir) {
-          // outcome #1 dest it's a file: fail if differeent
-          if (!renamingOnToSelf) {
-            throw new SwiftOperationFailedException(
-                "cannot rename a file over one that already exists");
-          } else {
-            // is mv self self where self is a file. this becomes a no-op
-            LOG.debug("Renaming file onto self: no-op => success");
-            return;
-          }
+        if (destExists) {
+          if (!destIsDir) {
+            // outcome #1 dest it's a file: fail if differeent
+            if (!renamingOnToSelf) {
+              throw new SwiftOperationFailedException("Cannot rename a file over one that already exists.");
+            } else {
+              // is mv self self where self is a file. this becomes a no-op
+              LOG.debug("Renaming file onto self: no-op => success");
+              return;
+            }
 
+          } else {
+            throw new SwiftOperationFailedException("Cannot rename a dir to a file.");
+          }
         }
         int childCount = childStats.size();
         // here there is one of:
@@ -843,8 +815,7 @@ public class SwiftNativeFileSystemStore {
           copyThenDeleteObject(srcObject, destPath);
         } else {
           // do the copy
-          SwiftUtils.debug(LOG,
-              "Source file appears to be partitioned." + " copying file and deleting children");
+          SwiftUtils.debug(LOG, "Source file appears to be partitioned." + " copying file and deleting children");
 
           copyObject(srcObject, destPath);
           deleteObjects(childStats);
@@ -866,8 +837,7 @@ public class SwiftNativeFileSystemStore {
 
         if (destExists && !destIsDir) {
           // #1 destination is a file: fail
-          throw new SwiftOperationFailedException(
-              "the source is a directory, but not the destination");
+          throw new SwiftOperationFailedException("The source is a directory, but the destination is a file.");
         }
         Path targetPath;
         // #2 destination is a dir or doesn't exist: use dest as name
@@ -905,8 +875,7 @@ public class SwiftNativeFileSystemStore {
             if (LOG.isTraceEnabled()) {
               // trace to debug some low-level rename path problems; retained
               // in case they ever come back.
-              LOG.trace("srcURI=" + srcURI + "; copySourceURI=" + copySourceURI
-                  + "; copyDestSubPath=" + copyDestSubPath + "; copyDestPath=" + copyDestPath);
+              LOG.trace("srcURI=" + srcURI + "; copySourceURI=" + copySourceURI + "; copyDestSubPath=" + copyDestSubPath + "; copyDestPath=" + copyDestPath);
             }
             final SwiftObjectPath copyDestination = toObjectPath(copyDestPath);
 
@@ -971,8 +940,7 @@ public class SwiftNativeFileSystemStore {
    * @param objectPath object path (can be null)
    * @param statuses listing output
    */
-  private void logDirectory(String message, SwiftObjectPath objectPath,
-      Iterable<FileStatus> statuses) {
+  private void logDirectory(String message, SwiftObjectPath objectPath, Iterable<FileStatus> statuses) {
 
     if (LOG.isDebugEnabled()) {
       LOG.debug(message + ": listing of " + objectPath);
@@ -990,16 +958,14 @@ public class SwiftNativeFileSystemStore {
 
 
   /**
-   * Copy an object then, if the copy worked, delete it. If the copy failed, the source object is
-   * not deleted.
+   * Copy an object then, if the copy worked, delete it. If the copy failed, the source object is not deleted.
    *
    * @param srcObject source object path
    * @param destObject destination object path
    * @throws IOException IO problems
    * 
    */
-  private void copyThenDeleteObject(SwiftObjectPath srcObject, SwiftObjectPath destObject)
-      throws IOException {
+  private void copyThenDeleteObject(SwiftObjectPath srcObject, SwiftObjectPath destObject) throws IOException {
 
 
     // do the copy
@@ -1015,8 +981,7 @@ public class SwiftNativeFileSystemStore {
    * @param destObject destination object path
    * @throws IOException IO problems
    */
-  private void copyObject(SwiftObjectPath srcObject, SwiftObjectPath destObject)
-      throws IOException {
+  private void copyObject(SwiftObjectPath srcObject, SwiftObjectPath destObject) throws IOException {
     if (srcObject.isEqualToOrParentOf(destObject)) {
       throw new SwiftException("Can't copy " + srcObject + " onto " + destObject);
     }
@@ -1028,8 +993,7 @@ public class SwiftNativeFileSystemStore {
   }
 
   /**
-   * Take a Hadoop path and return one which uses the URI prefix and authority of this FS. It
-   * doesn't make a relative path absolute.
+   * Take a Hadoop path and return one which uses the URI prefix and authority of this FS. It doesn't make a relative path absolute.
    * 
    * @param path path in
    * @return path with a URI bound to this FS
@@ -1037,8 +1001,7 @@ public class SwiftNativeFileSystemStore {
    */
   public Path getCorrectSwiftPath(Path path) throws SwiftException {
     try {
-      return new Path(new URI(uri.getScheme(), uri.getAuthority(),
-          SwiftUtils.encodeUrl(path.toUri().getPath()), null, null));
+      return new Path(new URI(uri.getScheme(), uri.getAuthority(), SwiftUtils.encodeUrl(path.toUri().getPath()), null, null));
     } catch (URISyntaxException e) {
       throw new SwiftException("Specified path " + path + " is incorrect", e);
     }
@@ -1053,8 +1016,7 @@ public class SwiftNativeFileSystemStore {
    */
   private Path getCorrectSwiftPath(SwiftObjectPath path) throws SwiftException {
     try {
-      final URI fullUri =
-          new URI(uri.getScheme(), uri.getAuthority(), path.getObject(), null, null);
+      final URI fullUri = new URI(uri.getScheme(), uri.getAuthority(), path.getObject(), null, null);
 
       return new Path(fullUri);
     } catch (URISyntaxException e) {
@@ -1083,9 +1045,7 @@ public class SwiftNativeFileSystemStore {
       } catch (IllegalArgumentException e) {
         // failure to create the URI, which means this is bad JSON. Convert
         // to an exception with useful text
-        throw new SwiftOperationFailedException(String.format(
-            "could not convert \"%s\" into a URI." + " source: %s " + " first JSON: %s", uri, path,
-            json.substring(0, 256)));
+        throw new SwiftOperationFailedException(String.format("could not convert \"%s\" into a URI." + " source: %s " + " first JSON: %s", uri, path, json.substring(0, 256)));
       }
     }
     return result;
@@ -1119,24 +1079,18 @@ public class SwiftNativeFileSystemStore {
 
 
   /**
-   * Delete the entire tree. This is an internal one with slightly different behavior: if an entry
-   * is missing, a {@link FileNotFoundException} is raised. This lets the caller distinguish a file
-   * not found with other reasons for failure, so handles race conditions in recursive directory
-   * deletes better.
+   * Delete the entire tree. This is an internal one with slightly different behavior: if an entry is missing, a {@link FileNotFoundException} is raised. This lets the caller distinguish a file not
+   * found with other reasons for failure, so handles race conditions in recursive directory deletes better.
    * <p/>
-   * The problem being addressed is: caller A requests a recursive directory of directory /dir ;
-   * caller B requests a delete of a file /dir/file, between caller A enumerating the files
-   * contents, and requesting a delete of /dir/file. We want to recognise the special case "directed
-   * file is no longer there" and not convert that into a failure
+   * The problem being addressed is: caller A requests a recursive directory of directory /dir ; caller B requests a delete of a file /dir/file, between caller A enumerating the files contents, and
+   * requesting a delete of /dir/file. We want to recognise the special case "directed file is no longer there" and not convert that into a failure
    *
    * @param absolutePath the path to delete.
-   * @param recursive if path is a directory and set to true, the directory is deleted else throws
-   *        an exception if the directory is not empty case of a file the recursive can be set to
-   *        either true or false.
+   * @param recursive if path is a directory and set to true, the directory is deleted else throws an exception if the directory is not empty case of a file the recursive can be set to either true or
+   *        false.
    * @return true if the object was deleted
    * @throws IOException IO problems
-   * @throws FileNotFoundException if a file/dir being deleted is not there - this includes entries
-   *         below the specified path, (if the path is a dir and recursive is true)
+   * @throws FileNotFoundException if a file/dir being deleted is not there - this includes entries below the specified path, (if the path is a dir and recursive is true)
    */
   public boolean delete(Path absolutePath, boolean recursive) throws IOException {
     Path swiftPath = getCorrectSwiftPath(absolutePath);
@@ -1161,8 +1115,7 @@ public class SwiftNativeFileSystemStore {
         if (statuses == null) {
           // the directory went away during the non-atomic stages of the operation.
           // Return false as it was not this thread doing the deletion.
-          SwiftUtils.debug(LOG, "Path '%s' has no status -it has 'gone away'", absolutePath,
-              recursive);
+          SwiftUtils.debug(LOG, "Path '%s' has no status -it has 'gone away'", absolutePath, recursive);
           return false;
         }
         int filecount = statuses.size();
@@ -1193,8 +1146,7 @@ public class SwiftNativeFileSystemStore {
           LOG.debug("Multiple child entries but entry has data: assume partitioned");
         } else if (!recursive) {
           // if there are children, unless this is a recursive operation, fail immediately
-          throw new SwiftOperationFailedException("Directory " + fileStatus + " is not empty: "
-              + SwiftUtils.fileStatsToString(statuses, "; "));
+          throw new SwiftOperationFailedException("Directory " + fileStatus + " is not empty: " + SwiftUtils.fileStatsToString(statuses, "; "));
         }
 
         // delete the entries. including ourself.

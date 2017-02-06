@@ -27,6 +27,6 @@ public class CacheObject<T> {
   }
 
   public boolean isExpired(long liveTime) {
-    return (this.accessTime + liveTime) > System.currentTimeMillis();
+    return (this.accessTime + liveTime) < System.currentTimeMillis();
   }
 }

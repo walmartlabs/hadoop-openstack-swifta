@@ -24,16 +24,14 @@ public class ListObjectsRequest {
   private ObjectsList objects;
   private volatile boolean hasRun = false;
 
-  public ListObjectsRequest(SwiftObjectPath path, boolean listDeep, boolean newest,
-      SwiftNativeFileSystemStore store) {
+  public ListObjectsRequest(SwiftObjectPath path, boolean listDeep, boolean newest, SwiftNativeFileSystemStore store) {
     this.path = path;
     this.listDeep = listDeep;
     this.newest = newest;
     this.store = store;
   }
 
-  public ListObjectsRequest(Path path, boolean listDeep, boolean newest,
-      SwiftNativeFileSystemStore store) throws SwiftConfigurationException, SwiftException {
+  public ListObjectsRequest(Path path, boolean listDeep, boolean newest, SwiftNativeFileSystemStore store) throws SwiftConfigurationException, SwiftException {
     this.path = store.toDirPath(store.getCorrectSwiftPath(path));
     this.listDeep = listDeep;
     this.newest = newest;
@@ -57,7 +55,7 @@ public class ListObjectsRequest {
     @Override
     public ObjectsList next() {
       if (!this.hasNext()) {
-        throw new NoSuchElementException();
+        return null;
       }
       try {
         String marker = (objects == null ? null : objects.getMarker());

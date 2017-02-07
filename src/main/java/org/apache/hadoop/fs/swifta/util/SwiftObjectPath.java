@@ -112,8 +112,8 @@ public final class SwiftObjectPath {
   public boolean isEqualToOrParentOf(SwiftObjectPath possibleChild) {
     String origPath = toUriPath();
     String path = origPath;
-    if (!path.endsWith("/")) {
-      path = path + "/";
+    if (!path.endsWith(SLASH)) {
+      path = path + SLASH;
     }
     String childPath = possibleChild.toUriPath();
     return childPath.equals(origPath) || childPath.startsWith(path);

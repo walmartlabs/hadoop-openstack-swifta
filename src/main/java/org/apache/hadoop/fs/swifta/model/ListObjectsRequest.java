@@ -68,7 +68,7 @@ public class ListObjectsRequest {
          * Fake an exception to capture the IO error.
          */
         NoSuchElementException e1 = new NoSuchElementException();
-        e1.initCause(e.getCause());
+        e1.initCause(e);
         throw e1;
       }
       if (!hasRun) {

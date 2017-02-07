@@ -148,9 +148,6 @@ public final class SwiftObjectPath {
     if (addTrailingSlash && !url.endsWith(SLASH)) {
       url += SLASH;
     }
-    if (!addTrailingSlash && url.endsWith(SLASH)) {
-      url = url.substring(0, url.length() - 1);
-    }
 
     String container = uri.getHost();
     if (container == null) {

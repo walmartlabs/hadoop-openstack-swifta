@@ -526,7 +526,7 @@ public class SwiftNativeFileSystemStore {
    * @throws IOException
    */
   public void createDirectory(Path path) throws IOException {
-    innerCreateDirectory(toDirPath(path));
+    innerCreateDirectory(toDirPathCreate(path));
   }
 
   /**
@@ -566,7 +566,11 @@ public class SwiftNativeFileSystemStore {
   }
 
   public SwiftObjectPath toDirPath(Path path) throws SwiftConfigurationException {
-    return SwiftObjectPath.fromPath(uri, path, false);
+    return SwiftObjectPath.fromPath(uri, path, Boolean.FALSE);
+  }
+
+  public SwiftObjectPath toDirPathCreate(Path path) throws SwiftConfigurationException {
+    return SwiftObjectPath.fromPath(uri, path, Boolean.FALSE, Boolean.TRUE);
   }
 
   private SwiftObjectPath toObjectPath(Path path) throws SwiftConfigurationException {

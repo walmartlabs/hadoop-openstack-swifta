@@ -64,7 +64,7 @@ public final class SwiftObjectPath {
       return true;
     }
     if (!(obj instanceof SwiftObjectPath)) {
-      return false;
+      return Boolean.FALSE;
     }
     final SwiftObjectPath that = (SwiftObjectPath) obj;
     return this.toUriPath().equals(that.toUriPath());
@@ -128,7 +128,11 @@ public final class SwiftObjectPath {
    * @throws SwiftConfigurationException if the URI host doesn't parse into container.service
    */
   public static SwiftObjectPath fromPath(URI uri, Path path) throws SwiftConfigurationException {
-    return fromPath(uri, path, false);
+    return fromPath(uri, path, Boolean.FALSE);
+  }
+
+  public static SwiftObjectPath fromPath(URI uri, Path path, boolean addTrailingSlash) throws SwiftConfigurationException {
+    return fromPath(uri, path, addTrailingSlash, Boolean.FALSE);
   }
 
   /**
@@ -141,12 +145,17 @@ public final class SwiftObjectPath {
    * @return a new instance.
    * @throws SwiftConfigurationException if the URI host doesn't parse into container.service
    */
-  public static SwiftObjectPath fromPath(URI uri, Path path, boolean addTrailingSlash) throws SwiftConfigurationException {
+  public static SwiftObjectPath fromPath(URI uri, Path path, boolean addTrailingSlash, boolean removeTrailingSlash) throws SwiftConfigurationException {
 
     String url = path.toUri().getPath().replaceAll(PATH_PART_PATTERN.pattern(), "");
     // add a trailing slash if needed
     if (addTrailingSlash && !url.endsWith(SLASH)) {
       url += SLASH;
+    }
+    if (removeTrailingSlash) {
+      if (!addTrailingSlash && url.endsWith(SLASH)) {
+        url = url.substring(0, url.length() - 1);
+      }
     }
 
     String container = uri.getHost();

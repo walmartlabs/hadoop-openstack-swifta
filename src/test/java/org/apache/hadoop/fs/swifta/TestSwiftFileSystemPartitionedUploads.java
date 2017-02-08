@@ -35,6 +35,7 @@ import java.net.URISyntaxException;
 /**
  * Test partitioned uploads. This is done by forcing a very small partition size and verifying that it is picked up.
  */
+@Ignore("Not implemented correctly.")
 public class TestSwiftFileSystemPartitionedUploads extends SwiftFileSystemBaseTest {
 
   public static final String WRONG_PARTITION_COUNT = "wrong number of partitions written into ";

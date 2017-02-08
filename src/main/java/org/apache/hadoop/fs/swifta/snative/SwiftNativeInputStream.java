@@ -1,16 +1,12 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
- * agreements. See the NOTICE file distributed with this work for additional information regarding
- * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License. You may obtain a
- * copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
+ * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package org.apache.hadoop.fs.swifta.snative;
@@ -32,17 +28,14 @@ import java.io.EOFException;
 import java.io.IOException;
 
 /**
- * The input stream from remote Swift blobs. The class attempts to be buffer aware, and react to a
- * forward seek operation by trying to scan ahead through the current block of data to find it. This
- * accelerates some operations that do a lot of seek()/read() actions, including work (such as in
- * the MR engine) that do a seek() immediately after an open().
+ * The input stream from remote Swift blobs. The class attempts to be buffer aware, and react to a forward seek operation by trying to scan ahead through the current block of data to find it. This
+ * accelerates some operations that do a lot of seek()/read() actions, including work (such as in the MR engine) that do a seek() immediately after an open().
  */
 class SwiftNativeInputStream extends FSInputStream {
 
   private static final Log LOG = LogFactory.getLog(SwiftNativeInputStream.class);
 
-  private static final MetricsFactory metric =
-      MetricsFactory.getMetricsFactory(SwiftNativeInputStream.class);
+  private static final MetricsFactory metric = MetricsFactory.getMetricsFactory(SwiftNativeInputStream.class);
 
 
   /**
@@ -90,8 +83,7 @@ class SwiftNativeInputStream extends FSInputStream {
 
   private long nextReadPosition = 0;
 
-  public SwiftNativeInputStream(SwiftNativeFileSystemStore storeNative,
-      FileSystem.Statistics statistics, Path path) throws IOException {
+  public SwiftNativeInputStream(SwiftNativeFileSystemStore storeNative, FileSystem.Statistics statistics, Path path) throws IOException {
     this.nativeStore = storeNative;
     this.statistics = statistics;
     this.path = path;
@@ -106,8 +98,7 @@ class SwiftNativeInputStream extends FSInputStream {
   }
 
   /**
-   * Move to a new position within the file relative to where the pointer is now. Always call from a
-   * synchronized clause.
+   * Move to a new position within the file relative to where the pointer is now. Always call from a synchronized clause.
    * 
    * @param offset offset
    */
@@ -129,8 +120,7 @@ class SwiftNativeInputStream extends FSInputStream {
     pos = seekPos;
     // and put the buffer offset to 0
     rangeOffset = 0;
-    SwiftUtils.trace(LOG, "Move: pos=%d; bufferOffset=%d; contentLength=%d", pos, rangeOffset,
-        contentLength);
+    SwiftUtils.trace(LOG, "Move: pos=%d; bufferOffset=%d; contentLength=%d", pos, rangeOffset, contentLength);
   }
 
   @Override
@@ -160,6 +150,9 @@ class SwiftNativeInputStream extends FSInputStream {
     SwiftUtils.debug(LOG, "read(buffer, %d, %d)", off, len);
     SwiftUtils.validateReadArgs(b, off, len);
     int result = -1;
+    if (this.contentLength == 0 || (nextReadPosition >= contentLength)) {
+      return result;
+    }
     try {
       verifyOpen();
       if (isLazy) {
@@ -204,8 +197,7 @@ class SwiftNativeInputStream extends FSInputStream {
   }
 
   /**
-   * close the stream. After this the stream is not usable -unless and until it is re-opened (which
-   * can happen on some of the buffer ops) This method is thread-safe and idempotent.
+   * close the stream. After this the stream is not usable -unless and until it is re-opened (which can happen on some of the buffer ops) This method is thread-safe and idempotent.
    *
    * @throws IOException on IO problems.
    */
@@ -244,13 +236,11 @@ class SwiftNativeInputStream extends FSInputStream {
 
   @Override
   public String toString() {
-    return "SwiftNativeInputStream" + " position=" + pos + " "
-        + (httpStream != null ? httpStream.toString() : (" no input stream: " + reasonClosed));
+    return "SwiftNativeInputStream" + " position=" + pos + " " + (httpStream != null ? httpStream.toString() : (" no input stream: " + reasonClosed));
   }
 
   /**
-   * Treats any finalize() call without the input stream being closed as a serious problem, logging
-   * at error level.
+   * Treats any finalize() call without the input stream being closed as a serious problem, logging at error level.
    * 
    * @throws Throwable n/a
    */
@@ -264,10 +254,8 @@ class SwiftNativeInputStream extends FSInputStream {
   // }
 
   /**
-   * Read through the specified number of bytes. The implementation iterates a byte a time, which
-   * may seem inefficient compared to the read(bytes[]) method offered by input streams. However, if
-   * you look at the code that implements that method, it comes down to read() one char at a time
-   * -only here the return value is discarded.
+   * Read through the specified number of bytes. The implementation iterates a byte a time, which may seem inefficient compared to the read(bytes[]) method offered by input streams. However, if you
+   * look at the code that implements that method, it comes down to read() one char at a time -only here the return value is discarded.
    *
    * <p/>
    * This is a no-op if the stream is closed.
@@ -330,8 +318,7 @@ class SwiftNativeInputStream extends FSInputStream {
       // if the seek is in range of that requested, scan forwards
       // instead of closing and re-opening a new HTTP connection
       if (LOG.isDebugEnabled()) {
-        SwiftUtils.debug(LOG, "seek is within current stream" + "; pos= %d ; targetPos=%d; "
-            + "offset= %d ; bufferOffset=%d", pos, targetPos, offset, rangeOffset);
+        SwiftUtils.debug(LOG, "seek is within current stream" + "; pos= %d ; targetPos=%d; " + "offset= %d ; bufferOffset=%d", pos, targetPos, offset, rangeOffset);
       }
 
       try {
@@ -370,15 +357,13 @@ class SwiftNativeInputStream extends FSInputStream {
   }
 
   /**
-   * Fill the buffer from the target position If the target position == current position, the read
-   * still goes ahead; this is a way of handling partial read failures.
+   * Fill the buffer from the target position If the target position == current position, the read still goes ahead; this is a way of handling partial read failures.
    * 
    * @param targetPos target position
    * @throws IOException IO problems on the read
    */
   private synchronized void fillBuffer(long targetPos) throws IOException {
-    SwiftUtils.debug(LOG, "Fetching %d bytes starting at %d", (this.contentLength - targetPos + 1),
-        targetPos);
+    SwiftUtils.debug(LOG, "Fetching %d bytes starting at %d", (this.contentLength - targetPos + 1), targetPos);
     HttpBodyContent blob = nativeStore.getObject(path, targetPos, contentLength);
     httpStream = blob.getInputStream();
     updateStartOfBufferPosition(targetPos);

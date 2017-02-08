@@ -1,16 +1,12 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
- * agreements. See the NOTICE file distributed with this work for additional information regarding
- * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License. You may obtain a
- * copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
+ * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package org.apache.hadoop.fs.swifta;
@@ -24,6 +20,7 @@ import static org.apache.hadoop.fs.swifta.util.SwiftTestUtils.writeDataset;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.swifta.exceptions.SwiftOperationFailedException;
 import org.apache.hadoop.fs.swifta.util.SwiftTestUtils;
 import org.junit.Test;
 
@@ -44,12 +41,18 @@ public class TestSwiftFileSystemRename extends SwiftFileSystemBaseTest {
     createFile(src);
     Path dst = path("/test/new/newdir");
     fs.mkdirs(dst);
-    rename(src, dst, true, false, true);
+    try {
+      rename(src, dst, true, false, true);
+      fail("Should not allow to move a file to override an existing dir.");
+    } catch (SwiftOperationFailedException e) {
+      // Expect
+    }
+
     Path newFile = path("/test/new/newdir/file");
+    createFile(newFile);
     if (!fs.exists(newFile)) {
       String ls = ls(dst);
       LOG.info(ls(path("/test/new")));
-      LOG.info(ls(path("/test/hadoop")));
       fail("did not find " + newFile + " - directory: " + ls);
     }
     assertTrue("Destination changed", fs.exists(path("/test/new/newdir/file")));
@@ -119,8 +122,7 @@ public class TestSwiftFileSystemRename extends SwiftFileSystemBaseTest {
     assertExists("Renamed nested subdir", path("/test/newdir/dir/subdir/"));
     assertExists("file under subdir", path("/test/newdir/dir/subdir/file2"));
 
-    assertPathDoesNotExist("Nested /test/hadoop/dir/subdir/file2 still exists",
-        path("/test/olddir/dir/subdir/file2"));
+    assertPathDoesNotExist("Nested /test/hadoop/dir/subdir/file2 still exists", path("/test/olddir/dir/subdir/file2"));
   }
 
   /**
@@ -208,6 +210,7 @@ public class TestSwiftFileSystemRename extends SwiftFileSystemBaseTest {
     }
     Path testdir = path("test/dir");
     fs.mkdirs(testdir);
+    assertExists("Source directory has not created ", testdir);
     Path parent = testdir.getParent();
     // the outcome here is ambiguous, so is not checked
     fs.rename(testdir, parent);
@@ -232,8 +235,7 @@ public class TestSwiftFileSystemRename extends SwiftFileSystemBaseTest {
   @Test(timeout = SWIFT_TEST_TIMEOUT)
   public void testRenamedConsistence() throws IOException {
     assumeRenameSupported();
-    describe(
-        "verify that overwriting a file with new data doesn't impact" + " the existing content");
+    describe("verify that overwriting a file with new data doesn't impact" + " the existing content");
 
     final Path filePath = new Path("/test/home/user/documents/file.txt");
     final Path newFilePath = new Path("/test/home/user/files/file.txt");

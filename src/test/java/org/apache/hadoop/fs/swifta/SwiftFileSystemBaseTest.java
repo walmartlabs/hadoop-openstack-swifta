@@ -1,16 +1,12 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
- * agreements. See the NOTICE file distributed with this work for additional information regarding
- * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License. You may obtain a
- * copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
+ * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package org.apache.hadoop.fs.swifta;
@@ -218,8 +214,7 @@ public class SwiftFileSystemBaseTest extends Assert implements SwiftTestConstant
    * @param dstExists add assert the dest exists afterwards
    * @throws IOException IO trouble
    */
-  protected void rename(Path src, Path dst, boolean renameMustSucceed, boolean srcExists,
-      boolean dstExists) throws IOException {
+  protected void rename(Path src, Path dst, boolean renameMustSucceed, boolean srcExists, boolean dstExists) throws IOException {
     if (renameMustSucceed) {
       renameToSuccess(src, dst, srcExists, dstExists);
     } else {
@@ -228,8 +223,7 @@ public class SwiftFileSystemBaseTest extends Assert implements SwiftTestConstant
   }
 
   /**
-   * Get a string describing the outcome of a rename, by listing the dest path and its parent along
-   * with some covering text
+   * Get a string describing the outcome of a rename, by listing the dest path and its parent along with some covering text
    * 
    * @param src source patj
    * @param dst dest path
@@ -248,8 +242,7 @@ public class SwiftFileSystemBaseTest extends Assert implements SwiftTestConstant
    *
    * @param src source
    * @param dst dest
-   * @throws IOException a failure other than an expected SwiftRenameException or
-   *         FileNotFoundException
+   * @throws IOException a failure other than an expected SwiftRenameException or FileNotFoundException
    */
   protected void renameToFailure(Path src, Path dst) throws IOException {
     try {
@@ -272,8 +265,7 @@ public class SwiftFileSystemBaseTest extends Assert implements SwiftTestConstant
    * @throws SwiftOperationFailedException operation failure
    * @throws IOException IO problems
    */
-  protected void renameToSuccess(Path src, Path dst, boolean srcExists, boolean dstExists)
-      throws SwiftOperationFailedException, IOException {
+  protected void renameToSuccess(Path src, Path dst, boolean srcExists, boolean dstExists) throws SwiftOperationFailedException, IOException {
     getStore().rename(src, dst);
     String outcome = getRenameOutcome(src, dst);
     assertEquals("Source " + src + "exists: " + outcome, srcExists, fs.exists(src));
@@ -314,8 +306,7 @@ public class SwiftFileSystemBaseTest extends Assert implements SwiftTestConstant
   }
 
   /**
-   * Assert that a file exists and whose {@link FileStatus} entry declares that this is a file and
-   * not a symlink or directory.
+   * Assert that a file exists and whose {@link FileStatus} entry declares that this is a file and not a symlink or directory.
    *
    * @param filename name of the file
    * @throws IOException IO problems during file operations
@@ -325,8 +316,7 @@ public class SwiftFileSystemBaseTest extends Assert implements SwiftTestConstant
   }
 
   /**
-   * Assert that a file exists and whose {@link FileStatus} entry declares that this is a file and
-   * not a symlink or directory.
+   * Assert that a file exists and whose {@link FileStatus} entry declares that this is a file and not a symlink or directory.
    *
    * @throws IOException IO problems during file operations
    */
@@ -377,8 +367,7 @@ public class SwiftFileSystemBaseTest extends Assert implements SwiftTestConstant
     OutputStream nativeStream = out.getWrappedStream();
     int written = getPartitionsWritten(out);
     if (written != expected) {
-      Assert.fail(action + ": " + TestSwiftFileSystemPartitionedUploads.WRONG_PARTITION_COUNT
-          + " + expected: " + expected + " actual: " + written + " -- " + nativeStream);
+      Assert.fail(action + ": " + TestSwiftFileSystemPartitionedUploads.WRONG_PARTITION_COUNT + " + expected: " + expected + " actual: " + written + " -- " + nativeStream);
     }
   }
 

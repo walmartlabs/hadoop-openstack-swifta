@@ -735,7 +735,7 @@ public class SwiftNativeFileSystemStore {
    * @throws SwiftOperationFailedException if the rename failed
    * @throws FileNotFoundException if the source directory is missing, or the parent directory of the destination
    */
-  public void rename(Path src, Path dst) throws FileNotFoundException, SwiftOperationFailedException, IOException {
+  public void rename(final Path src, final Path dst) throws FileNotFoundException, SwiftOperationFailedException, IOException {
     if (LOG.isDebugEnabled()) {
       LOG.debug("mv " + src + " " + dst);
     }
@@ -762,6 +762,9 @@ public class SwiftNativeFileSystemStore {
     // check to see if the destination parent directory exists
     Path srcParent = src.getParent();
     Path dstParent = dst.getParent();
+    if (dst.getName().equals(srcParent.getName())) {
+      throw new SwiftOperationFailedException("src and dst refer to the same file or directory.");
+    }
     // skip the overhead of a HEAD call if the src and dest share the same
     // parent dir (in which case the dest dir exists), or the destination
     // directory is root, in which case it must also exist
@@ -827,7 +830,7 @@ public class SwiftNativeFileSystemStore {
           // SwiftUtils.debug(LOG, "Deleting partitioned file %s ", stat);
           // deleteObject(stat.getPath());
           // }
-
+          this.clearCache(srcObject.toUriPath());
           swiftRestClient.delete(srcObject);
         }
       } else {
@@ -975,6 +978,7 @@ public class SwiftNativeFileSystemStore {
     // do the copy
     copyObject(srcObject, destObject);
     // getting here means the copy worked
+    this.clearCache(srcObject.toUriPath());
     swiftRestClient.delete(srcObject);
   }
 

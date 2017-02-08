@@ -33,8 +33,8 @@ import org.apache.hadoop.fs.swifta.snative.SwiftNativeFileSystem;
 import org.apache.hadoop.fs.swifta.util.SwiftTestUtils;
 import org.junit.Test;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 
 /**
@@ -279,9 +279,9 @@ public class TestSwiftFileSystemBasicOps extends SwiftFileSystemBaseTest {
     try {
       Path path = new Path("/test/hadoop/file");
       FileStatus[] statuses = fs.listStatus(path);
-      fail("Should throw FileNotFoundException on " + path
+      fail("Should throw NoSuchElementException (which wraps FileNotFoundException) on " + path
               + " but got list of length " + statuses.length);
-    } catch (FileNotFoundException fnfe) {
+    } catch (NoSuchElementException fnfe) {
       // expected
     }
   }

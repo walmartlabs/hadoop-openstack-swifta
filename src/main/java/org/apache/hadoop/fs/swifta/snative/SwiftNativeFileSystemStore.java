@@ -258,15 +258,13 @@ public class SwiftNativeFileSystemStore {
   }
 
   private Header[] handleCache(LRUCache<Header[]> lru, String path) {
-    Header[] headers = null;
     if (!swiftRestClient.getClientConfig().isUseHeaderCache()) {
       return null;
     }
-    headers = lru.get(path);
-    if (LOG.isDebugEnabled() && headers != null) {
+    if (LOG.isDebugEnabled() && lru.get(path) != null) {
       LOG.debug("[stat:newest]Found cache for " + path + "; cache size is " + lru1.getSize());
     }
-    return headers;
+    return lru.get(path);
   }
 
   private void setCache(LRUCache<Header[]> lru, String path, Header[] headers) {

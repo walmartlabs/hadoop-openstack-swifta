@@ -1,16 +1,12 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
- * agreements. See the NOTICE file distributed with this work for additional information regarding
- * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License. You may obtain a
- * copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
+ * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package org.apache.hadoop.fs.swifta.http;
@@ -31,12 +27,9 @@ import java.net.URI;
 import java.util.Objects;
 
 /**
- * This replaces the input stream release class from JetS3t and AWS; # Failures in the constructor
- * are relayed up instead of simply logged. # it is set up to be more robust at teardown # release
- * logic is thread safe Note that the thread safety of the inner stream contains no thread safety
- * guarantees -this stream is not to be read across streams. The thread safety logic here is to
- * ensure that even if somebody ignores that rule, the release code does not get entered twice -and
- * that any release in one thread is picked up by read operations in all others.
+ * This replaces the input stream release class from JetS3t and AWS; # Failures in the constructor are relayed up instead of simply logged. # it is set up to be more robust at teardown # release logic
+ * is thread safe Note that the thread safety of the inner stream contains no thread safety guarantees -this stream is not to be read across streams. The thread safety logic here is to ensure that
+ * even if somebody ignores that rule, the release code does not get entered twice -and that any release in one thread is picked up by read operations in all others.
  */
 public class HttpInputStreamWithRelease extends InputStream {
 
@@ -53,8 +46,7 @@ public class HttpInputStreamWithRelease extends InputStream {
   // Optimize performance.
   private BufferedInputStream inStream;
   /**
-   * In debug builds, this is filled in with the construction-time stack, which is then included in
-   * logs from the finalize(), method.
+   * In debug builds, this is filled in with the construction-time stack, which is then included in logs from the finalize(), method.
    */
   private final Exception constructionStack;
 
@@ -63,8 +55,7 @@ public class HttpInputStreamWithRelease extends InputStream {
    */
   private String reasonClosed = "unopened";
 
-  public HttpInputStreamWithRelease(final URI uri, final HttpMethod method, final int bufferSize)
-      throws IOException {
+  public HttpInputStreamWithRelease(final URI uri, final HttpMethod method, final int bufferSize) throws IOException {
     this.uri = uri;
     this.method = method;
     constructionStack = LOG.isDebugEnabled() ? new Exception("stack") : null;
@@ -112,16 +103,16 @@ public class HttpInputStreamWithRelease extends InputStream {
       } finally {
         if (inStream != null) {
           IOUtils.closeStream(inStream);
+          inStream = null;
         }
         if (oldInStream != null) {
           IOUtils.closeStream(oldInStream);
+          oldInStream = null;
         }
         // if something went wrong here, we do not want the release() operation
         // to try and do anything in advance.
         released = true;
         dataConsumed = true;
-        inStream = null;
-        oldInStream = null;
       }
     }
     return false;
@@ -221,8 +212,10 @@ public class HttpInputStreamWithRelease extends InputStream {
   @Override
   protected void finalize() throws Throwable {
     try {
-      if (release("finalize()", constructionStack)) {
-        LOG.warn("input stream of " + uri + " not closed properly -cleaned up in finalize()");
+      if (!released) {
+        if (release("finalize()", constructionStack)) {
+          LOG.warn("input stream of " + uri + " not closed properly -cleaned up in finalize()");
+        }
       }
     } catch (Exception e) {
       // swallow anything that failed here
@@ -233,7 +226,6 @@ public class HttpInputStreamWithRelease extends InputStream {
 
   @Override
   public String toString() {
-    return "HttpInputStreamWithRelease working with " + Objects.toString(uri) + " released="
-        + Objects.toString(released) + " dataConsumed=" + Objects.toString(dataConsumed);
+    return "HttpInputStreamWithRelease working with " + Objects.toString(uri) + " released=" + Objects.toString(released) + " dataConsumed=" + Objects.toString(dataConsumed);
   }
 }

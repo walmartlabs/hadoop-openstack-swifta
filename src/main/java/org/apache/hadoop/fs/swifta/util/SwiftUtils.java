@@ -1,16 +1,12 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
- * agreements. See the NOTICE file distributed with this work for additional information regarding
- * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License. You may obtain a
- * copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
+ * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package org.apache.hadoop.fs.swifta.util;
@@ -66,8 +62,7 @@ public final class SwiftUtils {
   }
 
   /**
-   * This test contains the is-directory logic for Swift, so if changed there is only one place for
-   * it.
+   * This test contains the is-directory logic for Swift, so if changed there is only one place for it.
    *
    * @param fileStatus status to examine
    * @return true if we consider this status to be representative of a directory.
@@ -97,8 +92,7 @@ public final class SwiftUtils {
   }
 
   /**
-   * Encode the URL. This extends {@link URLEncoder#encode(String, String)} with a replacement of +
-   * with %20.
+   * Encode the URL. This extends {@link URLEncoder#encode(String, String)} with a replacement of + with %20.
    * 
    * @param url URL string
    * @return an encoded string
@@ -108,8 +102,7 @@ public final class SwiftUtils {
     if (url.matches(PATTERN)) {
       try {
         url = URLEncoder.encode(url, ENCODE);
-        url = url.replaceAll(PLUS, SPACE_ENCODE).replaceAll(SLASH_ENCODE, SLASH)
-            .replace(COLON_ENCODE, COLON);
+        url = url.replaceAll(PLUS, SPACE_ENCODE).replaceAll(SLASH_ENCODE, SLASH).replace(COLON_ENCODE, COLON);
       } catch (UnsupportedEncodingException e) {
         throw new SwiftException("failed to encode URI", e);
       }
@@ -118,8 +111,7 @@ public final class SwiftUtils {
   }
 
   /**
-   * Sprintf() to the log iff the log is at debug level. If the log is not at debug level, the
-   * printf operation is skipped, so no time is spent generating the string.
+   * Sprintf() to the log iff the log is at debug level. If the log is not at debug level, the printf operation is skipped, so no time is spent generating the string.
    * 
    * @param log log to use
    * @param text text message
@@ -145,8 +137,7 @@ public final class SwiftUtils {
   }
 
   /**
-   * Sprintf() to the log iff the log is at trace level. If the log is not at trace level, the
-   * printf operation is skipped, so no time is spent generating the string.
+   * Sprintf() to the log iff the log is at trace level. If the log is not at trace level, the printf operation is skipped, so no time is spent generating the string.
    * 
    * @param log log to use
    * @param text text message
@@ -159,9 +150,7 @@ public final class SwiftUtils {
   }
 
   /**
-   * Given a partition number, calculate the partition value. This is used in the
-   * SwiftNativeOutputStream, and is placed here for tests to be able to calculate the filename of a
-   * partition.
+   * Given a partition number, calculate the partition value. This is used in the SwiftNativeOutputStream, and is placed here for tests to be able to calculate the filename of a partition.
    * 
    * @param partNumber part number
    * @return a string to use as the filename
@@ -175,8 +164,7 @@ public final class SwiftUtils {
    * 
    * @param fileSystem filesystem
    * @param path directory
-   * @return a listing of the filestatuses of elements in the directory, one to a line, precedeed by
-   *         the full path of the directory
+   * @return a listing of the filestatuses of elements in the directory, one to a line, precedeed by the full path of the directory
    * @throws IOException connectivity problems
    */
   public static String ls(FileSystem fileSystem, Path path) throws IOException {
@@ -220,8 +208,7 @@ public final class SwiftUtils {
   }
 
   /**
-   * Verify that the basic args to a read operation are valid; throws an exception if not -with
-   * meaningful text includeing.
+   * Verify that the basic args to a read operation are valid; throws an exception if not -with meaningful text includeing.
    * 
    * @param buffer destination buffer
    * @param off offset
@@ -240,8 +227,7 @@ public final class SwiftUtils {
       throw new IndexOutOfBoundsException("Negative read length " + len + " in " + READ);
     }
     if (off > buffer.length) {
-      throw new IndexOutOfBoundsException(
-          "Buffer offset of " + off + "beyond buffer size of " + buffer.length + " in " + READ);
+      throw new IndexOutOfBoundsException("Buffer offset of " + off + "beyond buffer size of " + buffer.length + " in " + READ);
     }
   }
 }

@@ -79,7 +79,7 @@ class SwiftNativeInputStream extends FSInputStream {
   /**
    * Offset in the range requested last.
    */
-  private long rangeOffset = 0;
+  // private long rangeOffset = 0;
 
   private long nextReadPosition = 0;
 
@@ -91,7 +91,6 @@ class SwiftNativeInputStream extends FSInputStream {
     HttpBodyContent content = storeNative.getObject(path);
     this.httpStream = content.getInputStream();
     this.contentLength = content.getContentLength();
-    // fillBuffer(0);
     this.isLazy = nativeStore.isLazyseek();
     metric.increase(path.toString(), this);
     metric.report();
@@ -105,8 +104,8 @@ class SwiftNativeInputStream extends FSInputStream {
   private synchronized void incPos(int offset) {
     pos += offset;
     nextReadPosition += offset;
-    rangeOffset += offset;
-    SwiftUtils.trace(LOG, "Inc: pos=%d bufferOffset=%d", pos, rangeOffset);
+    // rangeOffset += offset;
+    SwiftUtils.trace(LOG, "Inc: pos=%d nextReadPosition=%d", pos, nextReadPosition);
   }
 
   /**
@@ -118,9 +117,7 @@ class SwiftNativeInputStream extends FSInputStream {
   private synchronized void updateStartOfBufferPosition(long seekPos) {
     // reset the seek pointer
     pos = seekPos;
-    // and put the buffer offset to 0
-    rangeOffset = 0;
-    SwiftUtils.trace(LOG, "Move: pos=%d; bufferOffset=%d; contentLength=%d", pos, rangeOffset, contentLength);
+    SwiftUtils.trace(LOG, "Move: pos=%d; nextReadPosition=%d; contentLength=%d", pos, nextReadPosition, contentLength);
   }
 
   @Override
@@ -213,7 +210,6 @@ class SwiftNativeInputStream extends FSInputStream {
         if (LOG.isDebugEnabled()) {
           LOG.debug("Closing HTTP input stream : " + reason);
         }
-        // httpStream.close();
         IOUtils.closeStream(httpStream);
       }
     } finally {
@@ -264,18 +260,11 @@ class SwiftNativeInputStream extends FSInputStream {
    * @throws IOException IO problems
    * @throws SwiftException if a read returned -1.
    */
-  private int chompBytes(long bytes) throws IOException {
+  private long chompBytes(long bytes) throws IOException {
     int count = 0;
     if (httpStream != null) {
-      int result;
-      for (long i = 0; i < bytes; i++) {
-        result = httpStream.read();
-        if (result < 0) {
-          throw new SwiftException("Received error code while chomping input");
-        }
-        count++;
-        incPos(1);
-      }
+      count = (int) httpStream.skip(bytes);
+      incPos(count);
     }
     return count;
   }
@@ -318,7 +307,7 @@ class SwiftNativeInputStream extends FSInputStream {
       // if the seek is in range of that requested, scan forwards
       // instead of closing and re-opening a new HTTP connection
       if (LOG.isDebugEnabled()) {
-        SwiftUtils.debug(LOG, "seek is within current stream" + "; pos= %d ; targetPos=%d; " + "offset= %d ; bufferOffset=%d", pos, targetPos, offset, rangeOffset);
+        SwiftUtils.debug(LOG, "seek is within current stream" + "; pos= %d ; targetPos=%d; " + "offset= %d ; nextReadPosition=%d", pos, targetPos, offset, nextReadPosition);
       }
 
       try {

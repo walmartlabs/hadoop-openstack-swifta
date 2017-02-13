@@ -1,7 +1,5 @@
 package org.apache.hadoop.fs.swifta.model;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftConfigurationException;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftException;
@@ -14,7 +12,6 @@ import java.util.NoSuchElementException;
 
 public class ListObjectsRequest {
 
-  private static final Log LOG = LogFactory.getLog(ListObjectsRequest.class);
   private final SwiftObjectPath path;
   private final boolean listDeep;
   private final boolean newest;
@@ -32,7 +29,7 @@ public class ListObjectsRequest {
   }
 
   public ListObjectsRequest(Path path, boolean listDeep, boolean newest, SwiftNativeFileSystemStore store) throws SwiftConfigurationException, SwiftException {
-    this.path = store.toDirPath(store.getCorrectSwiftPath(path));
+    this.path = store.toDirPath(path);
     this.listDeep = listDeep;
     this.newest = newest;
     this.store = store;
@@ -58,11 +55,7 @@ public class ListObjectsRequest {
         return null;
       }
       try {
-        String marker = (objects == null ? null : objects.getMarker());
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("Get objects list from iterator, marker is " + marker);
-        }
-        objects = store.listDirectory(path, listDeep, newest, marker);
+        objects = store.listDirectory(path, listDeep, newest, (objects == null ? null : objects.getMarker()));
       } catch (IOException e) {
         /**
          * Fake an exception to capture the IO error.
@@ -70,9 +63,10 @@ public class ListObjectsRequest {
         NoSuchElementException e1 = new NoSuchElementException();
         e1.initCause(e);
         throw e1;
-      }
-      if (!hasRun) {
-        hasRun = Boolean.TRUE;
+      } finally {
+        if (!hasRun) {
+          hasRun = Boolean.TRUE;
+        }
       }
       return objects;
     }

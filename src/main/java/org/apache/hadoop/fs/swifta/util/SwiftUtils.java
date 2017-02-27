@@ -17,11 +17,11 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftException;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Various utility classes for SwiftFS support.
@@ -167,7 +167,7 @@ public final class SwiftUtils {
    * @return a listing of the filestatuses of elements in the directory, one to a line, precedeed by the full path of the directory
    * @throws IOException connectivity problems
    */
-  public static String ls(FileSystem fileSystem, Path path) throws IOException {
+  public synchronized static String ls(FileSystem fileSystem, Path path) throws IOException {
     if (path == null) {
       // surfaces when someone calls getParent() on something at the top of the path
       return SLASH;
@@ -176,7 +176,7 @@ public final class SwiftUtils {
     String pathtext = "ls " + path;
     try {
       stats = fileSystem.listStatus(path);
-    } catch (FileNotFoundException e) {
+    } catch (NoSuchElementException e) {
       return pathtext + " -file not found";
     } catch (IOException e) {
       return pathtext + " -failed: " + e;

@@ -126,7 +126,7 @@ public class SwiftTestUtils extends org.junit.Assert {
    * @param overwrite should the create option allow overwrites?
    * @throws IOException IO problems
    */
-  public static void writeDataset(FileSystem fs, Path path, byte[] src, int len, int blocksize,
+  public synchronized static void writeDataset(FileSystem fs, Path path, byte[] src, int len, int blocksize,
       boolean overwrite) throws IOException {
     assertTrue("Not enough data in source array to write " + len + " bytes", src.length >= len);
     FSDataOutputStream out = fs.create(path, overwrite,
@@ -390,7 +390,7 @@ public class SwiftTestUtils extends org.junit.Assert {
     return "/user/" + System.getProperty("user.name");
   }
 
-  public static String ls(FileSystem fileSystem, Path path) throws IOException {
+  public synchronized static String ls(FileSystem fileSystem, Path path) throws IOException {
     return SwiftUtils.ls(fileSystem, path);
   }
 

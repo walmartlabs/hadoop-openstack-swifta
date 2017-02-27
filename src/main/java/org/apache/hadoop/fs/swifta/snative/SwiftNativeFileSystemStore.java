@@ -180,8 +180,20 @@ public class SwiftNativeFileSystemStore {
     if (pathString.startsWith("/")) {
       pathString = pathString.substring(1);
     }
-
     swiftRestClient.upload(toObjectPath(path), new ByteArrayInputStream(new byte[0]), 0, new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString));
+  }
+
+  public void createManifestForPartFile(Path path, long len) throws IOException {
+    String pathString = toObjectPath(path).toString();
+    if (!pathString.endsWith("/")) {
+      pathString = pathString.concat("/");
+    }
+    if (pathString.startsWith("/")) {
+      pathString = pathString.substring(1);
+    }
+    swiftRestClient.putRequest(toObjectPath(new Path(pathString)), new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString),
+        new Header(SwiftProtocolConstants.HEADER_CONTENT_LENGTH, "" + len));
+    // .upload(toObjectPath(path), new ByteArrayInputStream(new byte[0]), 0, new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString));
   }
 
   /**
@@ -231,6 +243,7 @@ public class SwiftNativeFileSystemStore {
     boolean isDir = false;
     long length = 0;
     long lastModified = 0;
+    SwiftObjectPath objectManifest = null;
     for (Header header : headers) {
       String headerName = header.getName();
       if (headerName.equals(SwiftProtocolConstants.X_CONTAINER_OBJECT_COUNT) || headerName.equals(SwiftProtocolConstants.X_CONTAINER_BYTES_USED)) {
@@ -248,13 +261,19 @@ public class SwiftNativeFileSystemStore {
           throw new SwiftException("Failed to parse " + header.toString(), e);
         }
       }
+      if (headerName.equals(SwiftProtocolConstants.X_OBJECT_MANIFEST)) {
+        String[] values = header.getValue().split("/", 2);
+        if (values.length == 2) {
+          objectManifest = new SwiftObjectPath(values[0], "/" + values[1]);
+        }
+      }
     }
     if (lastModified == 0) {
       lastModified = System.currentTimeMillis();
     }
 
     Path correctSwiftPath = getCorrectSwiftPath(path);
-    return new SwiftFileStatus(length, isDir, 1, getBlocksize(), lastModified, correctSwiftPath);
+    return new SwiftFileStatus(length, isDir, 1, getBlocksize(), lastModified, correctSwiftPath, objectManifest);
   }
 
   private Header[] handleCache(LRUCache<Header[]> lru, String path) {
@@ -748,6 +767,7 @@ public class SwiftNativeFileSystemStore {
 
     final SwiftFileStatus srcMetadata;
     srcMetadata = getObjectMetadata(src);
+    boolean isPartFile = srcMetadata.isPartitionedFile();
     SwiftFileStatus dstMetadata;
     try {
       dstMetadata = getObjectMetadata(dst);
@@ -789,6 +809,9 @@ public class SwiftNativeFileSystemStore {
       ObjectsList object = ite.next();
       List<FileStatus> childStats = object.getFiles();
       boolean srcIsFile = !srcMetadata.isDir();
+      if (LOG.isDebugEnabled() && isPartFile) {
+        LOG.debug(srcIsFile + "=srcIsFile;Found partition file!" + src);
+      }
       if (srcIsFile) {
 
         // source is a simple file OR a partitioned file
@@ -804,7 +827,9 @@ public class SwiftNativeFileSystemStore {
               throw new SwiftOperationFailedException("Cannot rename a file over one that already exists.");
             } else {
               // is mv self self where self is a file. this becomes a no-op
-              LOG.debug("Renaming file onto self: no-op => success");
+              if (LOG.isDebugEnabled()) {
+                LOG.debug("Renaming file onto self: no-op => success");
+              }
               return;
             }
 
@@ -822,13 +847,37 @@ public class SwiftNativeFileSystemStore {
           // do the copy
           SwiftUtils.debug(LOG, "Source file appears to be partitioned." + " copying file and deleting children");
 
-          copyObject(srcObject, destPath);
-          deleteObjects(childStats);
-          // for (FileStatus stat : childStats) {
-          // SwiftUtils.debug(LOG, "Deleting partitioned file %s ", stat);
-          // deleteObject(stat.getPath());
-          // }
+          // copyObject(srcObject, destPath);
+          // this.createManifestForPartUpload(getCorrectSwiftPath(destPath));
+
+          Path newPrefixPath = getCorrectSwiftPath(destObject);
+          String newPrefixName = newPrefixPath.toUri().getPath();
+          if (!newPrefixName.endsWith("/")) {
+            newPrefixName = newPrefixName.concat("/");
+          }
+          createManifestForPartUpload(newPrefixPath);
+          for (FileStatus s : childStats) {
+            if (s.getLen() == 0) {
+              continue;
+            }
+            String oldName = s.getPath().toUri().getPath();
+            String oldPrefix = getCorrectSwiftPath(src).toUri().getPath();
+            String suffix;
+            if (oldPrefix.length() >= oldName.length()) {
+              suffix = oldName.substring(oldName.lastIndexOf('/'));
+            } else {
+              suffix = oldName.substring(oldPrefix.length() + 1);
+            }
+            String newName = newPrefixName + suffix;
+            SwiftObjectPath srcSeg = new SwiftObjectPath(srcObject.getContainer(), oldName);
+            SwiftObjectPath destSeg = new SwiftObjectPath(destObject.getContainer(), newName);
+            if (!swiftRestClient.copyObject(srcSeg, destSeg)) {
+              throw new SwiftException("Copy of " + srcSeg + " to " + destSeg + "failed");
+            }
+          }
+
           this.clearCache(srcObject.toUriPath());
+          deleteObjects(childStats);
           swiftRestClient.delete(srcObject);
         }
       } else {
@@ -837,6 +886,7 @@ public class SwiftNativeFileSystemStore {
         // outcomes (given we know the parent dir exists if we get this far)
         // #1 destination is a file: fail
         // #2 destination is a dir or doesn't exist: use dest as name
+        // #3 source is a partition file: use subdir of destination as name
         // #3 if the dest path is not == or under src: fail
 
 
@@ -847,7 +897,6 @@ public class SwiftNativeFileSystemStore {
         Path targetPath;
         // #2 destination is a dir or doesn't exist: use dest as name
         targetPath = dst;
-
         targetObjectPath = toObjectPath(targetPath);
         // final check for any recursive operations
         if (srcObject.isEqualToOrParentOf(targetObjectPath)) {
@@ -865,29 +914,28 @@ public class SwiftNativeFileSystemStore {
         // rather than recursively -everything in this list is either a file
         // or a 0-byte-len file pretending to be a directory.
         String srcURI = src.toUri().toString();
-        int prefixStripCount = srcURI.length() + 1;
+        int prefixStripCount = toObjectPath(src).toUriPath().length() + 1;
         Map<String, Future<Boolean>> copies = new HashMap<String, Future<Boolean>>();
         ThreadManager tm = new ThreadManager();
         try {
           tm.createThreadManager(this.swiftRestClient.getClientConfig().getMaxThreadsInPool());
           for (FileStatus fileStatus : childStats) {
             final Path copySourcePath = fileStatus.getPath();
-            String copySourceURI = copySourcePath.toUri().toString();
-
-            String copyDestSubPath = copySourceURI.substring(prefixStripCount);
+            // String copySourceURI = copySourcePath.toUri().toString();
+            final SwiftObjectPath copySrcPath = toObjectPath(copySourcePath);
+            String copyDestSubPath = copySrcPath.toUriPath().substring(prefixStripCount);
 
             Path copyDestPath = new Path(targetPath, copyDestSubPath);
-            if (LOG.isTraceEnabled()) {
+            if (LOG.isDebugEnabled()) {
               // trace to debug some low-level rename path problems; retained
               // in case they ever come back.
-              LOG.trace("srcURI=" + srcURI + "; copySourceURI=" + copySourceURI + "; copyDestSubPath=" + copyDestSubPath + "; copyDestPath=" + copyDestPath);
+              LOG.debug("srcURI=" + srcURI + "; copySourceURI=" + copySrcPath.toUriPath() + "; copyDestSubPath=" + copyDestSubPath + "; copyDestPath=" + copyDestPath);
             }
             final SwiftObjectPath copyDestination = toObjectPath(copyDestPath);
-
             copies.put(srcURI, tm.getPool().submit(new Callable<Boolean>() {
               public Boolean call() throws Exception {
                 try {
-                  copyThenDeleteObject(toObjectPath(copySourcePath), copyDestination);
+                  copyThenDeleteObject(copySrcPath, copyDestination);
                   return true;
                 } catch (IOException e) {
                   return false;
@@ -909,10 +957,15 @@ public class SwiftNativeFileSystemStore {
             } catch (InterruptedException e) {
               Thread.currentThread().interrupt();
             } catch (ExecutionException e) {
-              LOG.info("Skipping rename of " + key);
+              LOG.error("Skipping rename of " + key);
             } finally {
               future.cancel(Boolean.FALSE);
             }
+          }
+
+          // Set flags for partition file.
+          if (isPartFile) {
+            this.createManifestForPartFile(targetPath, 0);
           }
         } finally {
           // free memory

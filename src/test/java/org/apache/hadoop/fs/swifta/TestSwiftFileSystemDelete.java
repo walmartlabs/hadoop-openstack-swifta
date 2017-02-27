@@ -56,8 +56,8 @@ public class TestSwiftFileSystemDelete extends SwiftFileSystemBaseTest {
    */
   @Test(timeout = SWIFT_TEST_TIMEOUT)
   public void testRmRootDirRecursiveIsForbidden() throws Throwable {
-    Path root = path("/");
-    Path testFile = path("/test");
+    Path root = path("/test/");
+    Path testFile = path("/test/test-delete");
     createFile(testFile);
     assertTrue("rm(/) returned false", fs.delete(root, true));
     assertPathDoesNotExist("test file not deleted", testFile);

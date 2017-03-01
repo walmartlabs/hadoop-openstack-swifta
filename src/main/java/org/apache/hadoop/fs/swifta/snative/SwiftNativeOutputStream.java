@@ -51,7 +51,7 @@ class SwiftNativeOutputStream extends OutputStream {
   private static final MetricsFactory metric = MetricsFactory.getMetricsFactory(SwiftNativeOutputStream.class);
 
   private static final int ATTEMPT_LIMIT = 3;
-  private static final int FILE_MAX_THREADS = 20;
+  private static final int FILE_MAX_THREADS = 5;
   private long filePartSize;
   private String key;
   private AsynchronousFileChannel backupStream;

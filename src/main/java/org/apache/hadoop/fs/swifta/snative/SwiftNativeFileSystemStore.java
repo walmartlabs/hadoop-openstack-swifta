@@ -155,15 +155,18 @@ public class SwiftNativeFileSystemStore {
    */
   public void uploadFilePart(Path path, int partNumber, InputStream inputStream, long length) throws IOException {
 
-    String stringPath = path.toUri().toString();
+    String stringPath = path.toUri().getPath();
     String partitionFilename = SwiftUtils.partitionFilenameFromNumber(partNumber);
     if (stringPath.endsWith("/")) {
       stringPath = stringPath.concat(partitionFilename);
     } else {
       stringPath = stringPath.concat("/").concat(partitionFilename);
     }
-
-    swiftRestClient.upload(new SwiftObjectPath(toDirPath(path).getContainer(), stringPath), inputStream, length);
+    SwiftObjectPath p = new SwiftObjectPath(toDirPath(path).getContainer(), stringPath);
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("[uploadFilePart]Upload parts to server path:" + p.toUriPath());
+    }
+    swiftRestClient.upload(p, inputStream, length);
   }
 
   /**
@@ -173,27 +176,18 @@ public class SwiftNativeFileSystemStore {
    * @throws IOException
    */
   public void createManifestForPartUpload(Path path) throws IOException {
-    String pathString = toObjectPath(path).toString();
+    SwiftObjectPath p = toObjectPath(path);
+    String pathString = p.toUriPath();
     if (!pathString.endsWith("/")) {
       pathString = pathString.concat("/");
     }
     if (pathString.startsWith("/")) {
       pathString = pathString.substring(1);
     }
-    swiftRestClient.upload(toObjectPath(path), new ByteArrayInputStream(new byte[0]), 0, new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString));
-  }
-
-  public void createManifestForPartFile(Path path, long len) throws IOException {
-    String pathString = toObjectPath(path).toString();
-    if (!pathString.endsWith("/")) {
-      pathString = pathString.concat("/");
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Final writes manifest for header path:" + pathString);
     }
-    if (pathString.startsWith("/")) {
-      pathString = pathString.substring(1);
-    }
-    swiftRestClient.putRequest(toObjectPath(new Path(pathString)), new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString),
-        new Header(SwiftProtocolConstants.HEADER_CONTENT_LENGTH, "" + len));
-    // .upload(toObjectPath(path), new ByteArrayInputStream(new byte[0]), 0, new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString));
+    swiftRestClient.upload(p, new ByteArrayInputStream(new byte[0]), 0, new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString));
   }
 
   /**
@@ -349,7 +343,7 @@ public class SwiftNativeFileSystemStore {
     List<String> strLocations = new ArrayList<String>();
     final Map<String, Integer> similarityMap = new HashMap<String, Integer>();
     for (URI uri : uriLocations) {
-      String url = uri.toString();
+      String url = uri.getPath();
       int similarity = getSimilarity(getRack(uri.getHost()), hostRack);
       if (similarity > 0) {
         strLocations.add(url);
@@ -655,7 +649,7 @@ public class SwiftNativeFileSystemStore {
       for (FileStatus entryStatus : statuses) {
         final Path entryPath = entryStatus.getPath();
         // boolean deleted = deleteObject(entryPath);
-        deletes.put(entryPath.toString(), tm.getPool().submit(new Callable<Boolean>() {
+        deletes.put(entryPath.toUri().getPath(), tm.getPool().submit(new Callable<Boolean>() {
           public Boolean call() throws Exception {
             SwiftObjectPath swiftObjectPath = toObjectPath(entryPath);
             clearCache(swiftObjectPath.toUriPath());
@@ -810,7 +804,7 @@ public class SwiftNativeFileSystemStore {
       List<FileStatus> childStats = object.getFiles();
       boolean srcIsFile = !srcMetadata.isDir();
       if (LOG.isDebugEnabled() && isPartFile) {
-        LOG.debug(srcIsFile + "=srcIsFile;Found partition file!" + src);
+        LOG.debug("Found partition file!" + src + ";len:" + srcMetadata.getLen());
       }
       if (srcIsFile) {
 
@@ -838,10 +832,13 @@ public class SwiftNativeFileSystemStore {
           }
         }
         int childCount = childStats.size();
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("childCount:" + childCount);
+        }
         // here there is one of:
         // - a single object ==> standard file
-        // ->
-        if (childCount == 0) {
+        // - it can contain the file itself
+        if (childCount == 0 || childCount == 1) {
           copyThenDeleteObject(srcObject, destPath);
         } else {
           // do the copy
@@ -854,6 +851,9 @@ public class SwiftNativeFileSystemStore {
           String newPrefixName = newPrefixPath.toUri().getPath();
           if (!newPrefixName.endsWith("/")) {
             newPrefixName = newPrefixName.concat("/");
+          }
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("[Rename]Write manifest for path:" + newPrefixPath);
           }
           createManifestForPartUpload(newPrefixPath);
           for (FileStatus s : childStats) {
@@ -868,9 +868,15 @@ public class SwiftNativeFileSystemStore {
             } else {
               suffix = oldName.substring(oldPrefix.length() + 1);
             }
+            if (suffix.startsWith("/")) {
+              suffix = suffix.substring(1);
+            }
             String newName = newPrefixName + suffix;
             SwiftObjectPath srcSeg = new SwiftObjectPath(srcObject.getContainer(), oldName);
             SwiftObjectPath destSeg = new SwiftObjectPath(destObject.getContainer(), newName);
+            if (LOG.isDebugEnabled()) {
+              LOG.debug(oldName + "Moving file " + srcSeg.toUriPath() + " to " + destSeg.toUriPath());
+            }
             if (!swiftRestClient.copyObject(srcSeg, destSeg)) {
               throw new SwiftException("Copy of " + srcSeg + " to " + destSeg + "failed");
             }
@@ -913,7 +919,7 @@ public class SwiftNativeFileSystemStore {
         // by listing all children this can be done iteratively
         // rather than recursively -everything in this list is either a file
         // or a 0-byte-len file pretending to be a directory.
-        String srcURI = src.toUri().toString();
+        String srcURI = src.toUri().getPath();
         int prefixStripCount = toObjectPath(src).toUriPath().length() + 1;
         Map<String, Future<Boolean>> copies = new HashMap<String, Future<Boolean>>();
         ThreadManager tm = new ThreadManager();
@@ -965,7 +971,7 @@ public class SwiftNativeFileSystemStore {
 
           // Set flags for partition file.
           if (isPartFile) {
-            this.createManifestForPartFile(targetPath, 0);
+            this.createManifestForPartUpload(targetPath);
           }
         } finally {
           // free memory

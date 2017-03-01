@@ -68,7 +68,7 @@ public class SwiftClientConfig {
   /**
    * In milliseconds.
    */
-  private final static long DEFAULT_EXPIRES_TIME = 10 * 60 * 1000;
+  private final static long DEFAULT_EXPIRES_TIME = 30 * 60 * 1000;
 
   /**
    * the authentication endpoint as supplied in the configuration

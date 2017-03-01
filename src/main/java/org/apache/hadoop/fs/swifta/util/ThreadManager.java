@@ -17,13 +17,17 @@ public class ThreadManager {
 
   private ExecutorService threadPool;
 
-  private ThreadPoolExecutor createThreadManager(int coreThreads, int totalThreads,
-      ThreadFactory factory) {
+  public ThreadManager() {}
+
+  public ThreadManager(int maxThread) {
+    this.createThreadManager(maxThread);
+  }
+
+  private ThreadPoolExecutor createThreadManager(int coreThreads, int totalThreads, ThreadFactory factory) {
     if (factory == null) {
       factory = Executors.defaultThreadFactory();
     }
-    return new ThreadPoolExecutor(coreThreads, totalThreads, 60, TimeUnit.SECONDS,
-        new LinkedBlockingQueue<Runnable>(), factory);
+    return new ThreadPoolExecutor(coreThreads, totalThreads, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), factory);
   }
 
   public void createThreadManager(int maxThread) {
@@ -50,8 +54,7 @@ public class ThreadManager {
 
   public void cleanup() {
     try {
-      if (threadPool != null
-          && !this.threadPool.awaitTermination(AWAIT_TIMEOUT, TimeUnit.SECONDS)) {
+      if (threadPool != null && !this.threadPool.awaitTermination(AWAIT_TIMEOUT, TimeUnit.SECONDS)) {
         this.threadPool.shutdownNow();
       }
     } catch (Exception e) {

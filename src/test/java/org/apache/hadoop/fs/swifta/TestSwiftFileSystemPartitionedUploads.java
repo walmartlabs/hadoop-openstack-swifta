@@ -157,7 +157,6 @@ public class TestSwiftFileSystemPartitionedUploads extends SwiftFileSystemBaseTe
 
       out.write(src, firstWriteLen, remainder);
       out.close();
-
       expected = getExpectedPartitionsWritten(len, PART_SIZE_BYTES, false);
       assertPartitionsWritten("Remaining data", out, expected);
       expected = getExpectedPartitionsWritten(len, PART_SIZE_BYTES, true);
@@ -372,7 +371,6 @@ public class TestSwiftFileSystemPartitionedUploads extends SwiftFileSystemBaseTe
     String partOneName = SwiftUtils.partitionFilenameFromNumber(1);
     Path srcPart = new Path(src, partOneName);
     Path dest = new Path(root + "testRenamePartitionedFileDest");
-    Thread.sleep(3000);
     assertExists("Partition Exists", srcPart);
     fs.rename(src, dest);
     assertPathExists(fs, "dest file missing", dest);

@@ -419,7 +419,7 @@ public final class SwiftRestClient {
       public Long extractResult(HeadMethod method) throws IOException {
         long l = method.getResponseContentLength();
         if (l > 0) {
-          fileLen.set(uri.toString(), l);
+          fileLen.set(uri.getPath(), l);
         }
         return l;
       }

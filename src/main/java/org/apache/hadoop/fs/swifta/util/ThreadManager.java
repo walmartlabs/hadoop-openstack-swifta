@@ -19,25 +19,31 @@ public class ThreadManager {
 
   public ThreadManager() {}
 
-  public ThreadManager(int maxThread) {
-    this.createThreadManager(maxThread);
+  public ThreadManager(int minPoolSize, int maxPoolSize) {
+    this.createThreadManager(minPoolSize, maxPoolSize);
   }
 
   private ThreadPoolExecutor createThreadManager(int coreThreads, int totalThreads, ThreadFactory factory) {
     if (factory == null) {
       factory = Executors.defaultThreadFactory();
     }
-    return new ThreadPoolExecutor(coreThreads, totalThreads, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), factory);
+    return new ThreadPoolExecutor(coreThreads, totalThreads, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), factory);
   }
 
-  public void createThreadManager(int maxThread) {
-    if (maxThread < 1) {
-      maxThread = ThreadUtils.getMaxThread();
+  public void createThreadManager(int maxPoolSize) {
+    int minPoolSize = maxPoolSize >> 2;
+    minPoolSize = minPoolSize > 1 ? minPoolSize : 1;
+    this.createThreadManager(minPoolSize, maxPoolSize);
+  }
+
+  private void createThreadManager(int minPoolSize, int maxPoolSize) {
+    if (maxPoolSize < 1) {
+      maxPoolSize = ThreadUtils.getMaxThread();
     }
     if (LOG.isDebugEnabled()) {
-      LOG.debug("Max threads in pool is " + maxThread);
+      LOG.debug("Max threads in pool is " + maxPoolSize + ", min threads in pool is " + minPoolSize);
     }
-    ThreadPoolExecutor pool = this.createThreadManager(maxThread, maxThread, null);
+    ThreadPoolExecutor pool = this.createThreadManager(minPoolSize, maxPoolSize, null);
     pool.allowCoreThreadTimeOut(true);
     threadPool = pool;
   }

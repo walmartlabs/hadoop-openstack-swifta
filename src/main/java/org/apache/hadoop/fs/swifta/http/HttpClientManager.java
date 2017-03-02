@@ -42,14 +42,14 @@ public class HttpClientManager {
     /**
      * Get six times httpclient threads as default.
      */
-    int connections = ThreadUtils.getMaxThread() * 2;
+    int connections = ThreadUtils.getMaxThread() << 1;
     if (totalThreads < 1) {
       totalThreads = connections;
     }
 
     int coreThreads = clientConfig.getMaxCoreConnections();
     if (coreThreads < 1) {
-      coreThreads = connections;
+      coreThreads = (totalThreads >> 1);
     }
     if (LOG.isDebugEnabled()) {
       LOG.debug("Max total threads " + totalThreads + "; max core threads " + coreThreads);
@@ -62,10 +62,8 @@ public class HttpClientManager {
     connParam.setTcpNoDelay(Boolean.TRUE);
     connectionManager.setParams(connParam);
     // Connection eviction
-    ScheduledExecutorService scheduledExeService =
-        Executors.newScheduledThreadPool(1, new DaemonThreadFactory(THREAD_NAME));
-    scheduledExeService.scheduleAtFixedRate(new IdleConnectionMonitorThread(connectionManager),
-        INITAL_DELAY, PERIOD, TimeUnit.SECONDS);
+    ScheduledExecutorService scheduledExeService = Executors.newScheduledThreadPool(1, new DaemonThreadFactory(THREAD_NAME));
+    scheduledExeService.scheduleAtFixedRate(new IdleConnectionMonitorThread(connectionManager), INITAL_DELAY, PERIOD, TimeUnit.SECONDS);
   }
 }
 

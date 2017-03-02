@@ -40,6 +40,12 @@ public class LRUCache<T> {
    * Remove an existing node from the linked list. The null pointer check can be removed in future.
    */
   private void removeNode(DLinkedNode node, boolean isRemove) {
+    /**
+     * Sometimes happen while running some of Presto queries.
+     */
+    if (node == null) {
+      return;
+    }
     String key = node.key;
     DLinkedNode pre = node.pre;
     DLinkedNode post = node.post;

@@ -875,7 +875,7 @@ public class SwiftNativeFileSystemStore {
             SwiftObjectPath srcSeg = new SwiftObjectPath(srcObject.getContainer(), oldName);
             SwiftObjectPath destSeg = new SwiftObjectPath(destObject.getContainer(), newName);
             if (LOG.isDebugEnabled()) {
-              LOG.debug(oldName + "Moving file " + srcSeg.toUriPath() + " to " + destSeg.toUriPath());
+              LOG.debug("Moving file " + srcSeg.toUriPath() + " to " + destSeg.toUriPath());
             }
             if (!swiftRestClient.copyObject(srcSeg, destSeg)) {
               throw new SwiftException("Copy of " + srcSeg + " to " + destSeg + "failed");
@@ -969,10 +969,6 @@ public class SwiftNativeFileSystemStore {
             }
           }
 
-          // Set flags for partition file.
-          if (isPartFile) {
-            this.createManifestForPartUpload(targetPath);
-          }
         } finally {
           // free memory
           tm.cleanup();

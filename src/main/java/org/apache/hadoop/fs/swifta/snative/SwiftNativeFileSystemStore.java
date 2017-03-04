@@ -452,6 +452,10 @@ public class SwiftNativeFileSystemStore {
         throw e;
       }
     } catch (SwiftInvalidResponseException e) {
+      if (LOG.isDebugEnabled()) {
+        // Just for debug use.
+        LOG.error(e.getMessage());
+      }
       // bad HTTP error code
       if (e.getStatusCode() == HttpStatus.SC_NO_CONTENT) {
         // this can come back on a root list if the container is empty
@@ -487,6 +491,9 @@ public class SwiftNativeFileSystemStore {
     // in this case swift will return empty array
     if (fileStatusList.isEmpty()) {
       SwiftFileStatus objectMetadata = getObjectMetadata(correctSwiftPath, newest);
+      if(LOG.isDebugEnabled()) {
+        LOG.debug("The fileStatusList is empty:" + correctSwiftPath.toString());
+      }
       if (objectMetadata.isFile()) {
         files.add(objectMetadata);
         objects.setFiles(files);

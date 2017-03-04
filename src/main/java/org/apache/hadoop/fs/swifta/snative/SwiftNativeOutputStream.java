@@ -74,7 +74,7 @@ class SwiftNativeOutputStream extends OutputStream {
   // Part number and temporary files.
   Queue<BackupFile> backupFiles;
   // private Map<Integer, File> backupFiles;
-  private final ThreadManager executor;
+  private ThreadManager executor;
 
   private AtomicInteger partNumber;
 
@@ -104,7 +104,6 @@ class SwiftNativeOutputStream extends OutputStream {
     backupDir = UUID.randomUUID().toString();
     results = new HashMap<AsynchronousFileChannel, Future>();
     backupFiles = new ConcurrentLinkedQueue<BackupFile>();
-    executor = new ThreadManager(CORE_POOL_SIZE, NIO_WRITE_FILE_MAX_THREADS);
     backupStream = openForWrite(partNumber.getAndIncrement());
     uploads = new ArrayList<Future>();
     metric.increase(key, this);
@@ -113,6 +112,10 @@ class SwiftNativeOutputStream extends OutputStream {
 
   private synchronized AsynchronousFileChannel openForWrite(int partNumber) throws IOException {
     File tmp = newBackupFile(partNumber);
+    if (executor != null) {
+      executor.shutdown();
+    }
+    executor = new ThreadManager(CORE_POOL_SIZE, NIO_WRITE_FILE_MAX_THREADS);
     BackupFile file = new BackupFile(tmp, AsynchronousFileChannel.open(Paths.get(tmp.getAbsolutePath()), EnumSet.of(StandardOpenOption.WRITE), executor.getPool()), partNumber);
     // BackupFile file = new BackupFile(tmp, AsynchronousFileChannel.open(Paths.get(tmp.getAbsolutePath()), StandardOpenOption.WRITE), partNumber);
     backupFiles.add(file);
@@ -403,19 +406,21 @@ class SwiftNativeOutputStream extends OutputStream {
       AsynchronousFileChannel channel = entry.getKey();
       Future task = entry.getValue();
       try {
-        channel.force(Boolean.FALSE);
+        // channel.force(Boolean.FALSE);
         task.get();
       } catch (InterruptedException e) {
         e.printStackTrace();
       } catch (Exception e) {
         e.printStackTrace();
       } finally {
-        try {
-          channel.close();
-        } catch (IOException e) {
-          // Ignore
+        if (channel.isOpen()) {
+          try {
+            channel.close();
+          } catch (IOException e) {
+            // Ignore
+          }
+          task.cancel(Boolean.TRUE);
         }
-        task.cancel(Boolean.TRUE);
       }
 
     }
@@ -612,6 +617,7 @@ class AsynchronousUpload extends Thread {
               tm.createThreadManager(files.size());
             }
             uploads = out.doUpload(tm, file.getUploadFile(), file.getPartNumber());
+            file.getFileChannel().close();
           }
         }
         files = null;

@@ -184,6 +184,10 @@ public class HttpInputStreamWithRelease extends InputStream {
 
   @Override
   public synchronized int read(byte[] b, int off, int len) throws IOException {
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Read:" + off + ";len:" + len);
+    }
+
     SwiftUtils.validateReadArgs(b, off, len);
     // if the stream is already closed, then report an exception.
     assumeNotReleased();

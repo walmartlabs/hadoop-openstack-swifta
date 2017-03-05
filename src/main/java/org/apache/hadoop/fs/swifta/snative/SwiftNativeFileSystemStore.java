@@ -491,7 +491,7 @@ public class SwiftNativeFileSystemStore {
     // in this case swift will return empty array
     if (fileStatusList.isEmpty()) {
       SwiftFileStatus objectMetadata = getObjectMetadata(correctSwiftPath, newest);
-      if(LOG.isDebugEnabled()) {
+      if (LOG.isDebugEnabled()) {
         LOG.debug("The fileStatusList is empty:" + correctSwiftPath.toString());
       }
       if (objectMetadata.isFile()) {
@@ -742,6 +742,14 @@ public class SwiftNativeFileSystemStore {
     }
   }
 
+  private ThreadManager getThreadManager(List<FileStatus> childStats) {
+    ThreadManager tm = new ThreadManager();
+    // If required threads less than number in configuration, only picks less one.
+    int maxThread = childStats.size() > this.swiftRestClient.getClientConfig().getMaxThreadsForCopy() ? this.swiftRestClient.getClientConfig().getMaxThreadsForCopy() : childStats.size();
+    tm.createThreadManager(maxThread);
+    return tm;
+  }
+
   /**
    * Rename through copy-and-delete. this is a consequence of the Swift filesystem using the path as the hash into the Distributed Hash Table, "the ring" of filenames.
    * <p/>
@@ -863,6 +871,8 @@ public class SwiftNativeFileSystemStore {
             LOG.debug("[Rename]Write manifest for path:" + newPrefixPath);
           }
           createManifestForPartUpload(newPrefixPath);
+          ThreadManager tm = this.getThreadManager(childStats);
+          Map<String, Future<Boolean>> copies = new HashMap<String, Future<Boolean>>();
           for (FileStatus s : childStats) {
             if (s.getLen() == 0) {
               continue;
@@ -879,15 +889,27 @@ public class SwiftNativeFileSystemStore {
               suffix = suffix.substring(1);
             }
             String newName = newPrefixName + suffix;
-            SwiftObjectPath srcSeg = new SwiftObjectPath(srcObject.getContainer(), oldName);
-            SwiftObjectPath destSeg = new SwiftObjectPath(destObject.getContainer(), newName);
+            final SwiftObjectPath srcSeg = new SwiftObjectPath(srcObject.getContainer(), oldName);
+            final SwiftObjectPath destSeg = new SwiftObjectPath(destObject.getContainer(), newName);
             if (LOG.isDebugEnabled()) {
               LOG.debug("Moving file " + srcSeg.toUriPath() + " to " + destSeg.toUriPath());
             }
-            if (!swiftRestClient.copyObject(srcSeg, destSeg)) {
-              throw new SwiftException("Copy of " + srcSeg + " to " + destSeg + "failed");
-            }
+            copies.put(srcSeg.toUriPath(), tm.getPool().submit(new Callable<Boolean>() {
+              public Boolean call() throws Exception {
+                try {
+                  if (!swiftRestClient.copyObject(srcSeg, destSeg)) {
+                    throw new SwiftException("Copy of " + srcSeg + " to " + destSeg + "failed");
+                  }
+                  return true;
+                } catch (IOException e) {
+                  return false;
+                }
+              }
+            }));
           }
+
+          tm.shutdown();
+          this.waitToFinish(copies);
 
           this.clearCache(srcObject.toUriPath());
           deleteObjects(childStats);
@@ -929,9 +951,8 @@ public class SwiftNativeFileSystemStore {
         String srcURI = src.toUri().getPath();
         int prefixStripCount = toObjectPath(src).toUriPath().length() + 1;
         Map<String, Future<Boolean>> copies = new HashMap<String, Future<Boolean>>();
-        ThreadManager tm = new ThreadManager();
+        ThreadManager tm = this.getThreadManager(childStats);
         try {
-          tm.createThreadManager(this.swiftRestClient.getClientConfig().getMaxThreadsInPool());
           for (FileStatus fileStatus : childStats) {
             final Path copySourcePath = fileStatus.getPath();
             // String copySourceURI = copySourcePath.toUri().toString();
@@ -959,22 +980,7 @@ public class SwiftNativeFileSystemStore {
             // throttle();
           }
           tm.shutdown();
-          Set<Map.Entry<String, Future<Boolean>>> entrySet = copies.entrySet();
-          for (Map.Entry<String, Future<Boolean>> entry : entrySet) {
-            String key = entry.getKey();
-            Future<Boolean> future = entry.getValue();
-            try {
-              if (!future.get()) {
-                LOG.info("Skipping rename of " + key);
-              }
-            } catch (InterruptedException e) {
-              Thread.currentThread().interrupt();
-            } catch (ExecutionException e) {
-              LOG.error("Skipping rename of " + key);
-            } finally {
-              future.cancel(Boolean.FALSE);
-            }
-          }
+          this.waitToFinish(copies);
 
         } finally {
           // free memory
@@ -996,6 +1002,25 @@ public class SwiftNativeFileSystemStore {
         // create the destination directory
         LOG.warn("Source directory deleted during rename", e);
         innerCreateDirectory(destObject);
+      }
+    }
+  }
+
+  private void waitToFinish(Map<String, Future<Boolean>> copies) {
+    Set<Map.Entry<String, Future<Boolean>>> entrySet = copies.entrySet();
+    for (Map.Entry<String, Future<Boolean>> entry : entrySet) {
+      String key = entry.getKey();
+      Future<Boolean> future = entry.getValue();
+      try {
+        if (!future.get()) {
+          LOG.info("Skipping rename of " + key);
+        }
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      } catch (ExecutionException e) {
+        LOG.error("Skipping rename of " + key);
+      } finally {
+        future.cancel(Boolean.FALSE);
       }
     }
   }

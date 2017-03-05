@@ -31,15 +31,20 @@ public class ThreadManager {
   }
 
   public void createThreadManager(int maxPoolSize) {
-    int minPoolSize = maxPoolSize >> 2;
+    maxPoolSize = this.getRightThread(maxPoolSize);
+    int minPoolSize = maxPoolSize >> 1;
     minPoolSize = minPoolSize > 1 ? minPoolSize : 1;
     this.createThreadManager(minPoolSize, maxPoolSize);
   }
 
-  private void createThreadManager(int minPoolSize, int maxPoolSize) {
+  private int getRightThread(int maxPoolSize) {
     if (maxPoolSize < 1) {
       maxPoolSize = ThreadUtils.getMaxThread();
     }
+    return maxPoolSize;
+  }
+
+  private void createThreadManager(int minPoolSize, int maxPoolSize) {
     if (LOG.isDebugEnabled()) {
       LOG.debug("Max threads in pool is " + maxPoolSize + ", min threads in pool is " + minPoolSize);
     }

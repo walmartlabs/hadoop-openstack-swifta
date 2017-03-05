@@ -192,6 +192,11 @@ public class SwiftProtocolConstants {
    */
   public static final String SWIFT_MAX_CONNECTIONS_IN_POOL = FS_SWIFT + ".connections.max.pool";
 
+  /**
+   * The max threads for a parallel copy.
+   */
+  public static final String SWIFT_MAX_CONNECTIONS_FOR_COPY = FS_SWIFT + ".connections.max.copy";
+
   public static final String LRU_SIZE = FS_SWIFT + ".cache.size";
 
   /**

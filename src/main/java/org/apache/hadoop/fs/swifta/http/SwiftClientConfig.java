@@ -21,6 +21,7 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_INPU
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_LAZY_SEEK;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_LOCATION_AWARE_PROPERTY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_CONNECTIONS_IN_POOL;
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_CONNECTIONS_FOR_COPY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_HOST_CONNECTIONS;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_TOTAL_CONNECTIONS;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_PARTITION_SIZE;
@@ -63,6 +64,8 @@ public class SwiftClientConfig {
 
   private final static int DEFAULT_CONNECTIONS = 0; // Default set to 0.
 
+  private final static int DEFAULT_COPY_CONNECTIONS = 30; // Default set to 20.
+
   private final static int DEFAULT_LRU_SIZE = 100;
 
   /**
@@ -76,8 +79,7 @@ public class SwiftClientConfig {
   private URI authUri;
 
   /**
-   * Swift region. Some OpenStack installations has more than one region. In this case user can
-   * specify the region with which Hadoop will be working
+   * Swift region. Some OpenStack installations has more than one region. In this case user can specify the region with which Hadoop will be working
    */
   private String region;
 
@@ -107,8 +109,7 @@ public class SwiftClientConfig {
   private AuthenticationRequest authRequest;
 
   /**
-   * This auth request is similar to @see authRequest, with one difference: it has another json
-   * representation when authRequest one is not applicable
+   * This auth request is similar to @see authRequest, with one difference: it has another json representation when authRequest one is not applicable
    */
   private AuthenticationRequest keystoneAuthRequest;
 
@@ -212,6 +213,11 @@ public class SwiftClientConfig {
    */
   private int maxThreadsInPool;
 
+  /**
+   * Max threads for copy tasks.
+   */
+  private int maxThreadsForCopy;
+
 
 
   /**
@@ -220,8 +226,7 @@ public class SwiftClientConfig {
    * @param service which cloud
    * @param container which container
    * @param conf The configuration to use to extract the binding
-   * @throws SwiftConfigurationException the configuration is not valid for defining a rest client
-   *         against the service
+   * @throws SwiftConfigurationException the configuration is not valid for defining a rest client against the service
    */
   public SwiftClientConfig(String service, Configuration conf) throws SwiftConfigurationException {
     this.service = service;
@@ -256,19 +261,17 @@ public class SwiftClientConfig {
 
     maxThreadsInPool = conf.getInt(SWIFT_MAX_CONNECTIONS_IN_POOL, DEFAULT_CONNECTIONS);
 
+    maxThreadsForCopy = conf.getInt(SWIFT_MAX_CONNECTIONS_FOR_COPY, DEFAULT_COPY_CONNECTIONS);
+
     if (apiKey == null && password == null) {
-      throw new SwiftConfigurationException("Configuration for " + filesystemURI
-          + " must contain either " + SWIFT_PASSWORD_PROPERTY + " or " + SWIFT_APIKEY_PROPERTY);
+      throw new SwiftConfigurationException("Configuration for " + filesystemURI + " must contain either " + SWIFT_PASSWORD_PROPERTY + " or " + SWIFT_APIKEY_PROPERTY);
     }
     // create the (reusable) authentication request
     if (password != null) {
-      authRequest =
-          new PasswordAuthenticationRequest(tenant, new PasswordCredentials(username, password));
+      authRequest = new PasswordAuthenticationRequest(tenant, new PasswordCredentials(username, password));
     } else {
-      authRequest =
-          new ApiKeyAuthenticationRequest(tenant, new ApiKeyCredentials(username, apiKey));
-      keystoneAuthRequest =
-          new KeyStoneAuthRequest(tenant, new KeystoneApiKeyCredentials(username, apiKey));
+      authRequest = new ApiKeyAuthenticationRequest(tenant, new ApiKeyCredentials(username, apiKey));
+      keystoneAuthRequest = new KeyStoneAuthRequest(tenant, new KeystoneApiKeyCredentials(username, apiKey));
     }
     locationAware = "true".equals(props.getProperty(SWIFT_LOCATION_AWARE_PROPERTY, "false"));
 
@@ -289,21 +292,17 @@ public class SwiftClientConfig {
 
       blocksizeKB = conf.getInt(SWIFT_BLOCKSIZE, DEFAULT_SWIFT_BLOCKSIZE);
       if (blocksizeKB <= 0) {
-        throw new SwiftConfigurationException(
-            "Invalid blocksize set in " + SWIFT_BLOCKSIZE + ": " + blocksizeKB);
+        throw new SwiftConfigurationException("Invalid blocksize set in " + SWIFT_BLOCKSIZE + ": " + blocksizeKB);
       }
       partSizeKB = conf.getInt(SWIFT_PARTITION_SIZE, DEFAULT_SWIFT_PARTITION_SIZE);
-      inputBufferSize =
-          conf.getInt(SWIFT_INPUT_STREAM_BUFFER_SIZE, DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE);
+      inputBufferSize = conf.getInt(SWIFT_INPUT_STREAM_BUFFER_SIZE, DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE);
       if (partSizeKB <= 0) {
-        throw new SwiftConfigurationException(
-            "Invalid partition size set in " + SWIFT_PARTITION_SIZE + ": " + partSizeKB);
+        throw new SwiftConfigurationException("Invalid partition size set in " + SWIFT_PARTITION_SIZE + ": " + partSizeKB);
       }
 
       bufferSizeKB = conf.getInt(SWIFT_REQUEST_SIZE, DEFAULT_SWIFT_REQUEST_SIZE);
       if (bufferSizeKB <= 0) {
-        throw new SwiftConfigurationException(
-            "Invalid buffer size set in " + SWIFT_REQUEST_SIZE + ": " + bufferSizeKB);
+        throw new SwiftConfigurationException("Invalid buffer size set in " + SWIFT_REQUEST_SIZE + ": " + bufferSizeKB);
       }
     } catch (NumberFormatException e) {
       // convert exceptions raised parsing ints and longs into
@@ -314,20 +313,16 @@ public class SwiftClientConfig {
     if (LOG.isDebugEnabled()) {
       // everything you need for diagnostics. The password is omitted.
       serviceDescription = String.format(
-          "Service={%s} uri={%s}" + " tenant={%s} user={%s} region={%s}" + " publicURL={%b}"
-              + " location aware={%b}" + " partition size={%d KB}, buffer size={%d KB}"
-              + " block size={%d KB}" + " connect timeout={%d}, retry count={%d}"
-              + " socket timeout={%d}" + " throttle delay={%d}",
-          serviceProvider, stringAuthUri, tenant, username, region != null ? region : "(none)",
-          usePublicURL, locationAware, partSizeKB, bufferSizeKB, blocksizeKB, connectTimeout,
-          retryCount, socketTimeout, throttleDelay);
+          "Service={%s} uri={%s}" + " tenant={%s} user={%s} region={%s}" + " publicURL={%b}" + " location aware={%b}" + " partition size={%d KB}, buffer size={%d KB}" + " block size={%d KB}"
+              + " connect timeout={%d}, retry count={%d}" + " socket timeout={%d}" + " throttle delay={%d}",
+          serviceProvider, stringAuthUri, tenant, username, region != null ? region : "(none)", usePublicURL, locationAware, partSizeKB, bufferSizeKB, blocksizeKB, connectTimeout, retryCount,
+          socketTimeout, throttleDelay);
       LOG.debug(serviceDescription);
     }
     try {
       this.authUri = new URI(stringAuthUri);
     } catch (URISyntaxException e) {
-      throw new SwiftConfigurationException(
-          "The " + SWIFT_AUTH_PROPERTY + " property was incorrect: " + stringAuthUri, e);
+      throw new SwiftConfigurationException("The " + SWIFT_AUTH_PROPERTY + " property was incorrect: " + stringAuthUri, e);
     }
   }
 
@@ -530,10 +525,6 @@ public class SwiftClientConfig {
     return blocksizeKB;
   }
 
-  public void setBlocksizeKB(int blocksizeKB) {
-    this.blocksizeKB = blocksizeKB;
-  }
-
   public int getBufferSizeKB() {
     return bufferSizeKB;
   }
@@ -604,6 +595,10 @@ public class SwiftClientConfig {
 
   public int getMaxThreadsInPool() {
     return maxThreadsInPool;
+  }
+
+  public int getMaxThreadsForCopy() {
+    return maxThreadsForCopy;
   }
 
   public long getCacheLiveTime() {

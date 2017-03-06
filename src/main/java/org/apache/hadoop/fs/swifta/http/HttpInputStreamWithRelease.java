@@ -211,7 +211,7 @@ public class HttpInputStreamWithRelease extends InputStream {
   }
 
   /**
-   * Finalizer does release the stream, but also logs at WARN level including the URI at fault
+   * Finalize does release the stream, but also logs at WARN level including the URI at fault
    */
   @Override
   protected void finalize() throws Throwable {

@@ -50,6 +50,7 @@ public class SwiftFileSystemBaseTest extends Assert implements SwiftTestConstant
   protected static SwiftNativeFileSystem lastFs;
   protected byte[] data = SwiftTestUtils.dataset(getBlockSize() * 2, 0, 255);
   private Configuration conf;
+  protected boolean isLazySeek;
 
   @Before
   public void setUp() throws Exception {
@@ -68,6 +69,7 @@ public class SwiftFileSystemBaseTest extends Assert implements SwiftTestConstant
     }
     // remember the last FS
     lastFs = fs;
+    isLazySeek = SwiftTestUtils.isLazySeek(conf);
     noteAction("setup complete");
   }
 

@@ -40,10 +40,10 @@ public class HttpClientManager {
     int totalThreads = clientConfig.getMaxTotalConnections();
 
     /**
-     * Get six times httpclient threads as default.
+     * Httpclient threads as default.
      */
-    int connections = ThreadUtils.getMaxThread() << 1;
     if (totalThreads < 1) {
+      int connections = ThreadUtils.getMaxThread() << 1;
       totalThreads = connections;
     }
 

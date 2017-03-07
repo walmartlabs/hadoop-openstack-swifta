@@ -124,7 +124,6 @@ class SwiftNativeInputStream extends FSInputStream {
   public synchronized int read() throws IOException {
     verifyOpen();
     int result = -1;
-    LOG.info("read123:");
     try {
       result = httpStream.read();
     } catch (IOException e) {
@@ -153,7 +152,6 @@ class SwiftNativeInputStream extends FSInputStream {
     }
     try {
       verifyOpen();
-
       if (isLazy) {
         if (nextReadPosition >= contentLength) {
           return result;

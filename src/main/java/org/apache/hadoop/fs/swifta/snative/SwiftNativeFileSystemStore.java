@@ -673,7 +673,8 @@ public class SwiftNativeFileSystemStore {
         Future<Boolean> future = entry.getValue();
         try {
           if (!future.get()) {
-            SwiftUtils.debug(LOG, "Failed to delete entry '%s'; continuing", key);
+            LOG.info("Failed to delete entry '" + key + "'; continuing");
+            // SwiftUtils.debug(LOG, "Failed to delete entry '%s'; continuing", key);
           }
         } catch (InterruptedException e) {
           Thread.currentThread().interrupt();
@@ -682,7 +683,7 @@ public class SwiftNativeFileSystemStore {
           // do not fail, as the outcome is still OK.
           SwiftUtils.debug(LOG, "Path '%s' may no longer present; continuing", key);
         } finally {
-          future.cancel(Boolean.FALSE);
+          future.cancel(Boolean.TRUE);
         }
       }
     } finally {
@@ -914,6 +915,9 @@ public class SwiftNativeFileSystemStore {
           this.clearCache(srcObject.toUriPath());
           deleteObjects(childStats);
           swiftRestClient.delete(srcObject);
+          childStats.clear();
+          childStats = null;
+          copies = null;
         }
       } else {
 

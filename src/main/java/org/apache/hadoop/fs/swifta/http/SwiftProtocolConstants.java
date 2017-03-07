@@ -168,9 +168,9 @@ public class SwiftProtocolConstants {
   public static final int DEFAULT_SWIFT_REQUEST_SIZE = 64;
 
   /**
-   * The default buffer size for inputStream
+   * The default buffer size for inputStream. Increase this may speed up Presto queries a lot.
    */
-  public static final int DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE = 8192 * 1024;
+  public static final int DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE = 8192 * 10;
 
   /**
    * Buffer size for input stream in KB: {@value}

@@ -148,13 +148,16 @@ class SwiftNativeInputStream extends FSInputStream {
     SwiftUtils.debug(LOG, "read(buffer, %d, %d)", off, len);
     SwiftUtils.validateReadArgs(b, off, len);
     int result = -1;
-    if (this.contentLength == 0 || (nextReadPosition >= contentLength)) {
+    if (this.contentLength == 0) {
       return result;
     }
     try {
       verifyOpen();
 
       if (isLazy) {
+        if (nextReadPosition >= contentLength) {
+          return result;
+        }
         seekStream();
       }
       result = httpStream.read(b, off, len);

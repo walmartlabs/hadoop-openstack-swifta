@@ -100,6 +100,7 @@ import java.util.List;
 public final class SwiftRestClient {
 
   private static final Log LOG = LogFactory.getLog(SwiftRestClient.class);
+  private static final int TOLERANT_TIME = 5000;
 
 
   /**
@@ -1071,9 +1072,12 @@ public final class SwiftRestClient {
     try {
       int statusCode = 0;
       try {
+        long times = System.currentTimeMillis();
         statusCode = exec(method);
+        if ((System.currentTimeMillis() - times) > TOLERANT_TIME) {
+          LOG.warn("Servers take more than " + TOLERANT_TIME / 1000 + " seconds to response." + uri.toString());
+        }
       } catch (IOException e) {
-        // e.printStackTrace();
         // rethrow with extra diagnostics and wiki links
         throw ExceptionDiags.wrapException(uri.toString(), method.getName(), e);
       }

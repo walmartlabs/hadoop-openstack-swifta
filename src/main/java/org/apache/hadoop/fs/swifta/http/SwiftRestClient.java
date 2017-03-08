@@ -1074,8 +1074,9 @@ public final class SwiftRestClient {
       try {
         long times = System.currentTimeMillis();
         statusCode = exec(method);
-        if ((System.currentTimeMillis() - times) > TOLERANT_TIME) {
-          LOG.warn("Servers take more than " + TOLERANT_TIME / 1000 + " seconds to response." + uri.toString());
+        times = System.currentTimeMillis() - times;
+        if (times > TOLERANT_TIME) {
+          LOG.warn("Servers take more than " + times / 1000 + " seconds to response." + uri.toString());
         }
       } catch (IOException e) {
         // rethrow with extra diagnostics and wiki links

@@ -27,7 +27,7 @@ public class ThreadManager {
     if (factory == null) {
       factory = Executors.defaultThreadFactory();
     }
-    return new ThreadPoolExecutor(coreThreads, totalThreads, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), factory);
+    return new ThreadPoolExecutor(coreThreads, totalThreads, 120, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), factory);
   }
 
   public void createThreadManager(int maxPoolSize) {

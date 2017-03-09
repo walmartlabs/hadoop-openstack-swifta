@@ -209,7 +209,7 @@ public class SwiftProtocolConstants {
   /**
    * The user agent sent in requests.
    */
-  public static final String SWIFT_USER_AGENT = "Apache Hadoop Swift Client " + VersionInfo.getBuildVersion();
+  public static final String SWIFT_USER_AGENT = "Apache Hadoop Swifta Client " + VersionInfo.getBuildVersion();
 
   /**
    * Key for passing the service name as a property -not read from the configuration : {@value}

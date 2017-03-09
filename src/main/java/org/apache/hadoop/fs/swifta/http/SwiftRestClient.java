@@ -70,7 +70,6 @@ import org.apache.hadoop.fs.swifta.exceptions.SwiftInternalStateException;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftInvalidResponseException;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftThrottledRequestException;
 import org.apache.hadoop.fs.swifta.metrics.MetricsFactory;
-import org.apache.hadoop.fs.swifta.snative.LRUCache;
 import org.apache.hadoop.fs.swifta.util.Duration;
 import org.apache.hadoop.fs.swifta.util.DurationStats;
 import org.apache.hadoop.fs.swifta.util.DurationStatsTable;
@@ -100,7 +99,7 @@ import java.util.List;
 public final class SwiftRestClient {
 
   private static final Log LOG = LogFactory.getLog(SwiftRestClient.class);
-  private static final int TOLERANT_TIME = 5000;
+  private static final int TOLERANT_TIME = 60000;
 
 
   /**
@@ -135,12 +134,6 @@ public final class SwiftRestClient {
    * URI under which objects can be found. This is set when the user is authenticated -the URI is returned in the body of the success response.
    */
   private URI objectLocationURI;
-
-
-  /**
-   * Cache for file size
-   */
-  private LRUCache<Long> fileLen;
 
   private final DurationStatsTable durationStats = new DurationStatsTable();
 
@@ -419,9 +412,6 @@ public final class SwiftRestClient {
       @Override
       public Long extractResult(HeadMethod method) throws IOException {
         long l = method.getResponseContentLength();
-        if (l > 0) {
-          fileLen.set(uri.getPath(), l);
-        }
         return l;
       }
 
@@ -1064,8 +1054,9 @@ public final class SwiftRestClient {
     // retry policy
     HttpMethodParams methodParams = method.getParams();
     methodParams.setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(clientConfig.getRetryCount(), false));
-    methodParams.setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT, clientConfig.getConnectTimeout());
+    //methodParams.setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT, clientConfig.getConnectTimeout());
     methodParams.setSoTimeout(clientConfig.getSocketTimeout());
+    method.setParams(methodParams);
     method.addRequestHeader(HEADER_USER_AGENT, SWIFT_USER_AGENT);
     Duration duration = new Duration();
     boolean success = false;
@@ -1314,11 +1305,6 @@ public final class SwiftRestClient {
         // re-auth, this may recurse into the same dir
         if (LOG.isDebugEnabled()) {
           LOG.debug("Reauthenticating");
-        }
-        try {
-          Thread.sleep(200);
-        } catch (InterruptedException e) {
-          break;
         }
         authenticate();
         if (LOG.isDebugEnabled()) {

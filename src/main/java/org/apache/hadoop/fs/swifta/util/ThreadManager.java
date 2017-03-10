@@ -32,9 +32,7 @@ public class ThreadManager {
 
   public void createThreadManager(int maxPoolSize) {
     maxPoolSize = this.getRightThread(maxPoolSize);
-    int minPoolSize = maxPoolSize >> 1;
-    minPoolSize = minPoolSize > 1 ? minPoolSize : 1;
-    this.createThreadManager(minPoolSize, maxPoolSize);
+    this.createThreadManager(maxPoolSize, maxPoolSize);
   }
 
   private int getRightThread(int maxPoolSize) {

@@ -16,7 +16,7 @@ public class HttpClientManager {
 
   private static final Log LOG = LogFactory.getLog(HttpClientManager.class);
   private static final int INITAL_DELAY = 5;
-  private static final int PERIOD = 300;
+  private static final int PERIOD = 120;
   private static final String THREAD_NAME = "Swift-Httpclient-Monitor";
   private static MultiThreadedHttpConnectionManager connectionManager = null;
   private static HttpConnectionManagerParams connParam = null;

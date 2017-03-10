@@ -442,6 +442,9 @@ public class SwiftNativeFileSystemStore {
     byte[] bytes = null;
     try {
       bytes = swiftRestClient.listDeepObjectsInDirectory(path, listDeep, marker);
+      if (LOG.isDebugEnabled()) {
+        LOG.debug(new String(bytes) + " from path: " + path.toString());
+      }
     } catch (FileNotFoundException e) {
       if (LOG.isDebugEnabled()) {
         LOG.debug("" + "File/Directory not found " + path);
@@ -650,9 +653,9 @@ public class SwiftNativeFileSystemStore {
    */
   public void deleteObjects(List<FileStatus> statuses) throws IOException {
     Map<String, Future<Boolean>> deletes = new HashMap<String, Future<Boolean>>();
-    ThreadManager tm = new ThreadManager();
+    ThreadManager tm = null;
     try {
-      tm.createThreadManager(this.swiftRestClient.getClientConfig().getMaxThreadsInPool());
+      tm = this.getThreadManager(statuses.size(), this.swiftRestClient.getClientConfig().getMaxThreadsInPool());
       for (FileStatus entryStatus : statuses) {
         final Path entryPath = entryStatus.getPath();
         // boolean deleted = deleteObject(entryPath);
@@ -688,8 +691,10 @@ public class SwiftNativeFileSystemStore {
       }
     } finally {
       // free memory
-      tm.cleanup();
-      tm = null;
+      if (tm != null) {
+        tm.cleanup();
+        tm = null;
+      }
       deletes.clear();
       deletes = null;
     }
@@ -744,9 +749,13 @@ public class SwiftNativeFileSystemStore {
   }
 
   private ThreadManager getThreadManager(List<FileStatus> childStats) {
+    return this.getThreadManager(childStats.size(), this.swiftRestClient.getClientConfig().getMaxThreadsForCopy());
+  }
+
+  private ThreadManager getThreadManager(int size, int max) {
     ThreadManager tm = new ThreadManager();
     // If required threads less than number in configuration, only picks less one.
-    int maxThread = childStats.size() > this.swiftRestClient.getClientConfig().getMaxThreadsForCopy() ? this.swiftRestClient.getClientConfig().getMaxThreadsForCopy() : childStats.size();
+    int maxThread = size > max ? max : size;
     tm.createThreadManager(maxThread);
     return tm;
   }

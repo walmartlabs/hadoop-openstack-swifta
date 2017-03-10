@@ -36,7 +36,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -53,11 +52,11 @@ import java.util.concurrent.atomic.AtomicLong;
 class SwiftNativeOutputStream extends OutputStream {
   private static final Log LOG = LogFactory.getLog(SwiftNativeOutputStream.class);
   private static final MetricsFactory metric = MetricsFactory.getMetricsFactory(SwiftNativeOutputStream.class);
-  private static final int CORE_POOL_SIZE = 1;
-  private static final int ATTEMPT_LIMIT = 3;
+  private static final int CORE_POOL_SIZE = 2;
   private static final int NIO_WRITE_FILE_MAX_THREADS = 10;
 
-  static final int BACKGROUND_UPLOAD_MIN_BATCH_SIZE = 5;
+  private static final int ATTEMPT_LIMIT = 3;
+
   private long filePartSize;
   private String key;
   private AsynchronousFileChannel backupStream;
@@ -67,12 +66,17 @@ class SwiftNativeOutputStream extends OutputStream {
   private long bytesWritten;
   private AtomicLong bytesUploaded;
   private volatile boolean partUpload = false;
+
+  /**
+   * The minimum files to trigger a background upload.
+   */
+  static final int BACKGROUND_UPLOAD_MIN_BATCH_SIZE = 7;
   final byte[] oneByte = new byte[1];
   final String backupDir;
   @SuppressWarnings("rawtypes")
   final Map<AsynchronousFileChannel, Future> results;
   // Part number and temporary files.
-  Queue<BackupFile> backupFiles;
+  ConcurrentLinkedQueue<BackupFile> backupFiles;
   // private Map<Integer, File> backupFiles;
   private ThreadManager executor;
 
@@ -563,13 +567,13 @@ class BackupFile implements Serializable {
 
 class AsynchronousUpload extends Thread {
   private static final Log LOG = LogFactory.getLog(AsynchronousUpload.class);
-  private Queue<BackupFile> queue;
+  private ConcurrentLinkedQueue<BackupFile> queue;
   private volatile boolean execute;
   private long filePartSize;
   private SwiftNativeOutputStream out;
   private volatile boolean isFinished;
 
-  public AsynchronousUpload(Queue<BackupFile> queue, long filePartSize, SwiftNativeOutputStream out) {
+  public AsynchronousUpload(ConcurrentLinkedQueue<BackupFile> queue, long filePartSize, SwiftNativeOutputStream out) {
     super();
     this.queue = queue;
     this.execute = Boolean.TRUE;
@@ -597,13 +601,14 @@ class AsynchronousUpload extends Thread {
       try {
         List<Future> uploads = null;
         List<BackupFile> deletes = new ArrayList<BackupFile>();
-        List<BackupFile> files = new ArrayList<BackupFile>(queue);
+
         /**
          * Don't trigger background upload.
          */
-        if (files.size() < SwiftNativeOutputStream.BACKGROUND_UPLOAD_MIN_BATCH_SIZE) {
+        if (queue.size() < SwiftNativeOutputStream.BACKGROUND_UPLOAD_MIN_BATCH_SIZE) {
           continue;
         }
+        List<BackupFile> files = new ArrayList<BackupFile>(queue);
         for (BackupFile file : files) {
           Future future = out.results.get(file.getFileChannel());
           if (file.getUploadFile().length() == filePartSize && future != null && future.isDone()) {
@@ -616,8 +621,8 @@ class AsynchronousUpload extends Thread {
               tm = new ThreadManager();
               tm.createThreadManager(files.size());
             }
-            uploads = out.doUpload(tm, file.getUploadFile(), file.getPartNumber());
             file.getFileChannel().close();
+            uploads = out.doUpload(tm, file.getUploadFile(), file.getPartNumber());
           }
         }
         files = null;

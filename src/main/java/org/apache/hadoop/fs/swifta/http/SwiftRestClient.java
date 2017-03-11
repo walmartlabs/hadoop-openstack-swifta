@@ -50,6 +50,7 @@ import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1053,7 +1054,8 @@ public final class SwiftRestClient {
     // retry policy
     HttpMethodParams methodParams = method.getParams();
     methodParams.setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(clientConfig.getRetryCount(), false));
-    method.setParams(methodParams);
+    methodParams.setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT, clientConfig.getConnectTimeout());
+    methodParams.setSoTimeout(clientConfig.getSocketTimeout());
     method.addRequestHeader(HEADER_USER_AGENT, SWIFT_USER_AGENT);
     Duration duration = new Duration();
     boolean success = false;

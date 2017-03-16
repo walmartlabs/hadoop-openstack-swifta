@@ -48,7 +48,6 @@ class SwiftNativeOutputStream extends OutputStream {
   private static final MetricsFactory metric = MetricsFactory.getMetricsFactory(SwiftNativeOutputStream.class);
 
   private static final int ATTEMPT_LIMIT = 3;
-  private static final int BUFFER_SIZE = 8192 * 10;
 
   private long filePartSize;
   private String key;
@@ -66,10 +65,7 @@ class SwiftNativeOutputStream extends OutputStream {
   static final int BACKGROUND_UPLOAD_MIN_BATCH_SIZE = 5;
   final byte[] oneByte = new byte[1];
   final String backupDir;
-  // Part number and temporary files.
   ConcurrentLinkedQueue<BackupFile> backupFiles;
-  // private Map<Integer, File> backupFiles;
-  // private ThreadManager executor;
 
   private AtomicInteger partNumber;
 
@@ -77,6 +73,7 @@ class SwiftNativeOutputStream extends OutputStream {
   final List<Future> uploads;
   final File dir;
   private AsynchronousUpload uploadThread;
+  private int outputBufferSize;
 
   /**
    * Create an output stream.
@@ -88,7 +85,7 @@ class SwiftNativeOutputStream extends OutputStream {
    * @throws IOException
    */
   @SuppressWarnings("rawtypes")
-  public SwiftNativeOutputStream(Configuration conf, SwiftNativeFileSystemStore nativeStore, String key, long partSizeKB) throws IOException {
+  public SwiftNativeOutputStream(Configuration conf, SwiftNativeFileSystemStore nativeStore, String key, long partSizeKB, int outputBufferSize) throws IOException {
     dir = new File(conf.get("hadoop.tmp.dir"));
     this.key = key;
     this.nativeStore = nativeStore;
@@ -100,6 +97,7 @@ class SwiftNativeOutputStream extends OutputStream {
     backupFiles = new ConcurrentLinkedQueue<BackupFile>();
     backupStream = openForWrite(partNumber.getAndIncrement());
     uploads = new ArrayList<Future>();
+    this.outputBufferSize = outputBufferSize;
     metric.increase(key, this);
     metric.report();
   }
@@ -108,10 +106,8 @@ class SwiftNativeOutputStream extends OutputStream {
     this.closeStream();
     File tmp = newBackupFile(partNumber);
 
-    BackupFile file = new BackupFile(tmp, new BufferedOutputStream(new FileOutputStream(tmp), BUFFER_SIZE), partNumber);
-    // BackupFile file = new BackupFile(tmp, AsynchronousFileChannel.open(Paths.get(tmp.getAbsolutePath()), StandardOpenOption.WRITE), partNumber);
+    BackupFile file = new BackupFile(tmp, new BufferedOutputStream(new FileOutputStream(tmp), outputBufferSize), partNumber);
     backupFiles.add(file);
-    // backupFiles.put(partNumber, tmp);
     return file.getBufferedOutputStream();
   }
 
@@ -187,7 +183,6 @@ class SwiftNativeOutputStream extends OutputStream {
       metric.remove(this);
       metric.report();
     }
-    // assert backupStream == null : "backup stream has been reopened";
   }
 
   private void cleanUploadThread() {
@@ -310,7 +305,6 @@ class SwiftNativeOutputStream extends OutputStream {
     if (offset < 0 || len < 0 || (offset + len) > buffer.length) {
       throw new IndexOutOfBoundsException("Invalid offset/length for write");
     }
-    // LOG.info("writeToBackupStream(offset='" + offset + "', len='" + len + "')");
     // validate the output stream
     verifyOpen();
     this.autoWriteToSplittedBackupStream(buffer, offset, len);
@@ -334,12 +328,8 @@ class SwiftNativeOutputStream extends OutputStream {
       // no remainder -downgrade to noop
       return;
     }
-    // SwiftUtils.debug(LOG, " writeToBackupStream(offset=%d, len=%d)", offset, len);
-    // LOG.info("offset:" + offset + ";len:" + len);
-    // write the new data out to the backup stream
 
     while (len > 0) {
-      // LOG.info("len" + len + ";(blockOffset + len):" + (blockOffset + len) + ";filePartSize:" + filePartSize);
       if ((blockOffset + len) >= filePartSize) {
         int subLen = (int) (filePartSize - blockOffset);
         backupStream.write(buffer, offset, subLen);
@@ -410,7 +400,6 @@ class SwiftNativeOutputStream extends OutputStream {
       SwiftUtils.debug(LOG, "skipping upload of 0 byte final partition");
       delete(backupFile);
     } else {
-      // partUpload = true;
       boolean uploadSuccess = false;
       int attempt = 0;
       while (!uploadSuccess) {
@@ -424,23 +413,14 @@ class SwiftNativeOutputStream extends OutputStream {
           }
         }
       }
-      // delete(backupFile);
-      // blockOffset = 0;
-      // if (!closingUpload) {
-      // // if not the final upload, create a new output stream
-      // backupFile = newBackupFile();
-      // backupStream = AsynchronousFileChannel.open(Paths.get(backupFile.getAbsolutePath()), StandardOpenOption.WRITE);
-      // }
     }
   }
 
   private long uploadFilePartAttempt(final int attempt, final File backupFile, final int partNumber) throws IOException {
     long uploadLen = backupFile.length();
-    // SwiftUtils.debug(LOG, "Uploading part %d of file %s;" + " localfile=%s of length %d - attempt %d", partNumber, key, backupFile, uploadLen, attempt);
     BufferedInputStream inputStream = null;
     FileInputStream input = null;
     try {
-      // this.isDone(results);
       input = new FileInputStream(backupFile);
       inputStream = new BufferedInputStream(input);
       nativeStore.uploadFilePart(new Path(key), partNumber, inputStream, uploadLen);

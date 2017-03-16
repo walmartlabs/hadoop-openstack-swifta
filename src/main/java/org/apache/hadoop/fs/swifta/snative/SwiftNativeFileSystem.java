@@ -566,8 +566,7 @@ public class SwiftNativeFileSystem extends FileSystem {
    * @throws IOException
    */
   protected SwiftNativeOutputStream createSwiftOutputStream(Path path) throws IOException {
-    long partSizeKB = getStore().getPartsizeKB();
-    return new SwiftNativeOutputStream(getConf(), getStore(), path.toUri().toString(), partSizeKB);
+    return new SwiftNativeOutputStream(getConf(), getStore(), path.toUri().toString(), getStore().getPartsizeKB(), getStore().getOutputBufferSize());
   }
 
   /**

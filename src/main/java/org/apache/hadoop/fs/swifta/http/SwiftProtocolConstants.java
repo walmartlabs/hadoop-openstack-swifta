@@ -177,6 +177,8 @@ public class SwiftProtocolConstants {
    */
   public static final String SWIFT_INPUT_STREAM_BUFFER_SIZE = FS_SWIFT + ".inputstream.buffersize";
 
+  public static final String SWIFT_OUTPUT_STREAM_BUFFER_SIZE = FS_SWIFT + ".outputstream.buffersize";
+
   /**
    * HttpClient: Sets the maximum number of connections allowed.
    */

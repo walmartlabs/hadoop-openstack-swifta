@@ -18,10 +18,11 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_BLOC
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_CONNECTION_TIMEOUT;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_CONTAINER_PROPERTY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_INPUT_STREAM_BUFFER_SIZE;
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_OUTPUT_STREAM_BUFFER_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_LAZY_SEEK;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_LOCATION_AWARE_PROPERTY;
-import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_CONNECTIONS_IN_POOL;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_CONNECTIONS_FOR_COPY;
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_CONNECTIONS_IN_POOL;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_HOST_CONNECTIONS;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_TOTAL_CONNECTIONS;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_PARTITION_SIZE;
@@ -188,6 +189,8 @@ public class SwiftClientConfig {
 
   private int inputBufferSize;
 
+  private int outputBufferSize;
+
   private boolean isLazySeek;
 
   /**
@@ -296,6 +299,7 @@ public class SwiftClientConfig {
       }
       partSizeKB = conf.getLong(SWIFT_PARTITION_SIZE, DEFAULT_SWIFT_PARTITION_SIZE);
       inputBufferSize = conf.getInt(SWIFT_INPUT_STREAM_BUFFER_SIZE, DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE);
+      outputBufferSize = conf.getInt(SWIFT_OUTPUT_STREAM_BUFFER_SIZE, DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE);
       if (partSizeKB <= 0) {
         throw new SwiftConfigurationException("Invalid partition size set in " + SWIFT_PARTITION_SIZE + ": " + partSizeKB);
       }
@@ -551,6 +555,10 @@ public class SwiftClientConfig {
 
   public int getInputBufferSize() {
     return inputBufferSize;
+  }
+
+  public int getOutputBufferSize() {
+    return outputBufferSize;
   }
 
   public void setInputBufferSize(int inputBufferSize) {

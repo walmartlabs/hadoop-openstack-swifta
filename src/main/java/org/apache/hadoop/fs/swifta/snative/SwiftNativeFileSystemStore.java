@@ -124,6 +124,10 @@ public class SwiftNativeFileSystemStore {
     return swiftRestClient.getClientConfig().getPartSizeKB();
   }
 
+  public int getOutputBufferSize() {
+    return swiftRestClient.getClientConfig().getOutputBufferSize();
+  }
+
   public int getBufferSizeKB() {
     return swiftRestClient.getClientConfig().getBufferSizeKB();
   }

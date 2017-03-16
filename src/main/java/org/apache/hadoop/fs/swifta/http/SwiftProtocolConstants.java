@@ -155,7 +155,7 @@ public class SwiftProtocolConstants {
   /**
    * The default partition size for uploads: {@value}
    */
-  public static final int DEFAULT_SWIFT_PARTITION_SIZE = 4608 * 1024;
+  public static final long DEFAULT_SWIFT_PARTITION_SIZE = 4608 * 1024L;
 
   /**
    * request size for reads in KB: {@value}

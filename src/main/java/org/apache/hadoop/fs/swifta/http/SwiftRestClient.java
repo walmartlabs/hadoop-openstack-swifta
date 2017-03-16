@@ -326,7 +326,7 @@ public final class SwiftRestClient {
    * @param conf The configuration to use to extract the binding
    * @throws SwiftConfigurationException the configuration is not valid for defining a rest client against the service
    */
-  private SwiftRestClient(URI filesystemURI, Configuration conf) throws SwiftConfigurationException {
+  public SwiftRestClient(URI filesystemURI, Configuration conf) throws SwiftConfigurationException {
 
     String host = filesystemURI.getHost();
     if (host == null || host.isEmpty()) {
@@ -617,6 +617,9 @@ public final class SwiftRestClient {
     // in listing deep set param to false
     if (listDeep == false) {
       dataLocationURI.append("&delimiter=/");
+    }
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("findObjects:" + dataLocationURI);
     }
     return findObjects(dataLocationURI.toString(), requestHeaders);
   }

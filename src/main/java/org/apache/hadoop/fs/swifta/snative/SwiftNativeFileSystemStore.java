@@ -94,7 +94,7 @@ public class SwiftNativeFileSystemStore {
   public void initialize(URI fsURI, final Configuration configuration) throws IOException {
     this.uri = fsURI;
     dnsToSwitchMapping = ReflectionUtils.newInstance(configuration.getClass("topology.node.switch.mapping.impl", ScriptBasedMapping.class, DNSToSwitchMapping.class), configuration);
-    this.swiftRestClient = SwiftRestClient.getInstance(fsURI, configuration);
+    this.swiftRestClient = new SwiftRestClient(fsURI, configuration);
     metric.increase(this);
     metric.report();
     if (lru1 == null) {
@@ -164,7 +164,7 @@ public class SwiftNativeFileSystemStore {
     }
     SwiftObjectPath p = new SwiftObjectPath(toDirPath(path).getContainer(), stringPath);
     if (LOG.isDebugEnabled()) {
-      LOG.debug("[uploadFilePart]Upload parts to server path:" + p.toUriPath());
+      LOG.debug("[uploadFilePart] Upload parts to server length:" + length + " partNumber: " + partNumber + "" + p.toUriPath());
     }
     swiftRestClient.upload(p, inputStream, length);
   }
@@ -876,9 +876,6 @@ public class SwiftNativeFileSystemStore {
           String newPrefixName = newPrefixPath.toUri().getPath();
           if (!newPrefixName.endsWith("/")) {
             newPrefixName = newPrefixName.concat("/");
-          }
-          if (LOG.isDebugEnabled()) {
-            LOG.debug("[Rename]Write manifest for path:" + newPrefixPath);
           }
           createManifestForPartUpload(newPrefixPath);
           ThreadManager tm = this.getThreadManager(childStats);

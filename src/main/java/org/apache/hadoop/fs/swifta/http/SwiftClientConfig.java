@@ -174,7 +174,7 @@ public class SwiftClientConfig {
    */
   private boolean locationAware;
 
-  private int partSizeKB;
+  private long partSizeKB;
   /**
    * The blocksize of this FS
    */
@@ -294,7 +294,7 @@ public class SwiftClientConfig {
       if (blocksizeKB <= 0) {
         throw new SwiftConfigurationException("Invalid blocksize set in " + SWIFT_BLOCKSIZE + ": " + blocksizeKB);
       }
-      partSizeKB = conf.getInt(SWIFT_PARTITION_SIZE, DEFAULT_SWIFT_PARTITION_SIZE);
+      partSizeKB = conf.getLong(SWIFT_PARTITION_SIZE, DEFAULT_SWIFT_PARTITION_SIZE);
       inputBufferSize = conf.getInt(SWIFT_INPUT_STREAM_BUFFER_SIZE, DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE);
       if (partSizeKB <= 0) {
         throw new SwiftConfigurationException("Invalid partition size set in " + SWIFT_PARTITION_SIZE + ": " + partSizeKB);
@@ -513,7 +513,7 @@ public class SwiftClientConfig {
     this.locationAware = locationAware;
   }
 
-  public int getPartSizeKB() {
+  public long getPartSizeKB() {
     return partSizeKB;
   }
 

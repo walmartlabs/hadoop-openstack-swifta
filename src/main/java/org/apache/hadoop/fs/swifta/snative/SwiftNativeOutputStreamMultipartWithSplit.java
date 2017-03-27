@@ -13,6 +13,7 @@ package org.apache.hadoop.fs.swifta.snative;
 
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,9 +46,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * Output stream, buffers data on local disk. Writes to Swift on the close() method, unless the file is significantly large that it is being written as partitions. In this case, the first partition is
  * written on the first write that puts data over the partition, as may later writes. The close() then causes the final partition to be written, along with a partition manifest.
  */
-class SwiftNativeOutputStream extends OutputStream {
-  private static final Log LOG = LogFactory.getLog(SwiftNativeOutputStream.class);
-  private static final MetricsFactory metric = MetricsFactory.getMetricsFactory(SwiftNativeOutputStream.class);
+public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream {
+  private static final Log LOG = LogFactory.getLog(SwiftNativeOutputStreamMultipartWithSplit.class);
+  private static final MetricsFactory metric = MetricsFactory.getMetricsFactory(SwiftNativeOutputStreamMultipartWithSplit.class);
 
   private static final int ATTEMPT_LIMIT = 3;
 
@@ -74,9 +75,14 @@ class SwiftNativeOutputStream extends OutputStream {
 
   @SuppressWarnings("rawtypes")
   final List<Future> uploads;
+  @SuppressWarnings("rawtypes")
+  final List<Future> closes;
   final File dir;
   private AsynchronousUpload uploadThread;
   private int outputBufferSize = DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE;
+  private ThreadManager closeThreads = null;
+  private BackupFile file;
+  private File newDir;
 
   /**
    * Create an output stream.
@@ -88,7 +94,7 @@ class SwiftNativeOutputStream extends OutputStream {
    * @throws IOException
    */
   @SuppressWarnings("rawtypes")
-  public SwiftNativeOutputStream(Configuration conf, SwiftNativeFileSystemStore nativeStore, String key, long partSizeKB, int outputBufferSize) throws IOException {
+  public SwiftNativeOutputStreamMultipartWithSplit(Configuration conf, SwiftNativeFileSystemStore nativeStore, String key, long partSizeKB, int outputBufferSize) throws IOException {
     dir = new File(conf.get("hadoop.tmp.dir"));
     this.key = key;
     this.nativeStore = nativeStore;
@@ -98,27 +104,36 @@ class SwiftNativeOutputStream extends OutputStream {
     this.filePartSize = 1024L * partSizeKB;
     backupDir = UUID.randomUUID().toString();
     backupFiles = new ConcurrentLinkedQueue<BackupFile>();
+    newDir = new File(dir, backupDir);
+    newDir.deleteOnExit();
     this.openForWrite(partNumber.getAndIncrement());
     uploads = new ArrayList<Future>();
+    closes = new ArrayList<Future>();
     if (outputBufferSize > 0) {
       this.outputBufferSize = outputBufferSize;
     }
+    closeThreads = new ThreadManager(15, 20, Boolean.TRUE);
     metric.increase(key, this);
     metric.report();
   }
 
   private synchronized void openForWrite(int partNumber) throws IOException {
-    this.closeStream();
+    if (backupStream != null) {
+      BufferedOutputStream oldStream = backupStream;
+      closes.add(this.doClose(closeThreads, oldStream, file));
+    }
     File tmp = newBackupFile(partNumber);
-    backupStream = new BufferedOutputStream(new FileOutputStream(tmp), outputBufferSize);
-    BackupFile file = new BackupFile(tmp, partNumber);
+    file = new BackupFile(tmp, partNumber, new BufferedOutputStream(new FileOutputStream(tmp), outputBufferSize));
     backupFiles.add(file);
+    backupStream = file.getOutput();
   }
 
   private File newBackupFile(int partNumber) throws IOException {
-    File newDir = new File(dir, backupDir);
-    if (!newDir.mkdirs() && !newDir.exists()) {
-      throw new SwiftException("Cannot create Swift buffer directory: " + dir);
+
+    if (!newDir.exists()) {
+      if (!newDir.mkdirs() && !newDir.exists()) {
+        throw new SwiftException("Cannot create Swift buffer directory: " + dir);
+      }
     }
     String file = SwiftUtils.partitionFilenameFromNumber(partNumber);
     if (LOG.isDebugEnabled()) {
@@ -150,14 +165,6 @@ class SwiftNativeOutputStream extends OutputStream {
     }
   }
 
-  private synchronized void closeStream() throws IOException {
-    if (backupStream != null) {
-      backupStream.flush();
-      backupStream.close();
-      backupStream = null;
-    }
-  }
-
   /**
    * Close the stream. This will trigger the upload of all locally cached data to the remote blobstore.
    * 
@@ -169,10 +176,13 @@ class SwiftNativeOutputStream extends OutputStream {
       return;
     }
     try {
+      if (backupStream != null) {
+        backupStream.close();
+      }
       this.cleanUploadThread();
-      this.closeStream();
+      this.cleanCloseThread();
       closed = true;
-
+      this.waitToFinish(closes);
       Path keypath = new Path(key);
       if (partUpload) {
         uploadParts();
@@ -184,6 +194,7 @@ class SwiftNativeOutputStream extends OutputStream {
     } finally {
       cleanBackupFiles();
       this.cleanUploadThread();
+      this.clean();
       metric.remove(this);
       metric.report();
     }
@@ -192,6 +203,22 @@ class SwiftNativeOutputStream extends OutputStream {
   private void cleanUploadThread() {
     if (uploadThread != null) {
       uploadThread.close();
+    }
+  }
+
+  private void clean() {
+    try {
+      if (newDir != null) {
+        FileUtils.cleanDirectory(newDir);
+      }
+    } catch (Exception e) {
+      // Quiet
+    }
+  }
+
+  private void cleanCloseThread() {
+    if (closeThreads != null) {
+      closeThreads.shutdown();
     }
   }
 
@@ -204,7 +231,7 @@ class SwiftNativeOutputStream extends OutputStream {
     tm.createThreadManager(backupFiles.size());
 
     for (final BackupFile file : backupFiles) {
-      this.doUpload(tm, file.getUploadFile(), file.getPartNumber());
+      this.doUpload(tm, file, file.getPartNumber());
     }
     tm.shutdown();
     // Prevent incomplete read before a full upload.
@@ -213,14 +240,37 @@ class SwiftNativeOutputStream extends OutputStream {
   }
 
   @SuppressWarnings("rawtypes")
-  List<Future> doUpload(final ThreadManager tm, final File uploadFile, final int partNumber) {
+  Future doClose(final ThreadManager tm, final OutputStream out, final BackupFile file) {
+    return tm.getPool().submit(new Callable<Boolean>() {
+      public Boolean call() throws Exception {
+        try {
+          // Wait write to finish
+          if (out != null) {
+            out.close();
+          }
+          return Boolean.TRUE;
+        } catch (IOException e) {
+          LOG.error(e.getMessage());
+          return false;
+        } finally {
+          synchronized (file.lock) {
+            file.lock.notifyAll();
+          }
+          file.setClosed(Boolean.TRUE);
+        }
+      }
+    });
+  }
+
+  @SuppressWarnings("rawtypes")
+  List<Future> doUpload(final ThreadManager tm, final BackupFile uploadFile, final int partNumber) {
     uploads.add(tm.getPool().submit(new Callable<Boolean>() {
       public Boolean call() throws Exception {
         try {
           if (LOG.isDebugEnabled()) {
-            LOG.debug("Upload file " + uploadFile.getName() + ";partNumber=" + partNumber + ";len=" + uploadFile.length());
+            LOG.debug("Upload file " + uploadFile.getUploadFile().getName() + ";partNumber=" + partNumber + ";len=" + uploadFile.getUploadFile().length());
           }
-          partUpload(uploadFile, partNumber);
+          partUpload(uploadFile.getUploadFile(), partNumber);
           return Boolean.TRUE;
         } catch (IOException e) {
           LOG.error(e.getMessage());
@@ -233,9 +283,9 @@ class SwiftNativeOutputStream extends OutputStream {
 
   private void cleanBackupFiles() {
     if (backupFiles != null) {
-      for (final BackupFile file : backupFiles) {
-        delete(file.getUploadFile());
-      }
+      // for (final BackupFile file : backupFiles) {
+      // delete(file.getUploadFile());
+      // }
       backupFiles.clear();
     }
   }
@@ -285,6 +335,7 @@ class SwiftNativeOutputStream extends OutputStream {
     return uploadLen;
   }
 
+  @SuppressWarnings("unused")
   private void delete(File file) {
     if (file != null) {
       SwiftUtils.debug(LOG, "deleting %s", file);
@@ -312,7 +363,11 @@ class SwiftNativeOutputStream extends OutputStream {
     // validate the output stream
     verifyOpen();
     this.autoWriteToSplittedBackupStream(buffer, offset, len);
+  }
 
+  @Override
+  protected void finalize() throws Throwable {
+    this.clean();
   }
 
   /**
@@ -402,7 +457,7 @@ class SwiftNativeOutputStream extends OutputStream {
       // - the final partition is 0 bytes long
       // - one part has already been written
       SwiftUtils.debug(LOG, "skipping upload of 0 byte final partition");
-      delete(backupFile);
+      // delete(backupFile);
     } else {
       boolean uploadSuccess = false;
       int attempt = 0;
@@ -433,6 +488,7 @@ class SwiftNativeOutputStream extends OutputStream {
     } finally {
       IOUtils.closeQuietly(inputStream);
       IOUtils.closeQuietly(input);
+      backupFile.delete();
     }
 
     return uploadLen;
@@ -443,7 +499,8 @@ class SwiftNativeOutputStream extends OutputStream {
    * 
    * @return the partition size
    */
-  long getFilePartSize() {
+  @Override
+  public long getFilePartSize() {
     return filePartSize;
   }
 
@@ -452,7 +509,8 @@ class SwiftNativeOutputStream extends OutputStream {
    * 
    * @return the of partitions already written to the remote FS
    */
-  synchronized int getPartitionsWritten() {
+  @Override
+  public synchronized int getPartitionsWritten() {
     return partNumber.get() - 2;
   }
 
@@ -461,7 +519,8 @@ class SwiftNativeOutputStream extends OutputStream {
    * 
    * @return the number of bytes written to this stream
    */
-  long getBytesWritten() {
+  @Override
+  public long getBytesWritten() {
     return bytesWritten;
   }
 
@@ -470,14 +529,15 @@ class SwiftNativeOutputStream extends OutputStream {
    * 
    * @return the number of bytes written to the remote endpoint
    */
-  synchronized long getBytesUploaded() {
+  @Override
+  public synchronized long getBytesUploaded() {
     return bytesUploaded.get();
   }
 
   @Override
   public String toString() {
-    return "SwiftNativeOutputStream{" + ", key='" + key + '\'' + ", closed=" + closed + ", filePartSize=" + filePartSize + ", blockOffset=" + blockOffset + ", partUpload=" + partUpload
-        + ", nativeStore=" + nativeStore + ", bytesWritten=" + bytesWritten + ", bytesUploaded=" + bytesUploaded + '}';
+    return "SwiftNativeOutputStreamMultipartWithSplit{" + ", key='" + key + '\'' + ", closed=" + closed + ", filePartSize=" + filePartSize + ", blockOffset=" + blockOffset + ", partUpload="
+        + partUpload + ", nativeStore=" + nativeStore + ", bytesWritten=" + bytesWritten + ", bytesUploaded=" + bytesUploaded + '}';
   }
 }
 
@@ -487,18 +547,47 @@ class BackupFile implements Serializable {
   private static final long serialVersionUID = 2053872137059272405L;
   private File file;
   private int partNumber;
+  private BufferedOutputStream output;
+  private volatile boolean isClosed;
+  Object lock = new Object();
 
-  public BackupFile(File file, int partNumber) {
+  public BackupFile(File file, int partNumber, BufferedOutputStream output) {
     this.file = file;
     this.partNumber = partNumber;
+    this.output = output;
   }
 
   public File getUploadFile() {
     return this.file;
   }
 
+  public BufferedOutputStream getOutput() {
+    return this.output;
+  }
+
   public int getPartNumber() {
     return partNumber;
+  }
+
+  public boolean isClosed() {
+    return isClosed;
+  }
+
+  public void setClosed(boolean isClosed) {
+    this.isClosed = isClosed;
+  }
+
+  public void waitToClose() {
+
+    synchronized (lock) {
+      while (isClosed) {
+        try {
+          lock.wait();
+        } catch (InterruptedException e) {
+          break;
+        }
+      }
+    }
   }
 }
 
@@ -507,10 +596,10 @@ class AsynchronousUpload extends Thread {
   private static final Log LOG = LogFactory.getLog(AsynchronousUpload.class);
   private ConcurrentLinkedQueue<BackupFile> queue;
   private volatile boolean execute;
-  private SwiftNativeOutputStream out;
+  private SwiftNativeOutputStreamMultipartWithSplit out;
   private volatile boolean isFinished;
 
-  public AsynchronousUpload(ConcurrentLinkedQueue<BackupFile> queue, SwiftNativeOutputStream out) {
+  public AsynchronousUpload(ConcurrentLinkedQueue<BackupFile> queue, SwiftNativeOutputStreamMultipartWithSplit out) {
     super();
     this.queue = queue;
     this.execute = Boolean.TRUE;
@@ -541,12 +630,12 @@ class AsynchronousUpload extends Thread {
         /**
          * Don't trigger background upload.
          */
-        if (queue.size() < SwiftNativeOutputStream.BACKGROUND_UPLOAD_MIN_BATCH_SIZE) {
+        if (queue.size() < SwiftNativeOutputStreamMultipartWithSplit.BACKGROUND_UPLOAD_MIN_BATCH_SIZE) {
           continue;
         }
         // List<BackupFile> files = new ArrayList<BackupFile>(queue);
         int i = 0;
-        while (i < SwiftNativeOutputStream.BACKGROUND_UPLOAD_BATCH_SIZE) {
+        while (i < SwiftNativeOutputStreamMultipartWithSplit.BACKGROUND_UPLOAD_BATCH_SIZE) {
           i++;
           BackupFile file = queue.poll();
           if (LOG.isDebugEnabled()) {
@@ -554,9 +643,9 @@ class AsynchronousUpload extends Thread {
           }
           if (tm == null) {
             tm = new ThreadManager();
-            tm.createThreadManager(SwiftNativeOutputStream.BACKGROUND_UPLOAD_BATCH_SIZE);
+            tm.createThreadManager(SwiftNativeOutputStreamMultipartWithSplit.BACKGROUND_UPLOAD_BATCH_SIZE);
           }
-          uploads = out.doUpload(tm, file.getUploadFile(), file.getPartNumber());
+          uploads = out.doUpload(tm, file, file.getPartNumber());
         }
         // files = null;
         if (tm != null) {

@@ -9,6 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ThreadManager {
 
@@ -21,6 +22,10 @@ public class ThreadManager {
 
   public ThreadManager(int minPoolSize, int maxPoolSize) {
     this.createThreadManager(minPoolSize, maxPoolSize);
+  }
+
+  public ThreadManager(int minPoolSize, int maxPoolSize, boolean useMaxPriority) {
+    threadPool = this.createThreadManager(minPoolSize, maxPoolSize, new PriorityThreadFactory());
   }
 
   private ThreadPoolExecutor createThreadManager(int coreThreads, int totalThreads, ThreadFactory factory) {
@@ -72,4 +77,24 @@ public class ThreadManager {
     threadPool = null;
   }
 
+}
+
+
+class PriorityThreadFactory implements ThreadFactory {
+  private static final AtomicInteger poolNumber = new AtomicInteger(1);
+  private final ThreadGroup group;
+  private final AtomicInteger threadNumber = new AtomicInteger(1);
+  private final String namePrefix;
+
+  public PriorityThreadFactory() {
+    SecurityManager s = System.getSecurityManager();
+    group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+    namePrefix = "priority-pool-" + poolNumber.getAndIncrement() + "-thread-";
+  }
+
+  public Thread newThread(Runnable r) {
+    Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
+    t.setPriority(Thread.MAX_PRIORITY);
+    return t;
+  }
 }

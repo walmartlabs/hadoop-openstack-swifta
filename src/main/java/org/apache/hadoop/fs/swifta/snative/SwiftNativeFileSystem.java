@@ -554,7 +554,7 @@ public class SwiftNativeFileSystem extends FileSystem {
       }
     }
 
-    SwiftNativeOutputStream out = createSwiftOutputStream(file);
+    SwiftOutputStream out = createSwiftOutputStream(file);
     return new FSDataOutputStream(out, statistics);
   }
 
@@ -565,8 +565,8 @@ public class SwiftNativeFileSystem extends FileSystem {
    * @return the new file
    * @throws IOException
    */
-  protected SwiftNativeOutputStream createSwiftOutputStream(Path path) throws IOException {
-    return new SwiftNativeOutputStream(getConf(), getStore(), path.toUri().toString(), getStore().getPartsizeKB(), getStore().getOutputBufferSize());
+  protected SwiftOutputStream createSwiftOutputStream(Path path) throws IOException {
+    return getStore().createSwiftOutputStream(path);
   }
 
   /**
@@ -703,16 +703,17 @@ public class SwiftNativeFileSystem extends FileSystem {
    * 
    * @param outputStream output stream
    * @return the #of partitions written by that stream
+   * @throws SwiftUnsupportedFeatureException
    */
   @InterfaceAudience.Private
-  public static int getPartitionsWritten(FSDataOutputStream outputStream) {
-    SwiftNativeOutputStream snos = getSwiftNativeOutputStream(outputStream);
+  public static int getPartitionsWritten(FSDataOutputStream outputStream) throws SwiftUnsupportedFeatureException {
+    SwiftOutputStream snos = getSwiftOutputStream(outputStream);
     return snos.getPartitionsWritten();
   }
 
-  private static SwiftNativeOutputStream getSwiftNativeOutputStream(FSDataOutputStream outputStream) {
+  private static SwiftOutputStream getSwiftOutputStream(FSDataOutputStream outputStream) {
     OutputStream wrappedStream = outputStream.getWrappedStream();
-    return (SwiftNativeOutputStream) wrappedStream;
+    return (SwiftOutputStream) wrappedStream;
   }
 
   /**
@@ -720,10 +721,11 @@ public class SwiftNativeFileSystem extends FileSystem {
    *
    * @param outputStream output stream
    * @return partition size in bytes
+   * @throws SwiftUnsupportedFeatureException
    */
   @InterfaceAudience.Private
-  public static long getPartitionSize(FSDataOutputStream outputStream) {
-    SwiftNativeOutputStream snos = getSwiftNativeOutputStream(outputStream);
+  public static long getPartitionSize(FSDataOutputStream outputStream) throws SwiftUnsupportedFeatureException {
+    SwiftOutputStream snos = getSwiftOutputStream(outputStream);
     return snos.getFilePartSize();
   }
 
@@ -732,10 +734,11 @@ public class SwiftNativeFileSystem extends FileSystem {
    *
    * @param outputStream output stream
    * @return partition size in bytes
+   * @throws SwiftUnsupportedFeatureException
    */
   @InterfaceAudience.Private
-  public static long getBytesWritten(FSDataOutputStream outputStream) {
-    SwiftNativeOutputStream snos = getSwiftNativeOutputStream(outputStream);
+  public static long getBytesWritten(FSDataOutputStream outputStream) throws SwiftUnsupportedFeatureException {
+    SwiftOutputStream snos = getSwiftOutputStream(outputStream);
     return snos.getBytesWritten();
   }
 
@@ -744,10 +747,11 @@ public class SwiftNativeFileSystem extends FileSystem {
    *
    * @param outputStream output stream
    * @return partition size in bytes
+   * @throws SwiftUnsupportedFeatureException
    */
   @InterfaceAudience.Private
-  public static long getBytesUploaded(FSDataOutputStream outputStream) {
-    SwiftNativeOutputStream snos = getSwiftNativeOutputStream(outputStream);
+  public static long getBytesUploaded(FSDataOutputStream outputStream) throws SwiftUnsupportedFeatureException {
+    SwiftOutputStream snos = getSwiftOutputStream(outputStream);
     return snos.getBytesUploaded();
   }
 

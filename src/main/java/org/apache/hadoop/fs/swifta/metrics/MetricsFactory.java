@@ -11,8 +11,7 @@ public class MetricsFactory {
 
   private static final Log LOG = LogFactory.getLog(MetricsFactory.class);
 
-  private static Map<String, MetricsFactory> metricsMap =
-      new ConcurrentHashMap<String, MetricsFactory>();
+  private static Map<String, MetricsFactory> metricsMap = new ConcurrentHashMap<String, MetricsFactory>();
 
   private SwiftMetric metric;
 
@@ -21,23 +20,19 @@ public class MetricsFactory {
     String name = clazz.getSimpleName();
     if (!metricsMap.containsKey(name)) {
       if ("SwiftNativeInputStream".equals(name)) {
-        metricsMap.put(name, new MetricsFactory(
-            new InputstreamMetrics("Total opened SwiftNativeInputStream connections to cloud.")));
+        metricsMap.put(name, new MetricsFactory(new InputstreamMetrics("Total opened SwiftNativeInputStream connections to cloud.")));
       } else if ("SwiftNativeFileSystem".equals(name)) {
-        metricsMap.put(name,
-            new MetricsFactory(new SwiftaFileSystemMetrics("Total swift filesystem instances.")));
+        metricsMap.put(name, new MetricsFactory(new SwiftaFileSystemMetrics("Total swift filesystem instances.")));
       } else if ("SwiftNativeFileSystemStore".equals(name)) {
-        metricsMap.put(name, new MetricsFactory(
-            new SwiftaFileSystemStoreMetrics("Total swift filesystem store instances.")));
+        metricsMap.put(name, new MetricsFactory(new SwiftaFileSystemStoreMetrics("Total swift filesystem store instances.")));
       } else if ("HttpInputStreamWithRelease".equals(name)) {
-        metricsMap.put(name, new MetricsFactory(new InputstreamMetrics(
-            "Total opened HttpInputStreamWithRelease connections to cloud.")));
+        metricsMap.put(name, new MetricsFactory(new InputstreamMetrics("Total opened HttpInputStreamWithRelease connections to cloud.")));
       } else if ("SwiftRestClient".equals(name)) {
-        metricsMap.put(name,
-            new MetricsFactory(new SwiftRestClientMetrics("Total swift rest client instances.")));
+        metricsMap.put(name, new MetricsFactory(new SwiftRestClientMetrics("Total swift rest client instances.")));
       } else if ("SwiftNativeOutputStream".equals(name)) {
-        metricsMap.put(name, new MetricsFactory(
-            new OutputstreamMetrics("Total opened SwiftNativeOutputStream connections to cloud.")));
+        metricsMap.put(name, new MetricsFactory(new OutputstreamMetrics("Total opened SwiftNativeOutputStream connections to cloud.")));
+      } else if ("SwiftNativeOutputStreamOld".equals(name)) {
+        metricsMap.put(name, new MetricsFactory(new OutputstreamMetrics("Total opened SwiftNativeOutputStreamOld connections to cloud.")));
       } else {
         throw new UnsupportedOperationException("This method has not supported yet!");
       }

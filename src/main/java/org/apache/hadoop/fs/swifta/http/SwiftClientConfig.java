@@ -4,6 +4,7 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_CO
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_RETRY_AUTH_COUNT;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_RETRY_COUNT;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SOCKET_TIMEOUT;
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_WRITE_POLICY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SWIFT_BLOCKSIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SWIFT_PARTITION_SIZE;
@@ -36,6 +37,7 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_RETR
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_RETRY_COUNT;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_SERVICE_PROPERTY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_SOCKET_TIMEOUT;
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_WRITE_POLICY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_TENANT_PROPERTY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_THROTTLE_DELAY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_USERNAME_PROPERTY;
@@ -52,6 +54,7 @@ import org.apache.hadoop.fs.swifta.auth.KeystoneApiKeyCredentials;
 import org.apache.hadoop.fs.swifta.auth.PasswordAuthenticationRequest;
 import org.apache.hadoop.fs.swifta.auth.PasswordCredentials;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftConfigurationException;
+import org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.WritePolicies;
 import org.apache.hadoop.fs.swifta.util.DurationStatsTable;
 
 import java.net.URI;
@@ -154,6 +157,8 @@ public class SwiftClientConfig {
    * How long (in milliseconds) should a connection be attempted
    */
   private int socketTimeout;
+
+  private String writePolicy;
 
   /**
    * How long (in milliseconds) between bulk operations
@@ -287,9 +292,11 @@ public class SwiftClientConfig {
       connectTimeout = conf.getInt(SWIFT_CONNECTION_TIMEOUT, DEFAULT_CONNECT_TIMEOUT);
       socketTimeout = conf.getInt(SWIFT_SOCKET_TIMEOUT, DEFAULT_SOCKET_TIMEOUT);
 
+      writePolicy = conf.get(SWIFT_WRITE_POLICY, DEFAULT_WRITE_POLICY.name());
+
       throttleDelay = conf.getInt(SWIFT_THROTTLE_DELAY, DEFAULT_THROTTLE_DELAY);
 
-      // proxy options
+      // Proxy options
       proxyHost = conf.get(SWIFT_PROXY_HOST_PROPERTY);
       proxyPort = conf.getInt(SWIFT_PROXY_PORT_PROPERTY, 8080);
 
@@ -611,6 +618,18 @@ public class SwiftClientConfig {
 
   public long getCacheLiveTime() {
     return cacheLiveTime;
+  }
+
+  public WritePolicies getWritePolicy() {
+    WritePolicies cur;
+    if (WritePolicies.NO_LARGE_FILE_SUPPORT.name().equalsIgnoreCase(writePolicy)) {
+      cur = WritePolicies.NO_LARGE_FILE_SUPPORT;
+    } else if (WritePolicies.MULTIPART_NO_SPLIT.name().equalsIgnoreCase(writePolicy)) {
+      cur = WritePolicies.MULTIPART_NO_SPLIT;
+    } else {
+      cur = WritePolicies.MULTIPART_SPLIT;
+    }
+    return cur;
   }
 
 }

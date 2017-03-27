@@ -46,7 +46,6 @@ public class SwiftProtocolConstants {
 
   /** HTTP standard {@value} header */
   public static final String HEADER_CONTENT_RANGE = "Content-Range";
-
   /**
    * Patten for range headers
    */
@@ -110,9 +109,16 @@ public class SwiftProtocolConstants {
   public static final String SWIFT_SOCKET_TIMEOUT = FS_SWIFT + ".socket.timeout";
 
   /**
+   * timeout for all connections: {@value}
+   */
+  public static final String SWIFT_WRITE_POLICY = FS_SWIFT + ".write.policy";
+
+  /**
    * the default socket timeout in millis {@value}. This controls how long the connection waits for responses from servers.
    */
   public static final int DEFAULT_SOCKET_TIMEOUT = 60000;
+
+  public static final WritePolicies DEFAULT_WRITE_POLICY = WritePolicies.MULTIPART_SPLIT;
 
   /**
    * connection retry count for all connections: {@value}
@@ -286,4 +292,12 @@ public class SwiftProtocolConstants {
    * Default timeout in milliseconds for connection requests: {@value}
    */
   static final int DEFAULT_CONNECT_TIMEOUT = 15000;
+
+  /**
+   * Define write policies
+   *
+   */
+  public static enum WritePolicies {
+    NO_LARGE_FILE_SUPPORT, MULTIPART_SPLIT, MULTIPART_NO_SPLIT;
+  }
 }

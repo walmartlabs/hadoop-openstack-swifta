@@ -23,6 +23,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftOperationFailedException;
+import org.apache.hadoop.fs.swifta.exceptions.SwiftUnsupportedFeatureException;
 import org.apache.hadoop.fs.swifta.snative.SwiftNativeFileSystem;
 import org.apache.hadoop.fs.swifta.snative.SwiftNativeFileSystemStore;
 import org.apache.hadoop.fs.swifta.util.DurationStats;
@@ -353,8 +354,9 @@ public class SwiftFileSystemBaseTest extends Assert implements SwiftTestConstant
    * 
    * @param out output stream
    * @return the number of partitioned files written by the stream
+   * @throws SwiftUnsupportedFeatureException 
    */
-  protected int getPartitionsWritten(FSDataOutputStream out) {
+  protected int getPartitionsWritten(FSDataOutputStream out) throws SwiftUnsupportedFeatureException {
     return SwiftNativeFileSystem.getPartitionsWritten(out);
   }
 
@@ -364,8 +366,9 @@ public class SwiftFileSystemBaseTest extends Assert implements SwiftTestConstant
    * @param action operation (for use in the assertions)
    * @param out output stream
    * @param expected expected no. of partitions
+   * @throws SwiftUnsupportedFeatureException 
    */
-  protected void assertPartitionsWritten(String action, FSDataOutputStream out, long expected) {
+  protected void assertPartitionsWritten(String action, FSDataOutputStream out, long expected) throws SwiftUnsupportedFeatureException {
     OutputStream nativeStream = out.getWrappedStream();
     int written = getPartitionsWritten(out);
     if (written != expected) {

@@ -25,6 +25,7 @@ import org.apache.hadoop.fs.swifta.exceptions.SwiftInvalidResponseException;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftOperationFailedException;
 import org.apache.hadoop.fs.swifta.http.HttpBodyContent;
 import org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants;
+import org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.WritePolicies;
 import org.apache.hadoop.fs.swifta.http.SwiftRestClient;
 import org.apache.hadoop.fs.swifta.metrics.MetricsFactory;
 import org.apache.hadoop.fs.swifta.model.ListObjectsRequest;
@@ -83,6 +84,8 @@ public class SwiftNativeFileSystemStore {
    */
   private static LRUCache<Header[]> lru1;
   private static LRUCache<Header[]> lru2;
+  private static byte[] zeroByte = new byte[0];
+  private Configuration conf;
 
   /**
    * Initialize the filesystem store -this creates the REST client binding.
@@ -93,6 +96,7 @@ public class SwiftNativeFileSystemStore {
    */
   public void initialize(URI fsURI, final Configuration configuration) throws IOException {
     this.uri = fsURI;
+    this.conf = configuration;
     dnsToSwitchMapping = ReflectionUtils.newInstance(configuration.getClass("topology.node.switch.mapping.impl", ScriptBasedMapping.class, DNSToSwitchMapping.class), configuration);
     this.swiftRestClient = new SwiftRestClient(fsURI, configuration);
     metric.increase(this);
@@ -109,6 +113,28 @@ public class SwiftNativeFileSystemStore {
   @Override
   public String toString() {
     return "SwiftNativeFileSystemStore with " + swiftRestClient;
+  }
+
+  /**
+   * Create the swift output stream
+   * 
+   * @param path path to write to
+   * @return the new file
+   * @throws IOException
+   */
+  protected SwiftOutputStream createSwiftOutputStream(Path path) throws IOException {
+    WritePolicies policy = this.swiftRestClient.getClientConfig().getWritePolicy();
+    switch (policy) {
+      case MULTIPART_NO_SPLIT:
+        return new SwiftNativeOutputStreamMultipartNoSplit(this.conf, this, path.toUri().toString(), getPartsizeKB());
+      case MULTIPART_SPLIT:
+        return new SwiftNativeOutputStreamMultipartWithSplit(this.conf, this, path.toUri().toString(), getPartsizeKB(), getOutputBufferSize());
+      case NO_LARGE_FILE_SUPPORT:
+        return new SwiftNativeOutputStreamNoMultiPart(this.conf, this, path.toUri().toString(), getPartsizeKB());
+      default:
+        return new SwiftNativeOutputStreamMultipartWithSplit(this.conf, this, path.toUri().toString(), getPartsizeKB(), getOutputBufferSize());
+    }
+
   }
 
   /**
@@ -191,7 +217,7 @@ public class SwiftNativeFileSystemStore {
     if (LOG.isDebugEnabled()) {
       LOG.debug("Final writes manifest for header path:" + pathString);
     }
-    swiftRestClient.upload(p, new ByteArrayInputStream(new byte[0]), 0, new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString));
+    swiftRestClient.upload(p, new ByteArrayInputStream(zeroByte), 0, new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString));
   }
 
   /**

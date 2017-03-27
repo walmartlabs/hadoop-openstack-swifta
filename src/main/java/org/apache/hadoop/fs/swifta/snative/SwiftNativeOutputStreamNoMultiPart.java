@@ -204,7 +204,7 @@ public class SwiftNativeOutputStreamNoMultiPart extends SwiftOutputStream {
     SwiftUtils.debug(LOG, " write(offset=%d, len=%d)", offset, len);
 
     // if the size of file is greater than the partition limit
-    while (blockOffset + len >= filePartSize) {
+    if (blockOffset + len >= filePartSize) {
       throw new SwiftUnsupportedFeatureException("The file is large than expected, please try to use a different write policy. File len is " + len);
     }
     // any remaining data is now written

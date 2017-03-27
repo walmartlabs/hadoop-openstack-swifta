@@ -29,10 +29,12 @@ public class MetricsFactory {
         metricsMap.put(name, new MetricsFactory(new InputstreamMetrics("Total opened HttpInputStreamWithRelease connections to cloud.")));
       } else if ("SwiftRestClient".equals(name)) {
         metricsMap.put(name, new MetricsFactory(new SwiftRestClientMetrics("Total swift rest client instances.")));
-      } else if ("SwiftNativeOutputStream".equals(name)) {
-        metricsMap.put(name, new MetricsFactory(new OutputstreamMetrics("Total opened SwiftNativeOutputStream connections to cloud.")));
-      } else if ("SwiftNativeOutputStreamOld".equals(name)) {
-        metricsMap.put(name, new MetricsFactory(new OutputstreamMetrics("Total opened SwiftNativeOutputStreamOld connections to cloud.")));
+      } else if ("SwiftNativeOutputStreamMultipartNoSplit".equals(name)) {
+        metricsMap.put(name, new MetricsFactory(new OutputstreamMetrics("Total opened SwiftNativeOutputStreamMultipartNoSplit connections to cloud.")));
+      } else if ("SwiftNativeOutputStreamMultipartWithSplit".equals(name)) {
+        metricsMap.put(name, new MetricsFactory(new OutputstreamMetrics("Total opened SwiftNativeOutputStreamMultipartWithSplit connections to cloud.")));
+      } else if ("SwiftNativeOutputStreamNoMultiPart".equals(name)) {
+        metricsMap.put(name, new MetricsFactory(new OutputstreamMetrics("Total opened SwiftNativeOutputStreamNoMultiPart connections to cloud.")));
       } else {
         throw new UnsupportedOperationException("This method has not supported yet!");
       }

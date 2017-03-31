@@ -37,8 +37,6 @@ class SwiftNativeInputStream extends FSInputStream {
 
   private static final MetricsFactory metric = MetricsFactory.getMetricsFactory(SwiftNativeInputStream.class);
 
-  private static final long MAX_LEN = 1024 * 1024 * 10; // 10M
-
   /**
    * File nativeStore instance.
    */
@@ -146,9 +144,6 @@ class SwiftNativeInputStream extends FSInputStream {
   @Override
   public synchronized int read(byte[] b, int off, int len) throws IOException {
     SwiftUtils.debug(LOG, "read(buffer, %d, %d)", off, len);
-    if (len >= MAX_LEN) {
-      LOG.warn("Your request can be optimized with multipart download!" + len);
-    }
     SwiftUtils.validateReadArgs(b, off, len);
     int result = -1;
     if (this.contentLength == 0) {

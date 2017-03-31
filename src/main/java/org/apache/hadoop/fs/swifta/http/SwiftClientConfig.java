@@ -622,8 +622,8 @@ public class SwiftClientConfig {
 
   public WritePolicies getWritePolicy() {
     WritePolicies cur;
-    if (WritePolicies.NO_LARGE_FILE_SUPPORT.name().equalsIgnoreCase(writePolicy)) {
-      cur = WritePolicies.NO_LARGE_FILE_SUPPORT;
+    if (WritePolicies.MULTIPART_SINGLE_THREAD.name().equalsIgnoreCase(writePolicy)) {
+      cur = WritePolicies.MULTIPART_SINGLE_THREAD;
     } else if (WritePolicies.MULTIPART_NO_SPLIT.name().equalsIgnoreCase(writePolicy)) {
       cur = WritePolicies.MULTIPART_NO_SPLIT;
     } else {

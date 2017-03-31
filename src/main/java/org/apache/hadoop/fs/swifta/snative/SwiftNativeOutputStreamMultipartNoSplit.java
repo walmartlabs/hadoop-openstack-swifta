@@ -141,7 +141,6 @@ public class SwiftNativeOutputStreamMultipartNoSplit extends SwiftOutputStream {
   private void inParallelPartUpload() throws FileNotFoundException {
     long len = backupFile.length();
     long remain = len;
-    int partNumber = 0;
     long off = 0;
     int numberOfParts = (int) (len / this.filePartSize);
     numberOfParts = len % this.filePartSize > 0 ? numberOfParts + 1 : numberOfParts;
@@ -149,8 +148,7 @@ public class SwiftNativeOutputStreamMultipartNoSplit extends SwiftOutputStream {
     List<Future> uploads = new ArrayList<Future>();
     while (remain > 0) {
       long uploadLen = remain > this.filePartSize ? filePartSize : remain;
-      uploads.add(this.doUpload(tm, new RangeInputStream(new FileInputStream(backupFile), off, uploadLen, Boolean.TRUE), ++partNumber, uploadLen));
-      this.partNumber++;
+      uploads.add(this.doUpload(tm, new RangeInputStream(new FileInputStream(backupFile), off, uploadLen, Boolean.TRUE), partNumber++, uploadLen));
       off += uploadLen;
       remain -= uploadLen;
     }

@@ -33,7 +33,7 @@ public class MetricsFactory {
         metricsMap.put(name, new MetricsFactory(new OutputstreamMetrics("Total opened SwiftNativeOutputStreamMultipartNoSplit connections to cloud.")));
       } else if ("SwiftNativeOutputStreamMultipartWithSplit".equals(name)) {
         metricsMap.put(name, new MetricsFactory(new OutputstreamMetrics("Total opened SwiftNativeOutputStreamMultipartWithSplit connections to cloud.")));
-      } else if ("SwiftNativeOutputStreamNoMultiPart".equals(name)) {
+      } else if ("SwiftNativeOutputStreamMultiPartSingleThread".equals(name)) {
         metricsMap.put(name, new MetricsFactory(new OutputstreamMetrics("Total opened SwiftNativeOutputStreamNoMultiPart connections to cloud.")));
       } else {
         throw new UnsupportedOperationException("This method has not supported yet!");

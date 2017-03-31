@@ -129,8 +129,8 @@ public class SwiftNativeFileSystemStore {
         return new SwiftNativeOutputStreamMultipartNoSplit(this.conf, this, path.toUri().toString(), getPartsizeKB());
       case MULTIPART_SPLIT:
         return new SwiftNativeOutputStreamMultipartWithSplit(this.conf, this, path.toUri().toString(), getPartsizeKB(), getOutputBufferSize());
-      case NO_LARGE_FILE_SUPPORT:
-        return new SwiftNativeOutputStreamNoMultiPart(this.conf, this, path.toUri().toString(), getPartsizeKB());
+      case MULTIPART_SINGLE_THREAD:
+        return new SwiftNativeOutputStreamMultiPartSingleThread(this.conf, this, path.toUri().toString(), getPartsizeKB());
       default:
         return new SwiftNativeOutputStreamMultipartWithSplit(this.conf, this, path.toUri().toString(), getPartsizeKB(), getOutputBufferSize());
     }
@@ -215,7 +215,7 @@ public class SwiftNativeFileSystemStore {
       pathString = pathString.substring(1);
     }
     if (LOG.isDebugEnabled()) {
-      LOG.debug("Final writes manifest for header path:" + pathString);
+      LOG.debug("Final writes x-object-manifest for header path:" + pathString);
     }
     swiftRestClient.upload(p, new ByteArrayInputStream(zeroByte), 0, new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString));
   }
@@ -817,6 +817,9 @@ public class SwiftNativeFileSystemStore {
     final SwiftFileStatus srcMetadata;
     srcMetadata = getObjectMetadata(src);
     boolean isPartFile = srcMetadata.isPartitionedFile();
+    if (LOG.isDebugEnabled()) {
+      LOG.debug(src.toUri().getPath() + ": Is a partition file? " + isPartFile + "; moving to " + dst.toUri().getPath());
+    }
     SwiftFileStatus dstMetadata;
     try {
       dstMetadata = getObjectMetadata(dst);

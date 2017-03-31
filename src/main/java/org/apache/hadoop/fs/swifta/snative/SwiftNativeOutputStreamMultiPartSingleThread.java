@@ -17,7 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftException;
-import org.apache.hadoop.fs.swifta.exceptions.SwiftUnsupportedFeatureException;
+import org.apache.hadoop.fs.swifta.exceptions.SwiftInternalStateException;
 import org.apache.hadoop.fs.swifta.metrics.MetricsFactory;
 import org.apache.hadoop.fs.swifta.util.SwiftUtils;
 
@@ -32,9 +32,9 @@ import java.io.OutputStream;
  * Output stream, buffers data on local disk. Writes to Swift on the close() method, unless the file is significantly large that it is being written as partitions. In this case, the first partition is
  * written on the first write that puts data over the partition, as may later writes. The close() then causes the final partition to be written, along with a partition manifest.
  */
-public class SwiftNativeOutputStreamNoMultiPart extends SwiftOutputStream {
-  private static final Log LOG = LogFactory.getLog(SwiftNativeOutputStreamNoMultiPart.class);
-  private static final MetricsFactory metric = MetricsFactory.getMetricsFactory(SwiftNativeOutputStreamNoMultiPart.class);
+public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStream {
+  private static final Log LOG = LogFactory.getLog(SwiftNativeOutputStreamMultiPartSingleThread.class);
+  private static final MetricsFactory metric = MetricsFactory.getMetricsFactory(SwiftNativeOutputStreamMultiPartSingleThread.class);
 
   public static final int ATTEMPT_LIMIT = 3;
   private long filePartSize;
@@ -60,7 +60,7 @@ public class SwiftNativeOutputStreamNoMultiPart extends SwiftOutputStream {
    * @param partSizeKB the partition size
    * @throws IOException
    */
-  public SwiftNativeOutputStreamNoMultiPart(Configuration conf, SwiftNativeFileSystemStore nativeStore, String key, long partSizeKB) throws IOException {
+  public SwiftNativeOutputStreamMultiPartSingleThread(Configuration conf, SwiftNativeFileSystemStore nativeStore, String key, long partSizeKB) throws IOException {
     this.conf = conf;
     this.key = key;
     this.backupFile = newBackupFile();
@@ -204,8 +204,21 @@ public class SwiftNativeOutputStreamNoMultiPart extends SwiftOutputStream {
     SwiftUtils.debug(LOG, " write(offset=%d, len=%d)", offset, len);
 
     // if the size of file is greater than the partition limit
-    if (blockOffset + len >= filePartSize) {
-      throw new SwiftUnsupportedFeatureException("The file is large than expected, please try to use a different write policy. File len is " + len);
+    while (blockOffset + len >= filePartSize) {
+      // - then partition the blob and upload as many partitions
+      // are needed.
+      // how many bytes to write for this partition.
+      int subWriteLen = (int) (filePartSize - blockOffset);
+      if (subWriteLen < 0 || subWriteLen > len) {
+        throw new SwiftInternalStateException("Invalid subwrite len: " + subWriteLen + " -buffer len: " + len);
+      }
+      writeToBackupStream(buffer, offset, subWriteLen);
+      // move the offset along and length down
+      offset += subWriteLen;
+      len -= subWriteLen;
+      // now upload the partition that has just been filled up
+      // (this also sets blockOffset=0)
+      partUpload(false);
     }
     // any remaining data is now written
     writeToBackupStream(buffer, offset, len);

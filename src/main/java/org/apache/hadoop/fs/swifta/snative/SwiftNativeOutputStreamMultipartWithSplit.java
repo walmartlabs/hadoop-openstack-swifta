@@ -106,6 +106,11 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
     backupFiles = new ConcurrentLinkedQueue<BackupFile>();
     newDir = new File(dir, backupDir);
     newDir.deleteOnExit();
+    if (!newDir.exists()) {
+      if (!newDir.mkdirs() && !newDir.exists()) {
+        throw new SwiftException("Cannot create Swift buffer directory: " + dir);
+      }
+    }
     this.openForWrite(partNumber.getAndIncrement());
     uploads = new ArrayList<Future>();
     closes = new ArrayList<Future>();
@@ -130,11 +135,6 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
 
   private File newBackupFile(int partNumber) throws IOException {
 
-    if (!newDir.exists()) {
-      if (!newDir.mkdirs() && !newDir.exists()) {
-        throw new SwiftException("Cannot create Swift buffer directory: " + dir);
-      }
-    }
     String file = SwiftUtils.partitionFilenameFromNumber(partNumber);
     if (LOG.isDebugEnabled()) {
       LOG.debug("Temporary file:" + newDir + "/" + file);
@@ -383,10 +383,6 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
    * @throws IOException backup stream write failing
    */
   private void autoWriteToSplittedBackupStream(byte[] buffer, int offset, int len) throws IOException {
-    if (len <= 0) {
-      // no remainder -downgrade to noop
-      return;
-    }
 
     while (len > 0) {
       if ((blockOffset + len) >= filePartSize) {
@@ -397,7 +393,7 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
         len -= subLen;
         bytesWritten += subLen;
         blockOffset = 0;
-        partUpload = true;
+        partUpload = Boolean.TRUE;
         this.openForWrite(partNumber.getAndIncrement());
 
       } else {
@@ -410,7 +406,7 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
     /**
      * No race condition here. Upload files ahead if need.
      */
-    if (partUpload && uploadThread == null) {
+    if (uploadThread == null && partUpload) {
       uploadThread = new AsynchronousUpload(backupFiles, this);
       uploadThread.start();
     }

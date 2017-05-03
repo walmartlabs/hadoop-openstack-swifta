@@ -22,8 +22,7 @@ public class SwiftConnectionException extends SwiftException {
 
   private static final long serialVersionUID = 3707242425477309599L;
 
-  public SwiftConnectionException() {
-  }
+  public SwiftConnectionException() {}
 
   public SwiftConnectionException(String message) {
     super(message);

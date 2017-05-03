@@ -1,19 +1,16 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.apache.hadoop.fs.swifta.http;
@@ -40,8 +37,7 @@ import java.io.IOException;
 import java.net.URI;
 
 public class TestSwiftRestClient implements SwiftTestConstants {
-  private static final Log LOG =
-          LogFactory.getLog(TestSwiftRestClient.class);
+  private static final Log LOG = LogFactory.getLog(TestSwiftRestClient.class);
 
   private Configuration conf;
   private boolean runTests;
@@ -88,29 +84,25 @@ public class TestSwiftRestClient implements SwiftTestConstants {
     byte[] stuff = new byte[1];
     stuff[0] = 'a';
     client.upload(sobject, new ByteArrayInputStream(stuff), stuff.length);
-    //check file exists
+    // check file exists
     Duration head = new Duration();
-    Header[] responseHeaders = client.headRequest("expect success",
-                                                  sobject,
-                                                  SwiftRestClient.NEWEST);
+    Header[] responseHeaders =
+        client.headRequest("expect success", sobject, SwiftRestClient.NEWEST);
     head.finished();
     LOG.info("head request duration " + head);
-    for (Header header: responseHeaders) {
+    for (Header header : responseHeaders) {
       LOG.info(header.toString());
     }
-    //delete the file
+    // delete the file
     client.delete(sobject);
-    //check file is gone
+    // check file is gone
     try {
-      Header[] headers = client.headRequest("expect fail",
-                                            sobject,
-                                            SwiftRestClient.NEWEST);
-      Assert.fail("Expected deleted file, but object is still present: "
-                  + sobject);
+      Header[] headers = client.headRequest("expect fail", sobject, SwiftRestClient.NEWEST);
+      Assert.fail("Expected deleted file, but object is still present: " + sobject);
     } catch (FileNotFoundException e) {
-      //expected
+      // expected
     }
-    for (DurationStats stats: client.getOperationStatistics()) {
+    for (DurationStats stats : client.getOperationStatistics()) {
       LOG.info(stats);
     }
   }

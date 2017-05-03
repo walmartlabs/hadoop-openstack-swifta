@@ -593,15 +593,6 @@ public class SwiftNativeFileSystemStore {
     return objects;
   }
 
-  private static boolean extractDigits(final String in) {
-    final Pattern p = Pattern.compile("^(\\d{6})$");
-    final Matcher m = p.matcher(in);
-    if (m.find()) {
-      return true;
-    }
-    return false;
-  }
-
   /**
    * List all elements in this directory.
    *

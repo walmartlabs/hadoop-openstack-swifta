@@ -20,7 +20,7 @@ package org.apache.hadoop.fs.swifta.auth;
  * RENAME OR MODIFY FIELDS AND THEIR ACCESSORS.
  */
 public class Roles {
-  
+
   /**
    * The role name.
    */

@@ -1,16 +1,12 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
- * agreements. See the NOTICE file distributed with this work for additional information regarding
- * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License. You may obtain a
- * copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
+ * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package org.apache.hadoop.fs.swifta.http;
@@ -96,8 +92,7 @@ import java.util.List;
  * <p>
  * The core actions put, get and query data in the Swift object store, after authenticationg the client.
  * </p>
- * <b>Logging:</b>
- * Logging at DEBUG level displays detail about the actions of this client, including HTTP requests and responses -excluding authentication details.
+ * <b>Logging:</b> Logging at DEBUG level displays detail about the actions of this client, including HTTP requests and responses -excluding authentication details.
  */
 public final class SwiftRestClient {
 
@@ -226,7 +221,7 @@ public final class SwiftRestClient {
       return new GetMethod(uri);
     }
   }
-  
+
   private abstract static class GetMethodProcessor<R> extends HttpMethodProcessor<GetMethod, R> {
     @Override
     protected final GetMethod doCreateMethod(String uri) {
@@ -393,7 +388,7 @@ public final class SwiftRestClient {
     preRemoteCommand("getData");
     return getData(pathToUri(path), offset, length);
   }
-  
+
   /**
    * Get the path contents as an input stream. <b>Warning:</b> this input stream must be closed to avoid keeping Http connections open.
    *
@@ -407,7 +402,7 @@ public final class SwiftRestClient {
     preRemoteCommand("getData");
     return getData(pathToUri(path), requestHeaders);
   }
-  
+
   /**
    * Get the path contents as an input stream. <b>Warning:</b> this input stream must be closed to avoid keeping Http connections open.
    *
@@ -836,8 +831,12 @@ public final class SwiftRestClient {
      */
     @Override
     protected int[] getAllowedStatusCodes() {
-      return new int[] {SC_OK, SC_BAD_REQUEST, SC_CREATED, SC_ACCEPTED, SC_NON_AUTHORITATIVE_INFORMATION, SC_NO_CONTENT, SC_RESET_CONTENT, SC_PARTIAL_CONTENT, SC_MULTI_STATUS, 
-          SC_UNAUTHORIZED // if request unauthorized, try another method
+      return new int[] {SC_OK, SC_BAD_REQUEST, SC_CREATED, SC_ACCEPTED, SC_NON_AUTHORITATIVE_INFORMATION, SC_NO_CONTENT, SC_RESET_CONTENT, SC_PARTIAL_CONTENT, SC_MULTI_STATUS, SC_UNAUTHORIZED // if
+                                                                                                                                                                                                // request
+                                                                                                                                                                                                // unauthorized,
+                                                                                                                                                                                                // try
+                                                                                                                                                                                                // another
+                                                                                                                                                                                                // method
       };
     }
 
@@ -1309,8 +1308,7 @@ public final class SwiftRestClient {
       }
       statusCode = execWithDebugOutput(method, client);
       retry++;
-    } 
-    while (statusCode == HttpStatus.SC_UNAUTHORIZED && retry < clientConfig.getRetryAuth());
+    } while (statusCode == HttpStatus.SC_UNAUTHORIZED && retry < clientConfig.getRetryAuth());
 
     if ((statusCode == HttpStatus.SC_UNAUTHORIZED || statusCode == HttpStatus.SC_BAD_REQUEST) && method instanceof AuthPostMethod && !useKeystoneAuthentication) {
       if (LOG.isDebugEnabled()) {

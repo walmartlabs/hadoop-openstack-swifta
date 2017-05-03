@@ -31,22 +31,25 @@ import java.net.URI;
 import java.util.Objects;
 
 /**
- * This replaces the input stream release class from JetS3t and AWS; # Failures in the constructor are relayed up instead of simply logged. # it is set up to be more robust at teardown # release logic
- * is thread safe Note that the thread safety of the inner stream contains no thread safety guarantees -this stream is not to be read across streams. The thread safety logic here is to ensure that
- * even if somebody ignores that rule, the release code does not get entered twice -and that any release in one thread is picked up by read operations in all others.
+ * This replaces the input stream release class from JetS3t and AWS; # Failures in the constructor
+ * are relayed up instead of simply logged. # it is set up to be more robust at teardown # release
+ * logic is thread safe Note that the thread safety of the inner stream contains no thread safety
+ * guarantees -this stream is not to be read across streams. The thread safety logic here is to
+ * ensure that even if somebody ignores that rule, the release code does not get entered twice -and
+ * that any release in one thread is picked up by read operations in all others.
  */
 public class HttpInputStreamWithRelease extends InputStream {
 
   private static final Log LOG = LogFactory.getLog(HttpInputStreamWithRelease.class);
   private final URI uri;
   private final HttpMethod method;
-  
+
   /**
-   * Glag to say the stream is released -volatile so that read operations
-   * pick it up even while unsynchronized.
+   * Glag to say the stream is released -volatile so that read operations pick it up even while
+   * unsynchronized.
    */
   private volatile boolean released;
-  
+
   /**
    * Volatile flag to verify that data is consumed.
    */
@@ -57,9 +60,10 @@ public class HttpInputStreamWithRelease extends InputStream {
    * Optimize performance.
    */
   private BufferedInputStream inStream;
-  
+
   /**
-   * In debug builds, this is filled in with the construction-time stack, which is then included in logs from the finalize(), method.
+   * In debug builds, this is filled in with the construction-time stack, which is then included in
+   * logs from the finalize(), method.
    */
   private final Exception constructionStack;
 
@@ -68,7 +72,8 @@ public class HttpInputStreamWithRelease extends InputStream {
    */
   private String reasonClosed = "unopened";
 
-  public HttpInputStreamWithRelease(final URI uri, final HttpMethod method, final int bufferSize) throws IOException {
+  public HttpInputStreamWithRelease(final URI uri, final HttpMethod method, final int bufferSize)
+      throws IOException {
     this.uri = uri;
     this.method = method;
     constructionStack = LOG.isDebugEnabled() ? new Exception("stack") : null;
@@ -240,6 +245,7 @@ public class HttpInputStreamWithRelease extends InputStream {
 
   @Override
   public String toString() {
-    return "HttpInputStreamWithRelease working with " + Objects.toString(uri) + " released = " + Objects.toString(released) + " dataConsumed = " + Objects.toString(dataConsumed);
+    return "HttpInputStreamWithRelease working with " + Objects.toString(uri) + " released = "
+        + Objects.toString(released) + " dataConsumed = " + Objects.toString(dataConsumed);
   }
 }

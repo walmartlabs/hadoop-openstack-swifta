@@ -42,7 +42,9 @@ public class IdleConnectionMonitorThread extends Thread {
       // Close connections that have been idle longer than 300 seconds.
       connMgr.closeIdleConnections(300000);
       if (LOG.isDebugEnabled()) {
-        LOG.debug("The total number of pooled connections " + connMgr.getConnectionsInPool() + " out of " + connMgr.getParams().getMaxTotalConnections() + "; default max connections per host "
+        LOG.debug("The total number of pooled connections " + connMgr.getConnectionsInPool()
+            + " out of " + connMgr.getParams().getMaxTotalConnections()
+            + "; default max connections per host "
             + connMgr.getParams().getDefaultMaxConnectionsPerHost());
       }
 

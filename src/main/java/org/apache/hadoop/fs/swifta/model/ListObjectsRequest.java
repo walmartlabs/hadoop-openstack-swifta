@@ -36,14 +36,16 @@ public class ListObjectsRequest {
   private ObjectsList objects;
   private volatile boolean hasRun = false;
 
-  public ListObjectsRequest(SwiftObjectPath path, boolean listDeep, boolean newest, SwiftNativeFileSystemStore store) {
+  public ListObjectsRequest(SwiftObjectPath path, boolean listDeep, boolean newest,
+      SwiftNativeFileSystemStore store) {
     this.path = path;
     this.listDeep = listDeep;
     this.newest = newest;
     this.store = store;
   }
 
-  public ListObjectsRequest(Path path, boolean listDeep, boolean newest, SwiftNativeFileSystemStore store) throws SwiftConfigurationException, SwiftException {
+  public ListObjectsRequest(Path path, boolean listDeep, boolean newest,
+      SwiftNativeFileSystemStore store) throws SwiftConfigurationException, SwiftException {
     this.path = store.toDirPath(path);
     this.listDeep = listDeep;
     this.newest = newest;
@@ -70,7 +72,8 @@ public class ListObjectsRequest {
         return null;
       }
       try {
-        objects = store.listDirectory(path, listDeep, newest, (objects == null ? null : objects.getMarker()));
+        objects = store.listDirectory(path, listDeep, newest,
+            (objects == null ? null : objects.getMarker()));
       } catch (IOException e) {
         /**
          * Fake an exception to capture the IO error.

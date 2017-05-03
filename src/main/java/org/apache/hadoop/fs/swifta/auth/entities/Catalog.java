@@ -31,15 +31,15 @@ public class Catalog {
   /**
    * List of valid swift endpoints.
    */
-  private List<Endpoint> endpoints; 
-  
+  private List<Endpoint> endpoints;
+
   /**
    * Endpoint links are additional information description which aren't used in Hadoop and Swift
    * integration scope.
    */
   @JsonProperty("endpoints_links")
   private List<Object> endpointsLinks;
-  
+
   /**
    * Openstack REST service name. In our case name = "keystone"
    */

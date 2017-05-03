@@ -22,8 +22,8 @@ import java.util.Objects;
 /**
  * Access token representation of Openstack Keystone authentication. Class holds token id, tenant
  * and expiration time. THIS FILE IS MAPPED BY JACKSON TO AND FROM JSON. DO NOT RENAME OR MODIFY
- * FIELDS AND THEIR ACCESSORS.
- * Example:
+ * FIELDS AND THEIR ACCESSORS. Example:
+ * 
  * <pre>
  * "token" : {
  *   "RAX-AUTH:authenticatedBy" : [ "APIKEY" ],
@@ -38,21 +38,21 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 
 public class AccessToken {
-  
+
   /**
    * The token expiration time.
    */
-  private String expires; 
-  
+  private String expires;
+
   /**
    * The token id.
    */
-  private String id; 
+  private String id;
 
   /**
-   * The tenant name for whom id is attached. 
+   * The tenant name for whom id is attached.
    */
-  private Tenant tenant; 
+  private Tenant tenant;
 
 
   /**

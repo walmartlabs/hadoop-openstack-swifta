@@ -51,7 +51,7 @@ public class ThreadUtils {
     thread = null;
     return isDone;
   }
-  
+
   public static int getMaxThread() {
     return Runtime.getRuntime().availableProcessors() * THREADS_PER_PROCESSOR;
   }

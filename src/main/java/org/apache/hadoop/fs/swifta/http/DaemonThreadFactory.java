@@ -24,7 +24,7 @@ public class DaemonThreadFactory implements ThreadFactory {
   public DaemonThreadFactory() {
     this(null);
   }
-  
+
   public DaemonThreadFactory(String name) {
     this.name = name;
   }

@@ -25,7 +25,7 @@ import java.util.Objects;
  * THEIR ACCESSORS.
  */
 public class ApiKeyAuthenticationRequest extends AuthenticationRequest {
-  
+
   /**
    * Credentials for login.
    */

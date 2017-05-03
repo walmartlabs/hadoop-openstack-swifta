@@ -104,6 +104,7 @@ public class User {
 
   /**
    * Set the user roles.
+   * 
    * @param roles sets user roles
    */
   public void setRoles(List<Roles> roles) {

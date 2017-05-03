@@ -31,16 +31,16 @@ import java.net.UnknownHostException;
 public class ExceptionDiags {
   private static final Log LOG = LogFactory.getLog(ExceptionDiags.class);
 
-  /** 
-   * The text to point users elsewhere: {@value}. 
+  /**
+   * The text to point users elsewhere: {@value}.
    */
   private static final String FOR_MORE_DETAILS_SEE = " For more details see:  ";
-  /** 
-   * The text included in wrapped exceptions if the host is null: {@value}. 
+  /**
+   * The text included in wrapped exceptions if the host is null: {@value}.
    */
   public static final String UNKNOWN_HOST = "(unknown)";
-  /** 
-   * Base URL of the Hadoop Wiki: {@value}. 
+  /**
+   * Base URL of the Hadoop Wiki: {@value}.
    */
   public static final String HADOOP_WIKI = "http://wiki.apache.org/hadoop/";
 

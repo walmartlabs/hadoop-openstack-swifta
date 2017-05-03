@@ -1,19 +1,16 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.apache.hadoop.fs.swifta.scale;
@@ -42,7 +39,7 @@ public class TestWriteManySmallFiles extends SwiftScaleTestBase {
     fs.listStatus(dir);
     ls1.finished();
     long count = getOperationCount();
-    SwiftTestUtils.noteAction("Beginning Write of "+ count + " files ");
+    SwiftTestUtils.noteAction("Beginning Write of " + count + " files ");
     DurationStats writeStats = new DurationStats("write");
     DurationStats readStats = new DurationStats("read");
     String format = "%08d";
@@ -55,7 +52,7 @@ public class TestWriteManySmallFiles extends SwiftScaleTestBase {
       writeStats.add(d);
       Thread.sleep(1000);
     }
-    //at this point, the directory is full.
+    // at this point, the directory is full.
     SwiftTestUtils.noteAction("Beginning ls");
 
     Duration ls2 = new Duration();
@@ -74,23 +71,17 @@ public class TestWriteManySmallFiles extends SwiftScaleTestBase {
       d.finished();
       readStats.add(d);
     }
-    //do a recursive delete
+    // do a recursive delete
     SwiftTestUtils.noteAction("Beginning delete");
     Duration rm2 = new Duration();
     fs.delete(dir, true);
     rm2.finished();
-    //print the stats
-    LOG.info(String.format("'filesystem','%s'",fs.getUri()));
+    // print the stats
+    LOG.info(String.format("'filesystem','%s'", fs.getUri()));
     LOG.info(writeStats.toString());
     LOG.info(readStats.toString());
-    LOG.info(String.format(
-      "'rm1',%d,'ls1',%d",
-      rm1.value(),
-      ls1.value()));
-    LOG.info(String.format(
-      "'rm2',%d,'ls2',%d",
-      rm2.value(),
-      ls2.value()));
+    LOG.info(String.format("'rm1',%d,'ls1',%d", rm1.value(), ls1.value()));
+    LOG.info(String.format("'rm2',%d,'ls2',%d", rm2.value(), ls2.value()));
   }
 
 }

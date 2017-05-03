@@ -81,7 +81,7 @@ public class SwiftInvalidResponseException extends SwiftConnectionException {
   }
 
   /**
-   * Build a description that includes the exception title, the URI, the message, the status code 
+   * Build a description that includes the exception title, the URI, the message, the status code
    * and any body of the response.
    * 
    * @return the string value for display

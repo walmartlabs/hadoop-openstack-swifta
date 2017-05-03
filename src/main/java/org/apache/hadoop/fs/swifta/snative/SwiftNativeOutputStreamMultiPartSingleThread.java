@@ -33,12 +33,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Output stream, buffers data on local disk. Writes to Swift on the close() method, unless the file is significantly large that it is being written as partitions. In this case, the first partition is
- * written on the first write that puts data over the partition, as may later writes. The close() then causes the final partition to be written, along with a partition manifest.
+ * Output stream, buffers data on local disk. Writes to Swift on the close() method, unless the file
+ * is significantly large that it is being written as partitions. In this case, the first partition
+ * is written on the first write that puts data over the partition, as may later writes. The close()
+ * then causes the final partition to be written, along with a partition manifest.
  */
 public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStream {
-  private static final Log LOG = LogFactory.getLog(SwiftNativeOutputStreamMultiPartSingleThread.class);
-  private static final MetricsFactory metric = MetricsFactory.getMetricsFactory(SwiftNativeOutputStreamMultiPartSingleThread.class);
+  private static final Log LOG =
+      LogFactory.getLog(SwiftNativeOutputStreamMultiPartSingleThread.class);
+  private static final MetricsFactory metric =
+      MetricsFactory.getMetricsFactory(SwiftNativeOutputStreamMultiPartSingleThread.class);
 
   public static final int ATTEMPT_LIMIT = 3;
   private long filePartSize;
@@ -64,7 +68,8 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
    * @param partSizeKb the partition size
    * @throws IOException the exception
    */
-  public SwiftNativeOutputStreamMultiPartSingleThread(Configuration conf, SwiftNativeFileSystemStore nativeStore, String key, long partSizeKb) throws IOException {
+  public SwiftNativeOutputStreamMultiPartSingleThread(Configuration conf,
+      SwiftNativeFileSystemStore nativeStore, String key, long partSizeKb) throws IOException {
     this.conf = conf;
     this.key = key;
     this.backupFile = newBackupFile();
@@ -111,7 +116,8 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
   }
 
   /**
-   * Close the stream. This will trigger the upload of all locally cached data to the remote blobstore.
+   * Close the stream. This will trigger the upload of all locally cached data to the remote
+   * blobstore.
    * 
    * @throws IOException IO problems uploading the data.
    */
@@ -143,7 +149,8 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
   }
 
   /**
-   * Upload a file when closed, either in one go, or, if the file is already partitioned, by uploading the remaining partition and a manifest.
+   * Upload a file when closed, either in one go, or, if the file is already partitioned, by
+   * uploading the remaining partition and a manifest.
    * 
    * @param keypath key as a path
    * @throws IOException IO Problems
@@ -167,7 +174,8 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
 
   private long uploadFileAttempt(Path keypath, int attempt) throws IOException {
     long uploadLen = backupFile.length();
-    SwiftUtils.debug(LOG, "Closing write of file %s;" + " localfile=%s of length %d - attempt %d", key, backupFile, uploadLen, attempt);
+    SwiftUtils.debug(LOG, "Closing write of file %s;" + " localfile=%s of length %d - attempt %d",
+        key, backupFile, uploadLen, attempt);
     FileInputStream inputStream = null;
     try {
       inputStream = new FileInputStream(backupFile);
@@ -214,7 +222,8 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
       // how many bytes to write for this partition.
       int subWriteLen = (int) (filePartSize - blockOffset);
       if (subWriteLen < 0 || subWriteLen > len) {
-        throw new SwiftInternalStateException("Invalid subwrite len: " + subWriteLen + " -buffer len: " + len);
+        throw new SwiftInternalStateException(
+            "Invalid subwrite len: " + subWriteLen + " -buffer len: " + len);
       }
       writeToBackupStream(buffer, offset, subWriteLen);
       // move the offset along and length down
@@ -256,7 +265,8 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
   }
 
   /**
-   * Upload a single partition. This deletes the local backing-file, and re-opens it to create a new one.
+   * Upload a single partition. This deletes the local backing-file, and re-opens it to create a new
+   * one.
    * 
    * @param closingUpload is this the final upload of an upload
    * @throws IOException on IO problems
@@ -302,7 +312,9 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
 
   private long uploadFilePartAttempt(int attempt) throws IOException {
     long uploadLen = backupFile.length();
-    SwiftUtils.debug(LOG, "Uploading part %d of file %s;" + " localfile=%s of length %d  - attempt %d", partNumber, key, backupFile, uploadLen, attempt);
+    SwiftUtils.debug(LOG,
+        "Uploading part %d of file %s;" + " localfile=%s of length %d  - attempt %d", partNumber,
+        key, backupFile, uploadLen, attempt);
     FileInputStream inputStream = null;
     try {
       inputStream = new FileInputStream(backupFile);
@@ -337,7 +349,8 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
   }
 
   /**
-   * Get the number of bytes written to the output stream. This should always be less than or equal to bytesUploaded.
+   * Get the number of bytes written to the output stream. This should always be less than or equal
+   * to bytesUploaded.
    * 
    * @return the number of bytes written to this stream
    */
@@ -347,7 +360,8 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
   }
 
   /**
-   * Get the number of bytes uploaded to remote Swift cluster. bytesUploaded -bytesWritten = the number of bytes left to upload.
+   * Get the number of bytes uploaded to remote Swift cluster. bytesUploaded -bytesWritten = the
+   * number of bytes left to upload.
    * 
    * @return the number of bytes written to the remote endpoint
    */
@@ -358,7 +372,10 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
 
   @Override
   public String toString() {
-    return "SwiftNativeOutputStreamNoMultiPart{" + ", key='" + key + '\'' + ", backupFile=" + backupFile + ", closed=" + closed + ", filePartSize=" + filePartSize + ", partNumber=" + partNumber
-        + ", blockOffset=" + blockOffset + ", partUpload=" + partUpload + ", nativeStore=" + nativeStore + ", bytesWritten=" + bytesWritten + ", bytesUploaded=" + bytesUploaded + '}';
+    return "SwiftNativeOutputStreamNoMultiPart{" + ", key='" + key + '\'' + ", backupFile="
+        + backupFile + ", closed=" + closed + ", filePartSize=" + filePartSize + ", partNumber="
+        + partNumber + ", blockOffset=" + blockOffset + ", partUpload=" + partUpload
+        + ", nativeStore=" + nativeStore + ", bytesWritten=" + bytesWritten + ", bytesUploaded="
+        + bytesUploaded + '}';
   }
 }

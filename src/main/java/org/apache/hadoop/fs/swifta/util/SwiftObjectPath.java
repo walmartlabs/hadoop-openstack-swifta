@@ -106,8 +106,9 @@ public final class SwiftObjectPath {
 
 
   /**
-   * Query to see if the possibleChild object is a child path of this object.
-   * The test is done by probing for the path of the this object being at the start of the second -with a trailing slash, and both containers being equal.
+   * Query to see if the possibleChild object is a child path of this object. The test is done by
+   * probing for the path of the this object being at the start of the second -with a trailing
+   * slash, and both containers being equal.
    *
    * @param possibleChild possible child dir
    * @return true iff the possibleChild is under this object
@@ -123,7 +124,8 @@ public final class SwiftObjectPath {
   }
 
   /**
-   * Create a path tuple of (container, path), where the container is chosen from the host of the URI.
+   * Create a path tuple of (container, path), where the container is chosen from the host of the
+   * URI.
    *
    * @param uri uri to start from
    * @param path path underneath
@@ -134,13 +136,16 @@ public final class SwiftObjectPath {
     return fromPath(uri, path, Boolean.FALSE);
   }
 
-  public static SwiftObjectPath fromPath(URI uri, Path path, boolean addTrailingSlash) throws SwiftConfigurationException {
+  public static SwiftObjectPath fromPath(URI uri, Path path, boolean addTrailingSlash)
+      throws SwiftConfigurationException {
     return fromPath(uri, path, addTrailingSlash, Boolean.FALSE);
   }
 
   /**
-   * Create a path tuple of (container, path), where the container is chosen from the host of the URI. A trailing slash can be added to the path. This is the point where these /-es need to be
-   * appended, because when you construct a {@link Path} instance, {@link Path#normalizePath(String, String)} is called -which strips off any trailing slash.
+   * Create a path tuple of (container, path), where the container is chosen from the host of the
+   * URI. A trailing slash can be added to the path. This is the point where these /-es need to be
+   * appended, because when you construct a {@link Path} instance,
+   * {@link Path#normalizePath(String, String)} is called -which strips off any trailing slash.
    *
    * @param uri uri to start from
    * @param path path underneath
@@ -148,7 +153,8 @@ public final class SwiftObjectPath {
    * @return a new instance.
    * @throws SwiftConfigurationException if the URI host doesn't parse into container.service
    */
-  public static SwiftObjectPath fromPath(URI uri, Path path, boolean addTrailingSlash, boolean removeTrailingSlash) throws SwiftConfigurationException {
+  public static SwiftObjectPath fromPath(URI uri, Path path, boolean addTrailingSlash,
+      boolean removeTrailingSlash) throws SwiftConfigurationException {
 
     String url = path.toUri().getPath().replaceAll(PATH_PART_PATTERN.pattern(), "");
     // add a trailing slash if needed

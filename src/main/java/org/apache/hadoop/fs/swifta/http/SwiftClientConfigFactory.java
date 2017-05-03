@@ -23,10 +23,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SwiftClientConfigFactory {
 
-  private static final Map<String, SwiftClientConfig> multiClouds = new ConcurrentHashMap<String, SwiftClientConfig>();
+  private static final Map<String, SwiftClientConfig> multiClouds =
+      new ConcurrentHashMap<String, SwiftClientConfig>();
 
 
-  public static SwiftClientConfig getInstance(String service, Configuration conf) throws SwiftConfigurationException {
+  public static SwiftClientConfig getInstance(String service, Configuration conf)
+      throws SwiftConfigurationException {
     if (multiClouds.get(service) == null) {
       synchronized (multiClouds) {
         if (multiClouds.get(service) == null) {

@@ -22,11 +22,11 @@ import java.util.Objects;
  * JACKSON TO AND FROM JSON. DO NOT RENAME OR MODIFY FIELDS AND THEIR ACCESSORS.
  */
 public class ApiKeyCredentials {
-  
+
   /**
    * The user login.
    */
-  private String username; 
+  private String username;
 
   /**
    * The API key.

@@ -23,7 +23,7 @@ import java.util.Objects;
  * THEIR ACCESSORS.
  */
 public class PasswordAuthenticationRequest extends AuthenticationRequest {
-  
+
   /**
    * Credentials for login.
    */

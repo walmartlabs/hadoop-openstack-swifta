@@ -22,7 +22,7 @@ import java.util.Objects;
  * JACKSON TO AND FROM JSON. DO NOT RENAME OR MODIFY FIELDS AND THEIR ACCESSORS.
  */
 public class PasswordCredentials {
-  
+
   /**
    * user login.
    */

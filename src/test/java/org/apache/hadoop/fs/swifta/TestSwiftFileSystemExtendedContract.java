@@ -1,19 +1,16 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.apache.hadoop.fs.swifta;
@@ -39,7 +36,7 @@ public class TestSwiftFileSystemExtendedContract extends SwiftFileSystemBaseTest
   @Test(timeout = SWIFT_TEST_TIMEOUT)
   public void testOpenNonExistingFile() throws IOException {
     final Path p = new Path("/test/testOpenNonExistingFile");
-    //open it as a file, should get FileNotFoundException
+    // open it as a file, should get FileNotFoundException
     try {
       final FSDataInputStream in = fs.open(p);
       in.close();
@@ -101,13 +98,12 @@ public class TestSwiftFileSystemExtendedContract extends SwiftFileSystemBaseTest
   @Test(timeout = SWIFT_TEST_TIMEOUT)
   public void testGetSchemeImplemented() throws Throwable {
     String scheme = fs.getScheme();
-    assertEquals(SwiftNativeFileSystem.SWIFT,scheme);
+    assertEquals(SwiftNativeFileSystem.SWIFT, scheme);
   }
 
   /**
-   * Assert that a filesystem is case sensitive.
-   * This is done by creating a mixed-case filename and asserting that
-   * its lower case version is not there.
+   * Assert that a filesystem is case sensitive. This is done by creating a mixed-case filename and
+   * asserting that its lower case version is not there.
    *
    * @throws Exception failures
    */
@@ -123,21 +119,19 @@ public class TestSwiftFileSystemExtendedContract extends SwiftFileSystemBaseTest
     out.close();
     FileStatus upperStatus = fs.getFileStatus(upper);
     assertExists("Original upper case file" + upper, upper);
-    //verify the lower-case version of the filename doesn't exist
+    // verify the lower-case version of the filename doesn't exist
     assertPathDoesNotExist("lower case file", lower);
-    //now overwrite the lower case version of the filename with a
-    //new version.
+    // now overwrite the lower case version of the filename with a
+    // new version.
     out = fs.create(lower);
     out.writeUTF("l");
     out.close();
     assertExists("lower case file", lower);
-    //verifEy the length of the upper file hasn't changed
+    // verifEy the length of the upper file hasn't changed
     assertExists("Original upper case file " + upper, upper);
     FileStatus newStatus = fs.getFileStatus(upper);
-    assertEquals("Expected status:" + upperStatus
-            + " actual status " + newStatus,
-            upperStatus.getLen(),
-            newStatus.getLen());
+    assertEquals("Expected status:" + upperStatus + " actual status " + newStatus,
+        upperStatus.getLen(), newStatus.getLen());
   }
 
 }

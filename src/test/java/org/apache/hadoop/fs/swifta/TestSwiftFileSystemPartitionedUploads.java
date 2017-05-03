@@ -1,19 +1,16 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.apache.hadoop.fs.swifta;
@@ -39,7 +36,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 /**
- * Test partitioned uploads. This is done by forcing a very small partition size and verifying that it is picked up.
+ * Test partitioned uploads. This is done by forcing a very small partition size and verifying that
+ * it is picked up.
  */
 @Ignore("Skip for test purpose.")
 public class TestSwiftFileSystemPartitionedUploads extends SwiftFileSystemBaseTest {
@@ -200,14 +198,16 @@ public class TestSwiftFileSystemPartitionedUploads extends SwiftFileSystemBaseTe
     StringBuilder listing = lsToString(parentDirListing);
     String parentDirLS = listing.toString();
     FileStatus status = fs.getFileStatus(qualifiedPath);
-    assertEquals("Length of written file " + qualifiedPath + " from status check " + status + " in dir " + listing, len, status.getLen());
+    assertEquals("Length of written file " + qualifiedPath + " from status check " + status
+        + " in dir " + listing, len, status.getLen());
     String fileInfo = qualifiedPath + "  " + status;
     assertFalse("File claims to be a directory " + fileInfo, status.isDir());
 
     FileStatus listedFileStat = resolveChild(parentDirListing, qualifiedPath);
     assertNotNull("Did not find " + path + " in " + parentDirLS, listedFileStat);
     // file is in the parent dir. Now validate it's stats
-    assertEquals("Wrong len for " + path + " in listing " + parentDirLS, len, listedFileStat.getLen());
+    assertEquals("Wrong len for " + path + " in listing " + parentDirLS, len,
+        listedFileStat.getLen());
     listedFileStat.toString();
     return status;
   }
@@ -286,11 +286,13 @@ public class TestSwiftFileSystemPartitionedUploads extends SwiftFileSystemBaseTe
     SwiftTestUtils.compareByteArrays(src, dest, len);
     // finally, check the data
     FileStatus[] stats = fs.listStatus(path);
-    assertEquals("wrong entry count in " + SwiftTestUtils.dumpStats(path.toString(), stats), expected, stats.length);
+    assertEquals("wrong entry count in " + SwiftTestUtils.dumpStats(path.toString(), stats),
+        expected, stats.length);
   }
 
   /**
-   * Test that when a partitioned file is overwritten by a smaller one, all the old partitioned files go away
+   * Test that when a partitioned file is overwritten by a smaller one, all the old partitioned
+   * files go away
    * 
    * @throws Throwable
    */

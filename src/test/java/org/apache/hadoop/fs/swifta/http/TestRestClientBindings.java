@@ -1,19 +1,16 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.apache.hadoop.fs.swifta.http;
@@ -44,13 +41,11 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_TENA
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_USERNAME_PROPERTY;
 import static org.apache.hadoop.fs.swifta.util.SwiftTestUtils.assertPropertyEquals;
 
-public class TestRestClientBindings extends Assert
-  implements SwiftTestConstants {
+public class TestRestClientBindings extends Assert implements SwiftTestConstants {
 
   private static final String SERVICE = "sname";
   private static final String CONTAINER = "cname";
-  private static final String FS_URI = "swift://"
-          + CONTAINER + "." + SERVICE + "/";
+  private static final String FS_URI = "swift://" + CONTAINER + "." + SERVICE + "/";
   private static final String AUTH_URL = "http://localhost:8080/auth";
   private static final String USER = "user";
   private static final String PASS = "pass";
@@ -67,13 +62,9 @@ public class TestRestClientBindings extends Assert
     setInstanceVal(conf, SERVICE, DOT_PASSWORD, PASS);
   }
 
-  private void setInstanceVal(Configuration conf,
-                              String host,
-                              String key,
-                              String val) {
+  private void setInstanceVal(Configuration conf, String host, String key, String val) {
     String instance = RestClientBindings.buildSwiftInstancePrefix(host);
-    String confkey = instance
-            + key;
+    String confkey = instance + key;
     conf.set(confkey, val);
   }
 
@@ -100,13 +91,13 @@ public class TestRestClientBindings extends Assert
   public void expectBindingFailure(URI fsURI, Configuration config) {
     try {
       Properties binding = RestClientBindings.bind(fsURI, config);
-      //if we get here, binding didn't fail- there is something else.
-      //list the properties but not the values.
-      StringBuilder details = new StringBuilder() ;
-      for (Object key: binding.keySet()) {
+      // if we get here, binding didn't fail- there is something else.
+      // list the properties but not the values.
+      StringBuilder details = new StringBuilder();
+      for (Object key : binding.keySet()) {
         details.append(key.toString()).append(" ");
       }
-      fail("Expected a failure, got the binding [ "+ details+"]");
+      fail("Expected a failure, got the binding [ " + details + "]");
     } catch (SwiftConfigurationException expected) {
 
     }
@@ -118,13 +109,12 @@ public class TestRestClientBindings extends Assert
   }
 
 
-/* Hadoop 2.x+ only, as conf.unset() isn't a v1 feature
-  public void testBindAgainstConfIncompleteInstance() throws Exception {
-    String instance = RestClientBindings.buildSwiftInstancePrefix(SERVICE);
-    conf.unset(instance + DOT_PASSWORD);
-    expectBindingFailure(filesysURI, conf);
-  }
-*/
+  /*
+   * Hadoop 2.x+ only, as conf.unset() isn't a v1 feature public void
+   * testBindAgainstConfIncompleteInstance() throws Exception { String instance =
+   * RestClientBindings.buildSwiftInstancePrefix(SERVICE); conf.unset(instance + DOT_PASSWORD);
+   * expectBindingFailure(filesysURI, conf); }
+   */
 
   @Test(expected = SwiftConfigurationException.class)
   public void testDottedServiceURL() throws Exception {
@@ -137,34 +127,32 @@ public class TestRestClientBindings extends Assert
   }
 
   /**
-   * inner test method that expects container extraction to fail
-   * -if not prints a meaningful error message.
+   * inner test method that expects container extraction to fail -if not prints a meaningful error
+   * message.
    *
    * @param hostname hostname to parse
    */
   private static void expectExtractContainerFail(String hostname) {
     try {
       String container = RestClientBindings.extractContainerName(hostname);
-      fail("Expected an error -got a container of '" + container
-              + "' from " + hostname);
+      fail("Expected an error -got a container of '" + container + "' from " + hostname);
     } catch (SwiftConfigurationException expected) {
-      //expected
+      // expected
     }
   }
 
   /**
-   * inner test method that expects service extraction to fail
-   * -if not prints a meaningful error message.
+   * inner test method that expects service extraction to fail -if not prints a meaningful error
+   * message.
    *
    * @param hostname hostname to parse
    */
   public static void expectExtractServiceFail(String hostname) {
     try {
       String service = RestClientBindings.extractServiceName(hostname);
-      fail("Expected an error -got a service of '" + service
-              + "' from " + hostname);
+      fail("Expected an error -got a service of '" + service + "' from " + hostname);
     } catch (SwiftConfigurationException expected) {
-      //expected
+      // expected
     }
   }
 

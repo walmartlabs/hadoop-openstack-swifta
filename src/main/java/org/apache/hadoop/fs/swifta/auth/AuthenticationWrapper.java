@@ -22,7 +22,10 @@ package org.apache.hadoop.fs.swifta.auth;
  */
 public class AuthenticationWrapper {
 
-  private AuthenticationResponse access; // authentication response field
+  /**
+   * Authentication response field.
+   */
+  private AuthenticationResponse access;
 
   /**
    * Get the access.

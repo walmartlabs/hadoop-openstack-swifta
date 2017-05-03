@@ -35,22 +35,22 @@ public class Endpoint {
   /**
    * Keystone admin URL.
    */
-  private URI adminUrl;
+  private URI adminURL;
 
   /**
    * Keystone internal URL.
    */
-  private URI internalUrl;
+  private URI internalURL;
 
   /**
    * The public accessible URL.
    */
-  private URI publicUrl;
+  private URI publicURL;
 
   /**
    * The public accessible URL#2.
    */
-  private URI publicUrl2;
+  private URI publicURL2;
 
   /**
    * The Openstack region name.
@@ -102,7 +102,7 @@ public class Endpoint {
    * @return Keystone admin URL
    */
   public URI getAdminUrl() {
-    return adminUrl;
+    return adminURL;
   }
 
   /**
@@ -111,7 +111,7 @@ public class Endpoint {
    * @param adminUrl Keystone admin URL
    */
   public void setAdminUrl(URI adminUrl) {
-    this.adminUrl = adminUrl;
+    this.adminURL = adminUrl;
   }
 
   /**
@@ -120,7 +120,7 @@ public class Endpoint {
    * @return internal Keystone URL
    */
   public URI getInternalUrl() {
-    return internalUrl;
+    return internalURL;
   }
 
   /**
@@ -129,7 +129,7 @@ public class Endpoint {
    * @param internalUrl Keystone internal URL
    */
   public void setInternalUrl(URI internalUrl) {
-    this.internalUrl = internalUrl;
+    this.internalURL = internalUrl;
   }
 
   /**
@@ -138,7 +138,7 @@ public class Endpoint {
    * @return public accessible URL
    */
   public URI getPublicUrl() {
-    return publicUrl;
+    return publicURL;
   }
 
   /**
@@ -147,15 +147,15 @@ public class Endpoint {
    * @param publicUrl public URL
    */
   public void setPublicUrl(URI publicUrl) {
-    this.publicUrl = publicUrl;
+    this.publicURL = publicUrl;
   }
 
   public URI getPublicUrl2() {
-    return publicUrl2;
+    return publicURL2;
   }
 
   public void setPublicUrl2(URI publicUrl2) {
-    this.publicUrl2 = publicUrl2;
+    this.publicURL2 = publicUrl2;
   }
 
   /**

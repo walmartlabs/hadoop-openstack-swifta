@@ -20,7 +20,7 @@ package org.apache.hadoop.fs.swifta.exceptions;
 
 /**
  * The internal state of the Swift client is wrong -presumably a sign
- * of some bug
+ * of some bug.
  */
 public class SwiftInternalStateException extends SwiftException {
 

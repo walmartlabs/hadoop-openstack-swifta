@@ -70,8 +70,8 @@ public final class RestClientBindings {
     return SWIFT_SERVICE_PREFIX + service;
   }
 
-  public static Properties bind(URI fsURI, Configuration conf) throws SwiftConfigurationException {
-    String host = fsURI.getHost();
+  public static Properties bind(URI fsUri, Configuration conf) throws SwiftConfigurationException {
+    String host = fsUri.getHost();
     if (host == null || host.isEmpty()) {
       // expect shortnames -> conf names
       throw invalidName(host);
@@ -125,8 +125,8 @@ public final class RestClientBindings {
    */
   private static void copyBool(Configuration conf, String confKey, Properties props,
       String propsKey, boolean defVal) {
-    boolean b = conf.getBoolean(confKey, defVal);
-    props.setProperty(propsKey, Boolean.toString(b));
+    boolean bool = conf.getBoolean(confKey, defVal);
+    props.setProperty(propsKey, Boolean.toString(bool));
   }
 
   private static void set(Properties props, String key, String optVal) {
@@ -164,19 +164,19 @@ public final class RestClientBindings {
   }
 
   /**
-   * Get the container name from the hostname -the single element before the first "." in the
-   * hostname
+   * Get the container name from the hostname: the single element before the first "." in the
+   * hostname.
    *
    * @param hostname hostname to split
    * @return the container
-   * @throws SwiftConfigurationException
+   * @throws SwiftConfigurationException the exception
    */
   public static String extractContainerName(String hostname) throws SwiftConfigurationException {
-    int i = hostname.indexOf(".");
-    if (i <= 0) {
+    int index = hostname.indexOf(".");
+    if (index <= 0) {
       throw invalidName(hostname);
     }
-    return hostname.substring(0, i);
+    return hostname.substring(0, index);
   }
 
   public static String extractContainerName(URI uri) throws SwiftConfigurationException {
@@ -184,7 +184,7 @@ public final class RestClientBindings {
   }
 
   /**
-   * Raise an exception for an invalid service name
+   * Raise an exception for an invalid service name.
    *
    * @param hostname hostname that was being parsed
    * @return an exception to throw
@@ -195,20 +195,20 @@ public final class RestClientBindings {
 
 
   /**
-   * Get the service name from a longer hostname string
+   * Get the service name from a longer hostname string.
    *
    * @param hostname hostname
    * @return the separated out service name
    * @throws SwiftConfigurationException if the hostname was invalid
    */
   public static String extractServiceName(String hostname) throws SwiftConfigurationException {
-    int i = hostname.indexOf(".");
-    if (i <= 0) {
+    int index = hostname.indexOf(".");
+    if (index <= 0) {
       throw invalidName(hostname);
     }
-    String service = hostname.substring(i + 1);
+    String service = hostname.substring(index + 1);
     if (service.isEmpty() || service.contains(".")) {
-      // empty service contains dots in -not currently supported
+      // empty service contains dots in - not currently supported
       throw invalidName(hostname);
     }
     return service;

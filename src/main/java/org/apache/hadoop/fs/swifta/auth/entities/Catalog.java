@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
  * agreements. See the NOTICE file distributed with this work for additional information regarding
  * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
@@ -27,16 +27,19 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 
 public class Catalog {
+
   /**
-   * List of valid swift endpoints
+   * List of valid swift endpoints.
    */
-  private List<Endpoint> endpoints;
+  private List<Endpoint> endpoints; 
+  
   /**
-   * endpoint links are additional information description which aren't used in Hadoop and Swift
-   * integration scope
+   * Endpoint links are additional information description which aren't used in Hadoop and Swift
+   * integration scope.
    */
   @JsonProperty("endpoints_links")
   private List<Object> endpointsLinks;
+  
   /**
    * Openstack REST service name. In our case name = "keystone"
    */
@@ -48,6 +51,8 @@ public class Catalog {
   private String type;
 
   /**
+   * Get the list of endpoints.
+   * 
    * @return List of endpoints
    */
   public List<Endpoint> getEndpoints() {
@@ -55,6 +60,8 @@ public class Catalog {
   }
 
   /**
+   * Set the list of endpoints.
+   * 
    * @param endpoints list of endpoints
    */
   public void setEndpoints(List<Endpoint> endpoints) {
@@ -62,6 +69,8 @@ public class Catalog {
   }
 
   /**
+   * Get the list of endpoint links.
+   * 
    * @return list of endpoint links
    */
   public List<Object> getEndpointsLinks() {
@@ -69,13 +78,17 @@ public class Catalog {
   }
 
   /**
-   * @param endpoints_links list of endpoint links
+   * Set the list of endpoint links.
+   * 
+   * @param endpointsLinks list of endpoint links
    */
   public void setEndpointsLinks(List<Object> endpointsLinks) {
     this.endpointsLinks = endpointsLinks;
   }
 
   /**
+   * Get the name of Openstack REST service.
+   * 
    * @return name of Openstack REST service
    */
   public String getName() {
@@ -83,6 +96,8 @@ public class Catalog {
   }
 
   /**
+   * Set the name of Openstack REST service.
+   * 
    * @param name of Openstack REST service
    */
   public void setName(String name) {
@@ -90,6 +105,8 @@ public class Catalog {
   }
 
   /**
+   * Get the type of Openstack REST service.
+   * 
    * @return type of Openstack REST service
    */
   public String getType() {
@@ -97,7 +114,9 @@ public class Catalog {
   }
 
   /**
-   * @param type of REST service
+   * Set the type of Openstack REST service.
+   * 
+   * @param type of Openstack REST service
    */
   public void setType(String type) {
     this.type = type;

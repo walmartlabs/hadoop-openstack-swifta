@@ -1,12 +1,16 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
- * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
- * License at
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the License for the specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.apache.hadoop.fs.swifta.snative;
@@ -48,32 +52,34 @@ import java.util.List;
  */
 public class SwiftNativeFileSystem extends FileSystem {
 
-  /** filesystem prefix: {@value} */
+  /** 
+   * Filesystem prefix: {@value}. 
+   */
   public static final String SWIFT = "swift";
   private static final Log LOG = LogFactory.getLog(SwiftNativeFileSystem.class);
 
   /**
-   * Metrics of swifta filesystem
+   * Metrics of swifta filesystem.
    */
   private static final MetricsFactory metric = MetricsFactory.getMetricsFactory(SwiftNativeFileSystem.class);
 
   /**
-   * path to user work directory for storing temporary files
+   * Path to user work directory for storing temporary files.
    */
   private Path workingDir;
 
   /**
-   * Swift URI
+   * Swift URI.
    */
   private URI uri;
 
   /**
-   * reference to swiftFileSystemStore
+   * Reference to swiftFileSystemStore.
    */
   private SwiftNativeFileSystemStore store;
 
   /**
-   * Default constructor for Hadoop
+   * Default constructor for SwiftNativeFileSystem.
    */
   public SwiftNativeFileSystem() {
     // set client in initialize()
@@ -82,14 +88,14 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * This constructor used for testing purposes
+   * This constructor is used for testing purposes.
    */
   public SwiftNativeFileSystem(SwiftNativeFileSystemStore store) {
     this.store = store;
   }
 
   /**
-   * This is for testing
+   * This is for testing.
    * 
    * @return the inner store class
    */
@@ -103,11 +109,11 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * default class initialization
+   * Default class initialization.
    *
    * @param fsuri path to Swift
    * @param conf Hadoop configuration
-   * @throws IOException
+   * @throws IOException the exception
    */
   @Override
   public void initialize(URI fsuri, Configuration conf) throws IOException {
@@ -128,6 +134,8 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
+   * Get the URI.
+   * 
    * @return path to Swift
    */
   @Override
@@ -141,7 +149,7 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * Path to user working directory
+   * Get the path to user working directory.
    *
    * @return Hadoop path
    */
@@ -151,6 +159,8 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
+   * Set the user working directory.
+   * 
    * @param dir user working directory
    */
   @Override
@@ -177,6 +187,7 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
+   * Get the default Block Size.
    * The blocksize of this filesystem is set by the property SwiftProtocolConstants.SWIFT_BLOCKSIZE;the default is the value of SwiftProtocolConstants.DEFAULT_SWIFT_BLOCKSIZE;
    * 
    * @return the blocksize for this FS.
@@ -187,14 +198,14 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * The blocksize for this filesystem.
+   * Get the blocksize for this filesystem.
    * 
    * @see #getDefaultBlockSize()
-   * @param f path of file
+   * @param file path of file
    * @return the blocksize for the path
    */
   @Override
-  public long getDefaultBlockSize(Path f) {
+  public long getDefaultBlockSize(Path file) {
     return store.getBlocksize();
   }
 
@@ -204,20 +215,20 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   @Override
-  public boolean isFile(Path f) throws IOException {
+  public boolean isFile(Path file) throws IOException {
     try {
-      FileStatus fileStatus = getFileStatus(f);
+      FileStatus fileStatus = getFileStatus(file);
       return !SwiftUtils.isDirectory(fileStatus);
     } catch (FileNotFoundException e) {
-      return false; // f does not exist
+      return false; // file does not exist
     }
   }
 
   @Override
-  public boolean isDirectory(Path f) throws IOException {
+  public boolean isDirectory(Path file) throws IOException {
 
     try {
-      FileStatus fileStatus = getFileStatus(f);
+      FileStatus fileStatus = getFileStatus(file);
       return SwiftUtils.isDirectory(fileStatus);
     } catch (FileNotFoundException e) {
       return false; // f does not exist
@@ -284,11 +295,11 @@ public class SwiftNativeFileSystem extends FileSystem {
 
     final String[] names = new String[locations.size()];
     final String[] hosts = new String[locations.size()];
-    int i = 0;
+    int index = 0;
     for (URI location : locations) {
-      hosts[i] = location.getHost();
-      names[i] = location.getAuthority();
-      i++;
+      hosts[index] = location.getHost();
+      names[index] = location.getAuthority();
+      index++;
     }
     return new BlockLocation[] {new BlockLocation(names, hosts, 0, file.getLen())};
   }
@@ -296,17 +307,17 @@ public class SwiftNativeFileSystem extends FileSystem {
   /**
    * Return an array containing hostnames, offset and size of portions of the given file. For a nonexistent file or regions, null will be returned.
    *
-   * @param p path is used to identify an FS since an FS could have another FS that it could be delegating the call to
+   * @param path path is used to identify an FS since an FS could have another FS that it could be delegating the call to
    * @param start offset into the given file
    * @param len length for which to get locations for
    */
-  public BlockLocation[] getFileBlockLocations(Path p, long start, long len) throws IOException {
-    if (p == null) {
+  public BlockLocation[] getFileBlockLocations(Path path, long start, long len) throws IOException {
+    if (path == null) {
       return null;
     }
 
     if (store.isLocationAware()) {
-      FileStatus file = getFileStatus(p);
+      FileStatus file = getFileStatus(path);
       return getFileBlockLocations(file, start, len);
     } else {
       if (start < 0 || len < 0) {
@@ -326,9 +337,7 @@ public class SwiftNativeFileSystem extends FileSystem {
   /**
    * Create the parent directories. As an optimization, the entire hierarchy of parent directories is <i>Not</i> polled. Instead the tree is walked up from the last to the first, creating directories
    * until one that exists is found.
-   *
    * This strategy means if a file is created in an existing directory, one quick poll suffices.
-   *
    * There is a big assumption here: that all parent directories of an existing directory also exists.
    * 
    * @param path path to create.
@@ -381,7 +390,7 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * internal implementation of directory creation.
+   * Internal implementation of directory creation.
    *
    * @param path path to file
    * @return boolean file is created; false: no need to create
@@ -421,7 +430,7 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * Should mkdir create this directory? If the directory is root : false If the entry exists and is a directory: false If the entry exists and is a file: exception else: true
+   * Should mkdir create this directory? If the directory is root : false If the entry exists and is a directory: false If the entry exists and is a file: exception else: true.
    * 
    * @param directory path to query
    * @return true iff the directory should be created
@@ -457,8 +466,8 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * mkdir of a directory -irrespective of what was there underneath. There are no checks for the directory existing, there not being a path there, etc. etc. Those are assumed to have taken place
-   * already
+   * Mkdir of a directory -irrespective of what was there underneath. There are no checks for the directory existing, there not being a path there, etc. etc. Those are assumed to have taken place
+   * already.
    * 
    * @param absolutePath path to create
    * @throws IOException IO problems
@@ -476,7 +485,7 @@ public class SwiftNativeFileSystem extends FileSystem {
    *
    * @param path given path
    * @return the statuses of the files/directories in the given path
-   * @throws IOException
+   * @throws IOException the exception
    */
   @Override
   public FileStatus[] listStatus(Path path) throws IOException {
@@ -493,10 +502,10 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * This optional operation is not supported
+   * This optional operation is not supported.
    */
   @Override
-  public FSDataOutputStream append(Path f, int bufferSize, Progressable progress) throws IOException {
+  public FSDataOutputStream append(Path file, int bufferSize, Progressable progress) throws IOException {
     if (LOG.isDebugEnabled()) {
       LOG.debug("SwiftFileSystem.append");
     }
@@ -504,6 +513,8 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
+   * Create a file.
+   * 
    * @param permission Currently ignored.
    */
   @Override
@@ -559,11 +570,11 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * Create the swift output stream
+   * Create the swift output stream.
    * 
    * @param path path to write to
    * @return the new file
-   * @throws IOException
+   * @throws IOException the exception
    */
   protected SwiftOutputStream createSwiftOutputStream(Path path) throws IOException {
     return getStore().createSwiftOutputStream(path);
@@ -580,13 +591,13 @@ public class SwiftNativeFileSystem extends FileSystem {
    */
   @Override
   public FSDataInputStream open(Path path, int bufferSize) throws IOException {
-    int bufferSizeKB = getStore().getBufferSizeKB();
-    long readBlockSize = bufferSizeKB * 1024L;
+    int bufferSizeKb = getStore().getBufferSizeKb();
+    long readBlockSize = bufferSizeKb * 1024L;
     return open(path, bufferSize, readBlockSize);
   }
 
   /**
-   * Low-level operation to also set the block size for this operation
+   * Low-level operation to also set the block size for this operation.
    * 
    * @param path the file name to open
    * @param bufferSize the size of the buffer to be used.
@@ -601,7 +612,7 @@ public class SwiftNativeFileSystem extends FileSystem {
     // throw new SwiftConfigurationException("Bad remote buffer size");
     // }
     Path absolutePath = makeAbsolute(path);
-    FSDataInputStream input = new FSDataInputStream(new StrictBufferedFSInputStream(new SwiftNativeInputStream(store, statistics, absolutePath), bufferSize));
+    FSDataInputStream input = new FSDataInputStream(new StrictBufferedFsInputStream(new SwiftNativeInputStream(store, statistics, absolutePath), bufferSize));
     return input;
   }
 
@@ -631,7 +642,7 @@ public class SwiftNativeFileSystem extends FileSystem {
 
 
   /**
-   * Delete a file or directory
+   * Delete a file or directory.
    *
    * @param path the path to delete.
    * @param recursive if path is a directory and set to true, the directory is deleted else throws an exception if the directory is not empty case of a file the recursive can be set to either true or
@@ -650,15 +661,15 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * Delete a file. This method is abstract in Hadoop 1.x; in 2.x+ it is non-abstract and deprecated
+   * Delete a file. This method is abstract in Hadoop 1.x; in 2.x+ it is non-abstract and deprecated.
    */
   @Override
-  public boolean delete(Path f) throws IOException {
-    return delete(f, true);
+  public boolean delete(Path file) throws IOException {
+    return delete(file, true);
   }
 
   /**
-   * Makes path absolute
+   * Makes the absolute path.
    *
    * @param path path to file
    * @return absolute path
@@ -671,7 +682,7 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * Get the current operation statistics
+   * Get the current operation statistics.
    * 
    * @return a snapshot of the statistics
    */
@@ -680,7 +691,7 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * Low level method to do a deep listing of all entries, not stopping at the next directory entry. This is to let tests be confident that recursive deletes &c really are working.
+   * Low level method to do a deep listing of all entries, not stopping at the next directory entry. This is to let tests be confident that recursive deletes really are working.
    * 
    * @param path path to recurse down
    * @param newest ask for the newest data, potentially slower than not.
@@ -699,11 +710,11 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * Get the number of partitions written by an output stream This is for testing
+   * Get the number of partitions written by an output stream. This is for testing.
    * 
    * @param outputStream output stream
    * @return the #of partitions written by that stream
-   * @throws SwiftUnsupportedFeatureException
+   * @throws SwiftUnsupportedFeatureException the exception
    */
   @InterfaceAudience.Private
   public static int getPartitionsWritten(FSDataOutputStream outputStream) throws SwiftUnsupportedFeatureException {
@@ -717,11 +728,11 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * Get the size of partitions written by an output stream This is for testing
+   * Get the size of partitions written by an output stream. This is for testing.
    *
    * @param outputStream output stream
    * @return partition size in bytes
-   * @throws SwiftUnsupportedFeatureException
+   * @throws SwiftUnsupportedFeatureException the exception
    */
   @InterfaceAudience.Private
   public static long getPartitionSize(FSDataOutputStream outputStream) throws SwiftUnsupportedFeatureException {
@@ -730,11 +741,11 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * Get the the number of bytes written to an output stream This is for testing
+   * Get the the number of bytes written to an output stream. This is for testing.
    *
    * @param outputStream output stream
    * @return partition size in bytes
-   * @throws SwiftUnsupportedFeatureException
+   * @throws SwiftUnsupportedFeatureException the exception
    */
   @InterfaceAudience.Private
   public static long getBytesWritten(FSDataOutputStream outputStream) throws SwiftUnsupportedFeatureException {
@@ -743,12 +754,14 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   /**
-   * Get the the number of bytes uploaded by an output stream to the swift cluster. This is for testing
+   * Get the the number of bytes uploaded by an output stream to the swift cluster. This is for testing.
    *
    * @param outputStream output stream
    * @return partition size in bytes
-   * @throws SwiftUnsupportedFeatureException
+   * @throws SwiftUnsupportedFeatureException the exception
+   * 
    */
+  
   @InterfaceAudience.Private
   public static long getBytesUploaded(FSDataOutputStream outputStream) throws SwiftUnsupportedFeatureException {
     SwiftOutputStream snos = getSwiftOutputStream(outputStream);

@@ -21,17 +21,20 @@ package org.apache.hadoop.fs.swifta.auth;
  * ACCESSORS.
  */
 public class AuthenticationRequestWrapper {
+  
   /**
-   * authentication request
+   * Authentication request.
    */
-  private AuthenticationRequest auth;
+  private AuthenticationRequest auth; 
 
   /**
-   * default constructor used for json parsing
+   * Default constructor.
    */
   public AuthenticationRequestWrapper() {}
 
   /**
+   * Constructor for AuthenticationRequestWrapper.
+   * 
    * @param auth authentication requests
    */
   public AuthenticationRequestWrapper(AuthenticationRequest auth) {
@@ -39,6 +42,8 @@ public class AuthenticationRequestWrapper {
   }
 
   /**
+   * Get the authentication request.
+   * 
    * @return authentication request
    */
   public AuthenticationRequest getAuth() {
@@ -46,6 +51,8 @@ public class AuthenticationRequestWrapper {
   }
 
   /**
+   * Set the authentication request.
+   * 
    * @param auth authentication request
    */
   public void setAuth(AuthenticationRequest auth) {

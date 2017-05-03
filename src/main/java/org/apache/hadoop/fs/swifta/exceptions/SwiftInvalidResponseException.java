@@ -81,15 +81,16 @@ public class SwiftInvalidResponseException extends SwiftConnectionException {
   }
 
   /**
-   * Build a description that includes the exception title, the URI, the message, the status code
-   * -and any body of the response
+   * Build a description that includes the exception title, the URI, the message, the status code 
+   * and any body of the response.
    * 
    * @return the string value for display
    */
   @Override
   public String toString() {
-    if (body == null)
+    if (body == null) {
       body = "";
+    }
     StringBuilder msg = new StringBuilder(128 + body.length());
     msg.append(exceptionTitle());
     msg.append(": ");

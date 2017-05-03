@@ -1,12 +1,16 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
- * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
- * License at
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the License for the specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.apache.hadoop.fs.swifta.snative;
@@ -146,9 +150,9 @@ class SwiftNativeInputStream extends FSInputStream {
   }
 
   @Override
-  public synchronized int read(byte[] b, int off, int len) throws IOException {
+  public synchronized int read(byte[] bytes, int off, int len) throws IOException {
     SwiftUtils.debug(LOG, "read(buffer, %d, %d)", off, len);
-    SwiftUtils.validateReadArgs(b, off, len);
+    SwiftUtils.validateReadArgs(bytes, off, len);
     int result = -1;
     if (this.contentLength == 0 || nextReadPosition >= contentLength) {
       return result;
@@ -158,13 +162,13 @@ class SwiftNativeInputStream extends FSInputStream {
       if (isLazy) {
         seekStream(nextReadPosition);
       }
-      result = httpStream.read(b, off, len);
+      result = httpStream.read(bytes, off, len);
     } catch (IOException e) {
       // other IO problems are viewed as transient and re-attempted
       LOG.info("Received IOException while reading '" + path + "', attempting to reopen: " + e);
       LOG.debug("IOE on read()" + e, e);
       if (reopenBuffer()) {
-        result = httpStream.read(b, off, len);
+        result = httpStream.read(bytes, off, len);
       }
     }
     if (result > 0) {
@@ -225,7 +229,7 @@ class SwiftNativeInputStream extends FSInputStream {
   /**
    * Assume that the connection is not closed: throws an exception if it is.
    * 
-   * @throws SwiftConnectionClosedException
+   * @throws SwiftConnectionClosedException the exception
    */
   private void verifyOpen() throws SwiftConnectionClosedException {
     if (httpStream == null) {
@@ -339,7 +343,7 @@ class SwiftNativeInputStream extends FSInputStream {
   /**
    * Lazy seek.
    * 
-   * @throws IOException
+   * @throws IOException the exception.
    */
   private synchronized void seekStream(long targetPos) throws IOException {
     if (targetPos == pos) {

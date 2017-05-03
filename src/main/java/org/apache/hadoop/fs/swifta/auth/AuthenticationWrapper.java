@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
  * agreements. See the NOTICE file distributed with this work for additional information regarding
  * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
@@ -22,12 +22,11 @@ package org.apache.hadoop.fs.swifta.auth;
  */
 public class AuthenticationWrapper {
 
-  /**
-   * authentication response field
-   */
-  private AuthenticationResponse access;
+  private AuthenticationResponse access; // authentication response field
 
   /**
+   * Get the access.
+   * 
    * @return authentication response
    */
   public AuthenticationResponse getAccess() {
@@ -35,6 +34,8 @@ public class AuthenticationWrapper {
   }
 
   /**
+   * Set the access.
+   * 
    * @param access sets authentication response
    */
   public void setAccess(AuthenticationResponse access) {

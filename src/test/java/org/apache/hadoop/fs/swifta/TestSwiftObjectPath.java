@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.hadoop.fs.swifta;
 
 import org.apache.commons.logging.Log;
@@ -91,7 +92,7 @@ public class TestSwiftObjectPath implements SwiftTestConstants {
     SwiftObjectPath objectPath = SwiftObjectPath.fromPath(new URI(initialpath),
             ipath);
     URI endpoint = new URI(ENDPOINT);
-    URI uri = SwiftRestClient.pathToURI(objectPath, endpoint);
+    URI uri = SwiftRestClient.pathToUri(objectPath, endpoint);
     LOG.info("Inital Hadoop Path =" + initialpath);
     LOG.info("Merged URI=" + uri);
   }

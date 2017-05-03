@@ -22,22 +22,25 @@ import java.util.Objects;
  * JACKSON TO AND FROM JSON. DO NOT RENAME OR MODIFY FIELDS AND THEIR ACCESSORS.
  */
 public class ApiKeyCredentials {
+  
   /**
-   * user login
+   * The user login.
    */
-  private String username;
+  private String username; 
 
   /**
-   * user password
+   * The API key.
    */
   private String apikey;
 
   /**
-   * default constructor
+   * Default constructor.
    */
   public ApiKeyCredentials() {}
 
   /**
+   * The constructor for API key credentials.
+   * 
    * @param username user login
    * @param apikey user api key
    */
@@ -47,6 +50,8 @@ public class ApiKeyCredentials {
   }
 
   /**
+   * Get the API key.
+   * 
    * @return user api key
    */
   public String getApiKey() {
@@ -54,6 +59,8 @@ public class ApiKeyCredentials {
   }
 
   /**
+   * Set the API key.
+   * 
    * @param apikey user api key
    */
   public void setApiKey(String apikey) {
@@ -61,6 +68,8 @@ public class ApiKeyCredentials {
   }
 
   /**
+   * Get the user login.
+   * 
    * @return login
    */
   public String getUsername() {
@@ -68,6 +77,8 @@ public class ApiKeyCredentials {
   }
 
   /**
+   * Set the user login.
+   * 
    * @param username login
    */
   public void setUsername(String username) {

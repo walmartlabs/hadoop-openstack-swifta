@@ -24,12 +24,12 @@ import java.util.Objects;
 public class KeystoneApiKeyCredentials {
 
   /**
-   * User access key
+   * User access key.
    */
   private String accessKey;
 
   /**
-   * User access secret
+   * User secret key.
    */
   private String secretKey;
 

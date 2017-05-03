@@ -12,10 +12,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.apache.hadoop.fs.swifta.exceptions;
 
 /**
- * Exception raised when an attempt is made to use a closed stream
+ * Exception raised when an attempt is made to use a closed stream.
  */
 public class SwiftConnectionClosedException extends SwiftException {
 

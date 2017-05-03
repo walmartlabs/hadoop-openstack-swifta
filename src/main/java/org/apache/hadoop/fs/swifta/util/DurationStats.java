@@ -21,7 +21,7 @@ package org.apache.hadoop.fs.swifta.util;
 public class DurationStats {
 
   final String operation;
-  int n;
+  int num;
   long sum;
   long min;
   long max;
@@ -45,7 +45,7 @@ public class DurationStats {
    */
   public DurationStats(DurationStats that) {
     operation = that.operation;
-    n = that.n;
+    num = that.num;
     sum = that.sum;
     min = that.min;
     max = that.max;
@@ -65,19 +65,19 @@ public class DurationStats {
   /**
    * Add a number.
    * 
-   * @param x the number
+   * @param value the number
    */
-  public void add(long x) {
-    n++;
-    sum += x;
-    double delta = x - mean;
-    mean += delta / n;
-    m2 += delta * (x - mean);
-    if (x < min) {
-      min = x;
+  public void add(long value) {
+    num++;
+    sum += value;
+    double delta = value - mean;
+    mean += delta / num;
+    m2 += delta * (value - mean);
+    if (value < min) {
+      min = value;
     }
-    if (x > max) {
-      max = x;
+    if (value > max) {
+      max = value;
     }
   }
 
@@ -85,7 +85,7 @@ public class DurationStats {
    * Reset the data.
    */
   public void reset() {
-    n = 0;
+    num = 0;
     sum = 0;
     sum = 0;
     min = 10000000;
@@ -100,7 +100,7 @@ public class DurationStats {
    * @return the number of durations added
    */
   public int getCount() {
-    return n;
+    return num;
   }
 
   /**
@@ -127,7 +127,7 @@ public class DurationStats {
    * @return variance, or, if no samples are there, 0.
    */
   public double getVariance() {
-    return n > 0 ? (m2 / (n - 1)) : 0;
+    return num > 0 ? (m2 / (num - 1)) : 0;
   }
 
   /**
@@ -148,7 +148,7 @@ public class DurationStats {
   @Override
   public String toString() {
     return String.format("%s count=%d total=%.3fs mean=%.3fs stddev=%.3fs min=%.3fs max=%.3fs",
-        operation, n, sum / 1000.0, mean / 1000.0, getDeviation() / 1000000.0, min / 1000.0,
+        operation, num, sum / 1000.0, mean / 1000.0, getDeviation() / 1000000.0, min / 1000.0,
         max / 1000.0);
   }
 

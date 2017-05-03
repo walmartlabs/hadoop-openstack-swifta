@@ -22,16 +22,17 @@ import java.util.Objects;
 /**
  * Class that represents authentication request to Openstack Keystone. Contains basic authentication
  * information. THIS FILE IS MAPPED BY JACKSON TO AND FROM JSON. DO NOT RENAME OR MODIFY FIELDS AND
- * THEIR ACCESSORS
+ * THEIR ACCESSORS.
  */
 public class ApiKeyAuthenticationRequest extends AuthenticationRequest {
+  
   /**
-   * Credentials for login
+   * Credentials for login.
    */
   private ApiKeyCredentials apiKeyCredentials;
 
   /**
-   * API key auth
+   * The constructor for API key auth.
    * 
    * @param tenantName tenant
    * @param apiKeyCredentials credentials
@@ -42,6 +43,8 @@ public class ApiKeyAuthenticationRequest extends AuthenticationRequest {
   }
 
   /**
+   * Get API key credentials.
+   * 
    * @return credentials for login into Keystone
    */
   @JsonProperty("RAX-KSKEY:apiKeyCredentials")
@@ -50,6 +53,8 @@ public class ApiKeyAuthenticationRequest extends AuthenticationRequest {
   }
 
   /**
+   * Set API key credentials.
+   * 
    * @param apiKeyCredentials credentials for login into Keystone
    */
   public void setApiKeyCredentials(ApiKeyCredentials apiKeyCredentials) {

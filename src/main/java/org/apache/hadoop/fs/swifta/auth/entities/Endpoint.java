@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
  * agreements. See the NOTICE file distributed with this work for additional information regarding
  * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
@@ -28,64 +28,68 @@ import java.net.URI;
 public class Endpoint {
 
   /**
-   * endpoint id.
+   * The endpoint id.
    */
   private String id;
 
   /**
    * Keystone admin URL.
    */
-  private URI adminURL;
+  private URI adminUrl;
 
   /**
    * Keystone internal URL.
    */
-  private URI internalURL;
+  private URI internalUrl;
 
   /**
-   * public accessible URL.
+   * The public accessible URL.
    */
-  private URI publicURL;
+  private URI publicUrl;
 
   /**
-   * public accessible URL#2.
+   * The public accessible URL#2.
    */
-  private URI publicURL2;
+  private URI publicUrl2;
 
   /**
-   * Openstack region name.
+   * The Openstack region name.
    */
   private String region;
 
   /**
-   * This field is used in RackSpace authentication model.
+   * The field tenantId used in the RackSpace authentication model.
    */
   private String tenantId;
 
   /**
-   * This field user in RackSpace auth model.
+   * This field versionId in the RackSpace authentication model.
    */
   private String versionId;
 
   /**
-   * This field user in RackSpace auth model.
+   * This field versionInfo in the RackSpace authentication model.
    */
   private String versionInfo;
 
   /**
-   * This field user in RackSpace auth model.
+   * This field user in the RackSpace authentication model.
    */
   private String versionList;
 
 
   /**
-   * @return endpoint id.
+   * Get the endpoint id.
+   * 
+   * @return endpoint id
    */
   public String getId() {
     return id;
   }
 
   /**
+   * Set the endpoint id.
+   * 
    * @param id endpoint id
    */
   public void setId(String id) {
@@ -93,56 +97,70 @@ public class Endpoint {
   }
 
   /**
+   * Get the Keystone admin URL.
+   * 
    * @return Keystone admin URL
    */
-  public URI getAdminURL() {
-    return adminURL;
+  public URI getAdminUrl() {
+    return adminUrl;
   }
 
   /**
-   * @param adminURL Keystone admin URL
+   * Set the Keystone admin URL.
+   * 
+   * @param adminUrl Keystone admin URL
    */
-  public void setAdminURL(URI adminURL) {
-    this.adminURL = adminURL;
+  public void setAdminUrl(URI adminUrl) {
+    this.adminUrl = adminUrl;
   }
 
   /**
-   * @return internal Keystone
+   * Get the internal Keystone URL.
+   * 
+   * @return internal Keystone URL
    */
-  public URI getInternalURL() {
-    return internalURL;
+  public URI getInternalUrl() {
+    return internalUrl;
   }
 
   /**
-   * @param internalURL Keystone internal URL
+   * Set the internal Keystone URL.
+   * 
+   * @param internalUrl Keystone internal URL
    */
-  public void setInternalURL(URI internalURL) {
-    this.internalURL = internalURL;
+  public void setInternalUrl(URI internalUrl) {
+    this.internalUrl = internalUrl;
   }
 
   /**
+   * Get the public accessible URL.
+   * 
    * @return public accessible URL
    */
-  public URI getPublicURL() {
-    return publicURL;
+  public URI getPublicUrl() {
+    return publicUrl;
   }
 
   /**
-   * @param publicURL public URL
+   * Set the public accessible URL.
+   * 
+   * @param publicUrl public URL
    */
-  public void setPublicURL(URI publicURL) {
-    this.publicURL = publicURL;
+  public void setPublicUrl(URI publicUrl) {
+    this.publicUrl = publicUrl;
   }
 
-  public URI getPublicURL2() {
-    return publicURL2;
+  public URI getPublicUrl2() {
+    return publicUrl2;
   }
 
-  public void setPublicURL2(URI publicURL2) {
-    this.publicURL2 = publicURL2;
+  public void setPublicUrl2(URI publicUrl2) {
+    this.publicUrl2 = publicUrl2;
   }
 
   /**
+   * Get the Openstack region name.
+   * 
    * @return Openstack region name
    */
   public String getRegion() {
@@ -150,6 +168,8 @@ public class Endpoint {
   }
 
   /**
+   * Set the Openstack region name.
+   * 
    * @param region Openstack region name
    */
   public void setRegion(String region) {

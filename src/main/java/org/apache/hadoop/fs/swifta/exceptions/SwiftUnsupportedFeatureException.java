@@ -16,7 +16,7 @@
 package org.apache.hadoop.fs.swifta.exceptions;
 
 /**
- * Exception raised on an unsupported feature in the FS API -such as <code>append()</code>
+ * Exception raised on an unsupported feature in the FS API -such as <code>append()</code>.
  */
 public class SwiftUnsupportedFeatureException extends SwiftException {
 

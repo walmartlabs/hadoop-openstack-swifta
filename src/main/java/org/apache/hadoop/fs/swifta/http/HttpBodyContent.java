@@ -12,17 +12,18 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.apache.hadoop.fs.swifta.http;
 
 /**
- * Response tuple from GET operations; combines the input stream with the content length
+ * Response tuple from GET operations; combines the input stream with the content length.
  */
 public class HttpBodyContent {
   private final long contentLength;
   private final HttpInputStreamWithRelease inputStream;
 
   /**
-   * build a body response
+   * Build a body response.
    * 
    * @param inputStream input stream from the operation
    * @param contentLength length of content; may be -1 for "don't know"

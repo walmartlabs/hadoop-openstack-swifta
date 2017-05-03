@@ -13,31 +13,29 @@
  * the License.
  */
 
-package org.apache.hadoop.fs.swifta.snative;
+package org.apache.hadoop.fs.swifta.http;
 
-import org.apache.hadoop.fs.BufferedFSInputStream;
-import org.apache.hadoop.fs.FSInputStream;
-import org.apache.hadoop.fs.swifta.exceptions.SwiftConnectionClosedException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
-import java.io.IOException;
+public class DaemonThreadFactory implements ThreadFactory {
+  private final String name;
 
-/**
- * Add stricter compliance with the evolving FS specifications
- */
-public class StrictBufferedFSInputStream extends BufferedFSInputStream {
-
-  public StrictBufferedFSInputStream(FSInputStream in, int size) {
-    super(in, size);
+  public DaemonThreadFactory() {
+    this(null);
+  }
+  
+  public DaemonThreadFactory(String name) {
+    this.name = name;
   }
 
   @Override
-  public void seek(long pos) throws IOException {
-    if (pos < 0) {
-      throw new IOException("Negative position");
+  public Thread newThread(Runnable runnable) {
+    Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+    thread.setDaemon(true);
+    if (name != null) {
+      thread.setName(name);
     }
-    if (in == null) {
-      throw new SwiftConnectionClosedException("Stream closed");
-    }
-    super.seek(pos);
+    return thread;
   }
 }

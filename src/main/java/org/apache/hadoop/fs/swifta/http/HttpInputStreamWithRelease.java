@@ -1,12 +1,16 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
- * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
- * License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the License for the specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.apache.hadoop.fs.swifta.http;
@@ -36,22 +40,31 @@ public class HttpInputStreamWithRelease extends InputStream {
   private static final Log LOG = LogFactory.getLog(HttpInputStreamWithRelease.class);
   private final URI uri;
   private final HttpMethod method;
-  // flag to say the stream is released -volatile so that read operations
-  // pick it up even while unsynchronized.
+  
+  /**
+   * Glag to say the stream is released -volatile so that read operations
+   * pick it up even while unsynchronized.
+   */
   private volatile boolean released;
-  // volatile flag to verify that data is consumed.
+  
+  /**
+   * Volatile flag to verify that data is consumed.
+   */
   private volatile boolean dataConsumed;
   private InputStream oldInStream;
 
-  // Optimize performance.
+  /**
+   * Optimize performance.
+   */
   private BufferedInputStream inStream;
+  
   /**
    * In debug builds, this is filled in with the construction-time stack, which is then included in logs from the finalize(), method.
    */
   private final Exception constructionStack;
 
   /**
-   * Why the stream is closed
+   * Why the stream is closed.
    */
   private String reasonClosed = "unopened";
 
@@ -78,7 +91,7 @@ public class HttpInputStreamWithRelease extends InputStream {
   }
 
   /**
-   * Release logic
+   * Release logic.
    * 
    * @param reason reason for release (used in debug messages)
    * @param ex exception that is a cause -null for non-exceptional releases
@@ -119,7 +132,7 @@ public class HttpInputStreamWithRelease extends InputStream {
   }
 
   /**
-   * Release the method, using the exception as a cause
+   * Release the method, using the exception as a cause.
    * 
    * @param operation operation that failed
    * @param ex the exception which triggered it.
@@ -141,9 +154,9 @@ public class HttpInputStreamWithRelease extends InputStream {
   }
 
   /**
-   * Assume that the connection is not released: throws an exception if it is
+   * Assume that the connection is not released: throws an exception if there is.
    * 
-   * @throws SwiftConnectionClosedException
+   * @throws SwiftConnectionClosedException the exception
    */
   private synchronized void assumeNotReleased() throws SwiftConnectionClosedException {
     if (released || inStream == null) {
@@ -183,15 +196,15 @@ public class HttpInputStreamWithRelease extends InputStream {
   }
 
   @Override
-  public synchronized int read(byte[] b, int off, int len) throws IOException {
+  public synchronized int read(byte[] bytes, int off, int len) throws IOException {
 
-    SwiftUtils.validateReadArgs(b, off, len);
+    SwiftUtils.validateReadArgs(bytes, off, len);
     // if the stream is already closed, then report an exception.
     assumeNotReleased();
     // now read in a buffer, reacting differently to different operations
     int read;
     try {
-      read = inStream.read(b, off, len);
+      read = inStream.read(bytes, off, len);
     } catch (EOFException e) {
       if (LOG.isDebugEnabled()) {
         LOG.debug("EOF exception " + e, e);
@@ -208,25 +221,25 @@ public class HttpInputStreamWithRelease extends InputStream {
   }
 
   /**
-   * Finalize does release the stream, but also logs at WARN level including the URI at fault
+   * Finalize does release the stream, but also logs at WARN level including the URI at fault.
    */
   @Override
   protected void finalize() throws Throwable {
     try {
       if (!released) {
         if (release("finalize()", constructionStack)) {
-          LOG.warn("input stream of " + uri + " not closed properly -cleaned up in finalize()");
+          LOG.warn("input stream of " + uri + " not closed properly cleaned up in finalize()");
         }
       }
     } catch (Exception e) {
       // swallow anything that failed here
-      LOG.warn("Exception while releasing " + uri + "in finalizer", e);
+      LOG.warn("Exception while releasing " + uri + " in finalizer", e);
     }
     super.finalize();
   }
 
   @Override
   public String toString() {
-    return "HttpInputStreamWithRelease working with " + Objects.toString(uri) + " released=" + Objects.toString(released) + " dataConsumed=" + Objects.toString(dataConsumed);
+    return "HttpInputStreamWithRelease working with " + Objects.toString(uri) + " released = " + Objects.toString(released) + " dataConsumed = " + Objects.toString(dataConsumed);
   }
 }

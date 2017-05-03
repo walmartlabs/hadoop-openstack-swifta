@@ -23,12 +23,15 @@ import java.util.Objects;
  * THEIR ACCESSORS.
  */
 public class PasswordAuthenticationRequest extends AuthenticationRequest {
+  
   /**
-   * Credentials for login
+   * Credentials for login.
    */
   private PasswordCredentials passwordCredentials;
 
   /**
+   * Constructor for password authentication request.
+   * 
    * @param tenantName tenant
    * @param passwordCredentials password credentials
    */
@@ -38,6 +41,8 @@ public class PasswordAuthenticationRequest extends AuthenticationRequest {
   }
 
   /**
+   * Get the password credentials.
+   * 
    * @return credentials for login into Keystone
    */
   public PasswordCredentials getPasswordCredentials() {
@@ -45,6 +50,8 @@ public class PasswordAuthenticationRequest extends AuthenticationRequest {
   }
 
   /**
+   * Set the password credentials.
+   * 
    * @param passwordCredentials credentials for login into Keystone
    */
   public void setPasswordCredentials(PasswordCredentials passwordCredentials) {

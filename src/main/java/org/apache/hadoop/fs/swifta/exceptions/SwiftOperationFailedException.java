@@ -17,7 +17,7 @@ package org.apache.hadoop.fs.swifta.exceptions;
 
 /**
  * Used to relay exceptions upstream from the inner implementation to the public API, where it is
- * downgraded to a log+failure. Making it visible internally aids testing
+ * downgraded to a log+failure. Making it visible internally aids testing.
  */
 public class SwiftOperationFailedException extends SwiftException {
 

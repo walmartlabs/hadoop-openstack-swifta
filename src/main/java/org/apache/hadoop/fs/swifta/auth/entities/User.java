@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
  * agreements. See the NOTICE file distributed with this work for additional information regarding
  * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
@@ -30,32 +30,34 @@ import java.util.List;
 public class User {
 
   /**
-   * user id in Keystone
+   * The user id in Keystone.
    */
   private String id;
 
   /**
-   * user human readable name
+   * The user human readable name.
    */
   private String name;
 
   /**
-   * user roles in Keystone
+   * The user roles in Keystone.
    */
   private List<Roles> roles;
 
   /**
-   * links to user roles
+   * The links to user roles.
    */
   @JsonProperty("roles_links")
   private List<Object> rolesLinks;
 
   /**
-   * human readable username in Keystone
+   * The human readable username in Keystone.
    */
   private String username;
 
   /**
+   * Get the user id.
+   * 
    * @return user id
    */
   public String getId() {
@@ -63,6 +65,8 @@ public class User {
   }
 
   /**
+   * Set the user id.
+   * 
    * @param id user id
    */
   public void setId(String id) {
@@ -71,6 +75,8 @@ public class User {
 
 
   /**
+   * Get the user name.
+   * 
    * @return user name
    */
   public String getName() {
@@ -79,6 +85,8 @@ public class User {
 
 
   /**
+   * Set the user name.
+   * 
    * @param name user name
    */
   public void setName(String name) {
@@ -86,6 +94,8 @@ public class User {
   }
 
   /**
+   * Get the user roles.
+   * 
    * @return user roles
    */
   public List<Roles> getRoles() {
@@ -93,6 +103,7 @@ public class User {
   }
 
   /**
+   * Set the user roles.
    * @param roles sets user roles
    */
   public void setRoles(List<Roles> roles) {
@@ -100,6 +111,8 @@ public class User {
   }
 
   /**
+   * Get the user roles links.
+   * 
    * @return user roles links
    */
   public List<Object> getRolesLinks() {
@@ -107,13 +120,17 @@ public class User {
   }
 
   /**
-   * @param roles_links user roles links
+   * Set the user roles links.
+   * 
+   * @param rolesLinks user roles links
    */
   public void setRolesLinks(List<Object> rolesLinks) {
     this.rolesLinks = rolesLinks;
   }
 
   /**
+   * Get the user name.
+   * 
    * @return username
    */
   public String getUsername() {
@@ -121,6 +138,8 @@ public class User {
   }
 
   /**
+   * Set the user name.
+   * 
    * @param username human readable user name
    */
   public void setUsername(String username) {

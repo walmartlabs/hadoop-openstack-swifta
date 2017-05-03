@@ -19,7 +19,7 @@ import org.apache.hadoop.fs.Path;
 
 /**
  * Exception raised when an operation is meant to work on a directory, but the target path is not a
- * directory
+ * directory.
  */
 public class SwiftNotDirectoryException extends SwiftException {
 

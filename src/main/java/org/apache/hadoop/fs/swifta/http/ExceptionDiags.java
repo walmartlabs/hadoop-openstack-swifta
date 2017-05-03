@@ -31,15 +31,21 @@ import java.net.UnknownHostException;
 public class ExceptionDiags {
   private static final Log LOG = LogFactory.getLog(ExceptionDiags.class);
 
-  /** text to point users elsewhere: {@value} */
+  /** 
+   * The text to point users elsewhere: {@value}. 
+   */
   private static final String FOR_MORE_DETAILS_SEE = " For more details see:  ";
-  /** text included in wrapped exceptions if the host is null: {@value} */
+  /** 
+   * The text included in wrapped exceptions if the host is null: {@value}. 
+   */
   public static final String UNKNOWN_HOST = "(unknown)";
-  /** Base URL of the Hadoop Wiki: {@value} */
+  /** 
+   * Base URL of the Hadoop Wiki: {@value}. 
+   */
   public static final String HADOOP_WIKI = "http://wiki.apache.org/hadoop/";
 
   /**
-   * Take an IOException and a URI, wrap it where possible with something that includes the URI
+   * Take an IOException and a URI, wrap it where possible with something that includes the URI.
    *
    * @param dest target URI
    * @param operation operation
@@ -75,8 +81,8 @@ public class ExceptionDiags {
     Class<? extends Throwable> clazz = exception.getClass();
     try {
       Constructor<? extends Throwable> ctor = clazz.getConstructor(String.class);
-      Throwable t = ctor.newInstance(msg);
-      exception.initCause(t);
+      Throwable cause = ctor.newInstance(msg);
+      exception.initCause(cause);
       return exception;
     } catch (Throwable e) {
       LOG.warn("Unable to wrap exception of type " + clazz + ": it has no (String) constructor", e);

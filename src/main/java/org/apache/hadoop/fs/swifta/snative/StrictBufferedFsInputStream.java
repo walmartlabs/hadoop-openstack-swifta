@@ -13,27 +13,31 @@
  * the License.
  */
 
-package org.apache.hadoop.fs.swifta.http;
+package org.apache.hadoop.fs.swifta.snative;
 
-import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
+import org.apache.hadoop.fs.BufferedFSInputStream;
+import org.apache.hadoop.fs.FSInputStream;
+import org.apache.hadoop.fs.swifta.exceptions.SwiftConnectionClosedException;
+
+import java.io.IOException;
 
 /**
- * Implementation for SwiftRestClient to make copy requests. COPY is a method that came with WebDAV
- * (RFC2518), and is not something that can be handled by all proxies en-route to a filesystem.
+ * Add stricter compliance with the evolving FS specifications.
  */
-class CopyMethod extends EntityEnclosingMethod {
+public class StrictBufferedFsInputStream extends BufferedFSInputStream {
 
-  public CopyMethod(String uri) {
-    super(uri);
+  public StrictBufferedFsInputStream(FSInputStream in, int size) {
+    super(in, size);
   }
 
-  /**
-   * Get the HTTP method name.
-   * 
-   * @return the HTTP method name
-   */
   @Override
-  public String getName() {
-    return "COPY";
+  public void seek(long pos) throws IOException {
+    if (pos < 0) {
+      throw new IOException("Negative position");
+    }
+    if (in == null) {
+      throw new SwiftConnectionClosedException("Stream closed");
+    }
+    super.seek(pos);
   }
 }

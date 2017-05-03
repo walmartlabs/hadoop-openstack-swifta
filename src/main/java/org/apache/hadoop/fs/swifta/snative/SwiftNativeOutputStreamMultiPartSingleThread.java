@@ -1,15 +1,19 @@
-package org.apache.hadoop.fs.swifta.snative;
-
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
- * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
- * License at
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the License for the specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
+
+package org.apache.hadoop.fs.swifta.snative;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -57,10 +61,10 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
    * @param conf configuration to use
    * @param nativeStore native store to write through
    * @param key the key to write
-   * @param partSizeKB the partition size
-   * @throws IOException
+   * @param partSizeKb the partition size
+   * @throws IOException the exception
    */
-  public SwiftNativeOutputStreamMultiPartSingleThread(Configuration conf, SwiftNativeFileSystemStore nativeStore, String key, long partSizeKB) throws IOException {
+  public SwiftNativeOutputStreamMultiPartSingleThread(Configuration conf, SwiftNativeFileSystemStore nativeStore, String key, long partSizeKb) throws IOException {
     this.conf = conf;
     this.key = key;
     this.backupFile = newBackupFile();
@@ -68,7 +72,7 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
     this.backupStream = new BufferedOutputStream(new FileOutputStream(backupFile));
     this.partNumber = 1;
     this.blockOffset = 0;
-    this.filePartSize = 1024L * partSizeKB;
+    this.filePartSize = 1024L * partSizeKb;
     metric.increase(key, this);
     metric.report();
   }
@@ -88,7 +92,7 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
   /**
    * Flush the local backing stream. This does not trigger a flush of data to the remote blobstore.
    * 
-   * @throws IOException
+   * @throws IOException the exception
    */
   @Override
   public void flush() throws IOException {
@@ -186,9 +190,9 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
   }
 
   @Override
-  public void write(int b) throws IOException {
+  public void write(int intByte) throws IOException {
     // insert to a one byte array
-    oneByte[0] = (byte) b;
+    oneByte[0] = (byte) intByte;
     // then delegate to the array writing routine
     write(oneByte, 0, 1);
   }
@@ -313,7 +317,7 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
   }
 
   /**
-   * Get the file partition size
+   * Get the file partition size.
    * 
    * @return the partition size
    */

@@ -130,15 +130,15 @@ public class SwiftNativeFileSystemStore {
     WritePolicies policy = this.swiftRestClient.getClientConfig().getWritePolicy();
     switch (policy) {
       case MULTIPART_NO_SPLIT:
-        return new SwiftNativeOutputStreamMultipartNoSplit(this.conf, this, path.toUri().toString(), getPartsizeKB());
+        return new SwiftNativeOutputStreamMultipartNoSplit(this.conf, this, path.toUri().toString(), getPartsizeKb());
       case MULTIPART_SPLIT:
-        return new SwiftNativeOutputStreamMultipartWithSplit(this.conf, this, path.toUri().toString(), getPartsizeKB(), getOutputBufferSize());
+        return new SwiftNativeOutputStreamMultipartWithSplit(this.conf, this, path.toUri().toString(), getPartsizeKb(), getOutputBufferSize());
       case MULTIPART_SINGLE_THREAD:
-        return new SwiftNativeOutputStreamMultiPartSingleThread(this.conf, this, path.toUri().toString(), getPartsizeKB());
+        return new SwiftNativeOutputStreamMultiPartSingleThread(this.conf, this, path.toUri().toString(), getPartsizeKb());
       case MULTIPART_SPLIT_BLOCK:
-        return new SwiftNativeOutputStreamMultipartWithSplitBlock(this.conf, this, path.toUri().toString(), getPartsizeKB(), getOutputBufferSize());
+        return new SwiftNativeOutputStreamMultipartWithSplitBlock(this.conf, this, path.toUri().toString(), getPartsizeKb(), getOutputBufferSize());
       default:
-        return new SwiftNativeOutputStreamMultipartWithSplit(this.conf, this, path.toUri().toString(), getPartsizeKB(), getOutputBufferSize());
+        return new SwiftNativeOutputStreamMultipartWithSplit(this.conf, this, path.toUri().toString(), getPartsizeKb(), getOutputBufferSize());
     }
 
   }
@@ -149,19 +149,19 @@ public class SwiftNativeFileSystemStore {
    * @return the blocksize returned for all FileStatus queries, which is used by the MapReduce splitter.
    */
   public long getBlocksize() {
-    return 1024L * swiftRestClient.getClientConfig().getBlocksizeKB();
+    return 1024L * swiftRestClient.getClientConfig().getBlocksizeKb();
   }
 
-  public long getPartsizeKB() {
-    return swiftRestClient.getClientConfig().getPartSizeKB();
+  public long getPartsizeKb() {
+    return swiftRestClient.getClientConfig().getPartSizeKb();
   }
 
   public int getOutputBufferSize() {
     return swiftRestClient.getClientConfig().getOutputBufferSize();
   }
 
-  public int getBufferSizeKB() {
-    return swiftRestClient.getClientConfig().getBufferSizeKB();
+  public int getBufferSizeKb() {
+    return swiftRestClient.getClientConfig().getBufferSizeKb();
   }
 
   public int getThrottleDelay() {

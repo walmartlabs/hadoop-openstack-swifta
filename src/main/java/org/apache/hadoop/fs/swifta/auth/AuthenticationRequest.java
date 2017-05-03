@@ -24,14 +24,16 @@ import java.util.Objects;
  */
 public class AuthenticationRequest {
 
-  /**
-   * tenant name
-   */
   protected String tenantName;
 
+  /**
+   * Default constructor.
+   */
   public AuthenticationRequest() {}
 
   /**
+   * Get the Tenant Name.
+   * 
    * @return tenant name for Keystone authorization
    */
   public String getTenantName() {
@@ -39,6 +41,8 @@ public class AuthenticationRequest {
   }
 
   /**
+   * Set the Tenant Name.
+   * 
    * @param tenantName tenant name for authorization
    */
   public void setTenantName(String tenantName) {

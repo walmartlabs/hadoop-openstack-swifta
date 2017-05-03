@@ -21,12 +21,12 @@ import org.apache.commons.httpclient.HttpStatus;
 import java.net.URI;
 
 /**
- * An exception raised when an authentication request was rejected
+ * An exception raised when an authentication request was rejected.
  */
 public class SwiftAuthenticationFailedException extends SwiftInvalidResponseException {
 
   private static final long serialVersionUID = -1077000060620644890L;
-  private final static String AUTH = "authentication";
+  private static final String AUTH = "authentication";
 
   public SwiftAuthenticationFailedException(String message, int statusCode, String operation,
       URI uri) {

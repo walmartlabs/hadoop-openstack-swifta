@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
  * agreements. See the NOTICE file distributed with this work for additional information regarding
  * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
@@ -26,26 +26,28 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 public class Tenant {
 
   /**
-   * tenant id
+   * The tenant id.
    */
   private String id;
 
   /**
-   * tenant short description which Keystone returns
+   * The tenant short description which Keystone returns.
    */
   private String description;
 
   /**
-   * boolean enabled user account or no
+   * The boolean indicating whether the user account is enabled.
    */
   private boolean enabled;
 
   /**
-   * tenant human readable name
+   * The tenant human readable name.
    */
   private String name;
 
   /**
+   * Get the tenant name.
+   * 
    * @return tenant name
    */
   public String getName() {
@@ -53,6 +55,8 @@ public class Tenant {
   }
 
   /**
+   * Set the tenant name.
+   * 
    * @param name tenant name
    */
   public void setName(String name) {
@@ -60,6 +64,8 @@ public class Tenant {
   }
 
   /**
+   * Get whether the account is enabled.
+   * 
    * @return true if account enabled and false otherwise
    */
   public boolean isEnabled() {
@@ -67,6 +73,8 @@ public class Tenant {
   }
 
   /**
+   * Set whether the account is enabled.
+   * 
    * @param enabled enable or disable
    */
   public void setEnabled(boolean enabled) {
@@ -74,6 +82,8 @@ public class Tenant {
   }
 
   /**
+   * Get the account description.
+   * 
    * @return account short description
    */
   public String getDescription() {
@@ -81,6 +91,8 @@ public class Tenant {
   }
 
   /**
+   * Set the account description.
+   * 
    * @param description set account description
    */
   public void setDescription(String description) {
@@ -88,6 +100,8 @@ public class Tenant {
   }
 
   /**
+   * Get the tenant id.
+   * 
    * @return set tenant id
    */
   public String getId() {
@@ -95,6 +109,8 @@ public class Tenant {
   }
 
   /**
+   * Set the tenant id.
+   * 
    * @param id tenant id
    */
   public void setId(String id) {

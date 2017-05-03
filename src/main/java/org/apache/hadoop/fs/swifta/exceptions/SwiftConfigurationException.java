@@ -16,7 +16,7 @@
 package org.apache.hadoop.fs.swifta.exceptions;
 
 /**
- * Exception raised to indicate there is some problem with how the Swift FS is configured
+ * Exception raised to indicate there is some problem with how the Swift FS is configured.
  */
 public class SwiftConfigurationException extends SwiftException {
 

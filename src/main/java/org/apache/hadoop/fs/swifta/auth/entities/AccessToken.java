@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
  * agreements. See the NOTICE file distributed with this work for additional information regarding
  * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
@@ -23,9 +23,7 @@ import java.util.Objects;
  * Access token representation of Openstack Keystone authentication. Class holds token id, tenant
  * and expiration time. THIS FILE IS MAPPED BY JACKSON TO AND FROM JSON. DO NOT RENAME OR MODIFY
  * FIELDS AND THEIR ACCESSORS.
- * 
  * Example:
- * 
  * <pre>
  * "token" : {
  *   "RAX-AUTH:authenticatedBy" : [ "APIKEY" ],
@@ -40,21 +38,26 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 
 public class AccessToken {
+  
   /**
-   * token expiration time
+   * The token expiration time.
    */
-  private String expires;
+  private String expires; 
+  
   /**
-   * token id
+   * The token id.
    */
-  private String id;
+  private String id; 
+
   /**
-   * tenant name for whom id is attached
+   * The tenant name for whom id is attached. 
    */
-  private Tenant tenant;
+  private Tenant tenant; 
 
 
   /**
+   * Get the expiration time.
+   * 
    * @return token expiration time
    */
   public String getExpires() {
@@ -62,6 +65,8 @@ public class AccessToken {
   }
 
   /**
+   * Set the expiration time.
+   * 
    * @param expires the token expiration time
    */
   public void setExpires(String expires) {
@@ -69,6 +74,8 @@ public class AccessToken {
   }
 
   /**
+   * Get the token id.
+   * 
    * @return token value
    */
   public String getId() {
@@ -76,6 +83,8 @@ public class AccessToken {
   }
 
   /**
+   * Set the token id.
+   * 
    * @param id token value
    */
   public void setId(String id) {
@@ -83,6 +92,8 @@ public class AccessToken {
   }
 
   /**
+   * Get the tenant authenticated in Openstack Keystone.
+   * 
    * @return tenant authenticated in Openstack Keystone
    */
   public Tenant getTenant() {
@@ -90,6 +101,8 @@ public class AccessToken {
   }
 
   /**
+   * Set the tenant authenticated in Openstack Keystone.
+   * 
    * @param tenant tenant authenticated in Openstack Keystone
    */
   public void setTenant(Tenant tenant) {

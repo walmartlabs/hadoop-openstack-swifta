@@ -1,12 +1,16 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
- * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
- * License at
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the License for the specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.apache.hadoop.fs.swifta.util;
@@ -31,7 +35,7 @@ public final class SwiftObjectPath {
   private final String container;
 
   /**
-   * swift object
+   * The Swift object.
    */
   private final String object;
 
@@ -102,9 +106,8 @@ public final class SwiftObjectPath {
 
 
   /**
-   * Query to see if the possibleChild object is a child path of this. object.
-   *
-   * The test is done by probing for the path of the this object being at the start of the second -with a trailing slash, and both containers being equal
+   * Query to see if the possibleChild object is a child path of this object.
+   * The test is done by probing for the path of the this object being at the start of the second -with a trailing slash, and both containers being equal.
    *
    * @param possibleChild possible child dir
    * @return true iff the possibleChild is under this object

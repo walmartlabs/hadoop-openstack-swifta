@@ -1,15 +1,30 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.apache.hadoop.fs.swifta.http;
 
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_CONNECT_TIMEOUT;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_RETRY_AUTH_COUNT;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_RETRY_COUNT;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SOCKET_TIMEOUT;
-import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_WRITE_POLICY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SWIFT_BLOCKSIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SWIFT_PARTITION_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SWIFT_REQUEST_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_THROTTLE_DELAY;
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_WRITE_POLICY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.LRU_LIVE_TIME;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.LRU_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_APIKEY_PROPERTY;
@@ -19,7 +34,6 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_BLOC
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_CONNECTION_TIMEOUT;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_CONTAINER_PROPERTY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_INPUT_STREAM_BUFFER_SIZE;
-import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_OUTPUT_STREAM_BUFFER_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_LAZY_SEEK;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_LOCATION_AWARE_PROPERTY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_CONNECTIONS_FOR_COPY;
@@ -27,6 +41,7 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_CONNECTIONS_FOR_DELETE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_HOST_CONNECTIONS;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_TOTAL_CONNECTIONS;
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_OUTPUT_STREAM_BUFFER_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_PARTITION_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_PASSWORD_PROPERTY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_PROXY_HOST_PROPERTY;
@@ -38,10 +53,10 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_RETR
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_RETRY_COUNT;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_SERVICE_PROPERTY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_SOCKET_TIMEOUT;
-import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_WRITE_POLICY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_TENANT_PROPERTY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_THROTTLE_DELAY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_USERNAME_PROPERTY;
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_WRITE_POLICY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.USE_HEADER_CACHE;
 
 import org.apache.commons.logging.Log;
@@ -64,115 +79,112 @@ import java.util.Properties;
 
 public class SwiftClientConfig {
 
+  private static final Log LOG = LogFactory.getLog(SwiftClientConfig.class);
 
-  private final static Log LOG = LogFactory.getLog(SwiftClientConfig.class);
+  private static final int DEFAULT_CONNECTIONS = 0; // Default set to 0.
 
-  private final static int DEFAULT_CONNECTIONS = 0; // Default set to 0.
+  private static final int DEFAULT_COPY_CONNECTIONS = 0; // Default set to 0.
 
-  private final static int DEFAULT_COPY_CONNECTIONS = 0; // Default set to 0.
-
-  private final static int DEFAULT_LRU_SIZE = 1000;
+  private static final int DEFAULT_LRU_SIZE = 1000;
 
   /**
    * In milliseconds.
    */
-  private final static long DEFAULT_EXPIRES_TIME = 30 * 60 * 1000;
+  private static final long DEFAULT_EXPIRES_TIME = 30 * 60 * 1000;
 
   /**
-   * the authentication endpoint as supplied in the configuration
+   * The authentication endpoint as supplied in the configuration.
    */
   private URI authUri;
 
   /**
-   * Swift region. Some OpenStack installations has more than one region. In this case user can specify the region with which Hadoop will be working
+   * Swift region. Some OpenStack installations has more than one region. In this case user can specify the region with which Hadoop will be working.
    */
   private String region;
 
   /**
-   * tenant name
+   * The tenant name.
    */
   private String tenant;
 
   /**
-   * username name
+   * The user name.
    */
   private String username;
 
   /**
-   * user password
+   * The user password.
    */
   private String password;
 
   /**
-   * user api key
+   * The user API key.
    */
   private String apiKey;
 
   /**
-   * The authentication request used to authenticate with Swift
+   * The authentication request used to authenticate with Swift.
    */
   private AuthenticationRequest authRequest;
 
   /**
-   * This auth request is similar to @see authRequest, with one difference: it has another json representation when authRequest one is not applicable
+   * This auth request is similar to @see authRequest, with one difference: it has another json representation when authRequest one is not applicable.
    */
   private AuthenticationRequest keystoneAuthRequest;
 
   private String serviceDescription;
 
-
-
-  private URI filesystemURI;
+  private URI filesystemUri;
 
   /**
-   * The name of the service provider
+   * The name of the service provider.
    */
   private String serviceProvider;
 
   /**
-   * Should the public swift endpoint be used, rather than the in-cluster one?
+   * Should the public swift endpoint be used rather than the in-cluster one.
    */
-  private boolean usePublicURL;
+  private boolean usePublicUrl;
 
   /**
-   * Number of times to retry a connection
+   * Number of times to retry a connection.
    */
   private int retryCount;
 
   /**
-   * Number of times to retry a auth
+   * Number of times to retry a auth.
    */
   private int retryAuth;
 
   /**
-   * Entry in the swift catalog defining the prefix used to talk to objects
+   * Entry in the swift catalog defining the prefix used to talk to objects.
    */
   private String authEndpointPrefix;
 
   /**
-   * How long (in milliseconds) should a connection be attempted
+   * How long (in milliseconds) should a connection be attempted.
    */
   private int connectTimeout;
 
   /**
-   * How long (in milliseconds) should a connection be attempted
+   * How long (in milliseconds) should a connection be attempted.
    */
   private int socketTimeout;
 
   private String writePolicy;
 
   /**
-   * How long (in milliseconds) between bulk operations
+   * How long (in milliseconds) between bulk operations.
    */
   private int throttleDelay;
 
   /**
-   * the name of a proxy host (can be null, in which case there is no proxy)
+   * The name of a proxy host (can be null, in which case there is no proxy).
    */
   private String proxyHost;
 
   /**
-   * The port of a proxy. This is ignored if {@link #proxyHost} is null
+   * The port of a proxy. This is ignored if {@link #proxyHost} is null.
    */
   private int proxyPort;
 
@@ -181,13 +193,14 @@ public class SwiftClientConfig {
    */
   private boolean locationAware;
 
-  private long partSizeKB;
+  private long partSizeKb;
+  
   /**
-   * The blocksize of this FS
+   * The blocksize of this FS.
    */
-  private int blocksizeKB;
+  private int blocksizeKb;
 
-  private int bufferSizeKB;
+  private int bufferSizeKb;
 
   private int maxCoreConnections;
 
@@ -200,12 +213,12 @@ public class SwiftClientConfig {
   private boolean isLazySeek;
 
   /**
-   * LRU cache for HEAD request
+   * The LRU cache size for the HEAD requests.
    */
   private int lruCacheSize;
 
   /**
-   * How long the LRU cache lives
+   * The time the LRU cache lives.
    */
   private long cacheLiveTime;
 
@@ -214,7 +227,9 @@ public class SwiftClientConfig {
   private DurationStatsTable durationStats = new DurationStatsTable();
 
   private String service;
+  
   private Configuration conf;
+  
   private Properties props;
 
   /**
@@ -234,7 +249,7 @@ public class SwiftClientConfig {
 
 
   /**
-   * Create a Swift Client config instance.
+   * Create a Swift Client configuration instance.
    *
    * @param service which cloud
    * @param container which container
@@ -260,7 +275,7 @@ public class SwiftClientConfig {
     // service is used for diagnostics
     serviceProvider = props.getProperty(SWIFT_SERVICE_PROPERTY);
     String isPubProp = props.getProperty(SWIFT_PUBLIC_PROPERTY, "false");
-    usePublicURL = "true".equals(isPubProp);
+    usePublicUrl = "true".equals(isPubProp);
     authEndpointPrefix = getOption(props, SWIFT_AUTH_ENDPOINT_PREFIX);
     maxCoreConnections = conf.getInt(SWIFT_MAX_HOST_CONNECTIONS, DEFAULT_CONNECTIONS);
 
@@ -279,7 +294,7 @@ public class SwiftClientConfig {
     maxInParallelUpload = conf.getInt(SWIFT_MAX_CONNECTIONS_FOR_UPLOAD, DEFAULT_CONNECTIONS);
 
     if (apiKey == null && password == null) {
-      throw new SwiftConfigurationException("Configuration for " + filesystemURI + " must contain either " + SWIFT_PASSWORD_PROPERTY + " or " + SWIFT_APIKEY_PROPERTY);
+      throw new SwiftConfigurationException("Configuration for " + filesystemUri + " must contain either " + SWIFT_PASSWORD_PROPERTY + " or " + SWIFT_APIKEY_PROPERTY);
     }
     // create the (reusable) authentication request
     if (password != null) {
@@ -307,23 +322,23 @@ public class SwiftClientConfig {
       proxyHost = conf.get(SWIFT_PROXY_HOST_PROPERTY);
       proxyPort = conf.getInt(SWIFT_PROXY_PORT_PROPERTY, 8080);
 
-      blocksizeKB = conf.getInt(SWIFT_BLOCKSIZE, DEFAULT_SWIFT_BLOCKSIZE);
-      if (blocksizeKB <= 0) {
-        throw new SwiftConfigurationException("Invalid blocksize set in " + SWIFT_BLOCKSIZE + ": " + blocksizeKB);
+      blocksizeKb = conf.getInt(SWIFT_BLOCKSIZE, DEFAULT_SWIFT_BLOCKSIZE);
+      if (blocksizeKb <= 0) {
+        throw new SwiftConfigurationException("Invalid blocksize set in " + SWIFT_BLOCKSIZE + ": " + blocksizeKb);
       }
-      partSizeKB = conf.getLong(SWIFT_PARTITION_SIZE, DEFAULT_SWIFT_PARTITION_SIZE);
+      partSizeKb = conf.getLong(SWIFT_PARTITION_SIZE, DEFAULT_SWIFT_PARTITION_SIZE);
       inputBufferSize = conf.getInt(SWIFT_INPUT_STREAM_BUFFER_SIZE, DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE);
       outputBufferSize = conf.getInt(SWIFT_OUTPUT_STREAM_BUFFER_SIZE, DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE);
-      if (partSizeKB <= 0) {
-        throw new SwiftConfigurationException("Invalid partition size set in " + SWIFT_PARTITION_SIZE + ": " + partSizeKB);
+      if (partSizeKb <= 0) {
+        throw new SwiftConfigurationException("Invalid partition size set in " + SWIFT_PARTITION_SIZE + ": " + partSizeKb);
       }
 
-      bufferSizeKB = conf.getInt(SWIFT_REQUEST_SIZE, DEFAULT_SWIFT_REQUEST_SIZE);
-      if (bufferSizeKB <= 0) {
-        throw new SwiftConfigurationException("Invalid buffer size set in " + SWIFT_REQUEST_SIZE + ": " + bufferSizeKB);
+      bufferSizeKb = conf.getInt(SWIFT_REQUEST_SIZE, DEFAULT_SWIFT_REQUEST_SIZE);
+      if (bufferSizeKb <= 0) {
+        throw new SwiftConfigurationException("Invalid buffer size set in " + SWIFT_REQUEST_SIZE + ": " + bufferSizeKb);
       }
     } catch (NumberFormatException e) {
-      // convert exceptions raised parsing ints and longs into
+      // convert exceptions raised parsing integers and longs into
       // SwiftConfigurationException instances
       throw new SwiftConfigurationException(e.toString(), e);
     }
@@ -333,7 +348,7 @@ public class SwiftClientConfig {
       serviceDescription = String.format(
           "Service={%s} uri={%s}" + " tenant={%s} user={%s} region={%s}" + " publicURL={%b}" + " location aware={%b}" + " partition size={%d KB}, buffer size={%d KB}" + " block size={%d KB}"
               + " connect timeout={%d}, retry count={%d}" + " socket timeout={%d}" + " throttle delay={%d}",
-          serviceProvider, stringAuthUri, tenant, username, region != null ? region : "(none)", usePublicURL, locationAware, partSizeKB, bufferSizeKB, blocksizeKB, connectTimeout, retryCount,
+          serviceProvider, stringAuthUri, tenant, username, region != null ? region : "(none)", usePublicUrl, locationAware, partSizeKb, bufferSizeKb, blocksizeKb, connectTimeout, retryCount,
           socketTimeout, throttleDelay);
       LOG.debug(serviceDescription);
     }
@@ -350,7 +365,7 @@ public class SwiftClientConfig {
   }
 
   /**
-   * Get a mandatory configuration option
+   * Get a mandatory configuration option.
    *
    * @param props property set
    * @param key key
@@ -459,12 +474,12 @@ public class SwiftClientConfig {
     this.serviceProvider = serviceProvider;
   }
 
-  public boolean isUsePublicURL() {
-    return usePublicURL;
+  public boolean isUsePublicUrl() {
+    return usePublicUrl;
   }
 
-  public void setUsePublicURL(boolean usePublicURL) {
-    this.usePublicURL = usePublicURL;
+  public void setUsePublicUrl(boolean usePublicUrl) {
+    this.usePublicUrl = usePublicUrl;
   }
 
   public int getRetryCount() {
@@ -531,24 +546,24 @@ public class SwiftClientConfig {
     this.locationAware = locationAware;
   }
 
-  public long getPartSizeKB() {
-    return partSizeKB;
+  public long getPartSizeKb() {
+    return partSizeKb;
   }
 
-  public void setPartSizeKB(int partSizeKB) {
-    this.partSizeKB = partSizeKB;
+  public void setPartSizeKb(int partSizeKb) {
+    this.partSizeKb = partSizeKb;
   }
 
-  public int getBlocksizeKB() {
-    return blocksizeKB;
+  public int getBlocksizeKb() {
+    return blocksizeKb;
   }
 
-  public int getBufferSizeKB() {
-    return bufferSizeKB;
+  public int getBufferSizeKb() {
+    return bufferSizeKb;
   }
 
-  public void setBufferSizeKB(int bufferSizeKB) {
-    this.bufferSizeKB = bufferSizeKB;
+  public void setBufferSizeKb(int bufferSizeKb) {
+    this.bufferSizeKb = bufferSizeKb;
   }
 
   public int getMaxCoreConnections() {

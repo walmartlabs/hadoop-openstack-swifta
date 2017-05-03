@@ -1,12 +1,16 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
- * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
- * License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the License for the specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.apache.hadoop.fs.swifta.util;
@@ -82,7 +86,7 @@ public final class SwiftUtils {
   }
 
   /**
-   * Predicate: Is a swift object referring to the root directory?
+   * Predicate whether a swift object refers to the root directory.
    * 
    * @param swiftObject object to probe
    * @return true iff the object refers to the root
@@ -167,7 +171,7 @@ public final class SwiftUtils {
    * @return a listing of the filestatuses of elements in the directory, one to a line, precedeed by the full path of the directory
    * @throws IOException connectivity problems
    */
-  public synchronized static String ls(FileSystem fileSystem, Path path) throws IOException {
+  public static synchronized String ls(FileSystem fileSystem, Path path) throws IOException {
     if (path == null) {
       // surfaces when someone calls getParent() on something at the top of the path
       return SLASH;

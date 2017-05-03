@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
  * agreements. See the NOTICE file distributed with this work for additional information regarding
  * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
@@ -20,32 +20,35 @@ package org.apache.hadoop.fs.swifta.auth;
  * RENAME OR MODIFY FIELDS AND THEIR ACCESSORS.
  */
 public class Roles {
+  
   /**
-   * role name
+   * The role name.
    */
   private String name;
 
   /**
-   * This field user in RackSpace auth model
+   * The field user in the RackSpace auth model.
    */
   private String id;
 
   /**
-   * This field user in RackSpace auth model
+   * The field user in the RackSpace auth model.
    */
   private String description;
 
   /**
-   * Service id used in HP public Cloud
+   * The service id used in the HP public cloud.
    */
   private String serviceId;
 
   /**
-   * Service id used in HP public Cloud
+   * The tenant id used in the HP public cloud.
    */
   private String tenantId;
 
   /**
+   * Get the role name.
+   * 
    * @return role name
    */
   public String getName() {
@@ -53,6 +56,8 @@ public class Roles {
   }
 
   /**
+   * Set the role name.
+   * 
    * @param name role name
    */
   public void setName(String name) {

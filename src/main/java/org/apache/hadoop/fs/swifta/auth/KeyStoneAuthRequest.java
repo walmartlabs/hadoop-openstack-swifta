@@ -26,11 +26,13 @@ import java.util.Objects;
 public class KeyStoneAuthRequest extends AuthenticationRequest {
 
   /**
-   * Credentials for Keystone authentication
+   * Credentials for Keystone authentication.
    */
   private KeystoneApiKeyCredentials apiAccessKeyCredentials;
 
   /**
+   * Constructor for KeystoneAuthRequest.
+   * 
    * @param tenant Keystone tenant name for authentication
    * @param apiAccessKeyCredentials Credentials for authentication
    */

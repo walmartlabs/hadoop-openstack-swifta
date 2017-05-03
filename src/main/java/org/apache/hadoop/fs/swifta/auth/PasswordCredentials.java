@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
  * agreements. See the NOTICE file distributed with this work for additional information regarding
  * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
@@ -22,22 +22,25 @@ import java.util.Objects;
  * JACKSON TO AND FROM JSON. DO NOT RENAME OR MODIFY FIELDS AND THEIR ACCESSORS.
  */
 public class PasswordCredentials {
+  
   /**
-   * user login
+   * user login.
    */
   private String username;
 
   /**
-   * user password
+   * user password.
    */
   private String password;
 
   /**
-   * default constructor
+   * Default constructor.
    */
   public PasswordCredentials() {}
 
   /**
+   * Constructor for Password Credentials.
+   * 
    * @param username user login
    * @param password user password
    */
@@ -47,6 +50,8 @@ public class PasswordCredentials {
   }
 
   /**
+   * Get the user password.
+   * 
    * @return user password
    */
   public String getPassword() {
@@ -54,6 +59,8 @@ public class PasswordCredentials {
   }
 
   /**
+   * Set the user password.
+   * 
    * @param password user password
    */
   public void setPassword(String password) {
@@ -61,6 +68,8 @@ public class PasswordCredentials {
   }
 
   /**
+   * Get the user login.
+   * 
    * @return login
    */
   public String getUsername() {
@@ -68,6 +77,8 @@ public class PasswordCredentials {
   }
 
   /**
+   * Set the user login.
+   * 
    * @param username login
    */
   public void setUsername(String username) {

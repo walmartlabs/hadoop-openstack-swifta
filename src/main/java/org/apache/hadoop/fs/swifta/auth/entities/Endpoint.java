@@ -101,17 +101,17 @@ public class Endpoint {
    * 
    * @return Keystone admin URL
    */
-  public URI getAdminUrl() {
+  public URI getAdminURL() {
     return adminURL;
   }
 
   /**
    * Set the Keystone admin URL.
    * 
-   * @param adminUrl Keystone admin URL
+   * @param adminURL Keystone admin URL
    */
-  public void setAdminUrl(URI adminUrl) {
-    this.adminURL = adminUrl;
+  public void setAdminURL(URI adminURL) {
+    this.adminURL = adminURL;
   }
 
   /**
@@ -119,17 +119,17 @@ public class Endpoint {
    * 
    * @return internal Keystone URL
    */
-  public URI getInternalUrl() {
+  public URI getInternalURL() {
     return internalURL;
   }
 
   /**
    * Set the internal Keystone URL.
    * 
-   * @param internalUrl Keystone internal URL
+   * @param internalURL Keystone internal URL
    */
-  public void setInternalUrl(URI internalUrl) {
-    this.internalURL = internalUrl;
+  public void setInternalURL(URI internalURL) {
+    this.internalURL = internalURL;
   }
 
   /**
@@ -137,25 +137,25 @@ public class Endpoint {
    * 
    * @return public accessible URL
    */
-  public URI getPublicUrl() {
+  public URI getPublicURL() {
     return publicURL;
   }
 
   /**
    * Set the public accessible URL.
    * 
-   * @param publicUrl public URL
+   * @param publicURL public URL
    */
-  public void setPublicUrl(URI publicUrl) {
-    this.publicURL = publicUrl;
+  public void setPublicURL(URI publicURL) {
+    this.publicURL = publicURL;
   }
 
-  public URI getPublicUrl2() {
+  public URI getPublicURL2() {
     return publicURL2;
   }
 
-  public void setPublicUrl2(URI publicUrl2) {
-    this.publicURL2 = publicUrl2;
+  public void setPublicURL2(URI publicURL2) {
+    this.publicURL2 = publicURL2;
   }
 
   /**

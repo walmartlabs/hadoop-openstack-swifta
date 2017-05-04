@@ -878,8 +878,8 @@ public final class SwiftRestClient {
           // now go through the endpoints
           for (Endpoint endpoint : catalog.getEndpoints()) {
             String endpointRegion = endpoint.getRegion();
-            URI publicUri = endpoint.getPublicUrl();
-            URI internalUri = endpoint.getInternalUrl();
+            URI publicUri = endpoint.getPublicURL();
+            URI internalUri = endpoint.getInternalURL();
             descr = String.format("[%s => %s / %s]; ", endpointRegion, publicUri, internalUri);
             regionList.append(descr);
             if (LOG.isDebugEnabled()) {

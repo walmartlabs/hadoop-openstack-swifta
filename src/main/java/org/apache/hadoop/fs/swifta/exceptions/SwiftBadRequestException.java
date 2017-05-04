@@ -15,9 +15,9 @@
 
 package org.apache.hadoop.fs.swifta.exceptions;
 
-import org.apache.commons.httpclient.HttpMethod;
-
 import java.net.URI;
+
+import org.apache.commons.httpclient.HttpMethod;
 
 /**
  * Thrown to indicate that data locality can't be calculated or requested path is incorrect. Data

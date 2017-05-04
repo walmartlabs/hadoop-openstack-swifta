@@ -15,15 +15,15 @@
 
 package org.apache.hadoop.fs.swifta.model;
 
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftConfigurationException;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftException;
 import org.apache.hadoop.fs.swifta.snative.SwiftNativeFileSystemStore;
 import org.apache.hadoop.fs.swifta.util.SwiftObjectPath;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 public class ListObjectsRequest {
 
@@ -36,6 +36,13 @@ public class ListObjectsRequest {
   private ObjectsList objects;
   private volatile boolean hasRun = false;
 
+  /**
+   * The constructor for the ListObjectsRequest.
+   * @param path the swift object path
+   * @param listDeep whether listing the deep directory
+   * @param newest whether to retrieve the newest
+   * @param store the file system store
+   */
   public ListObjectsRequest(SwiftObjectPath path, boolean listDeep, boolean newest,
       SwiftNativeFileSystemStore store) {
     this.path = path;
@@ -44,6 +51,15 @@ public class ListObjectsRequest {
     this.store = store;
   }
 
+  /**
+   * The constructor for the ListObjectsRequest.
+   * @param path the path
+   * @param listDeep whether listing the deep directory
+   * @param newest whether to retrieve the newest
+   * @param store the file system store
+   * @throws SwiftConfigurationException the configuration exception
+   * @throws SwiftException the swift exception
+   */
   public ListObjectsRequest(Path path, boolean listDeep, boolean newest,
       SwiftNativeFileSystemStore store) throws SwiftConfigurationException, SwiftException {
     this.path = store.toDirPath(path);

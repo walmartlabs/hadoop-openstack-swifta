@@ -36,6 +36,15 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SERVICE_CA
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_RANGE_HEADER_FORMAT_PATTERN;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_USER_AGENT;
 
+import java.io.EOFException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
@@ -77,15 +86,6 @@ import org.apache.hadoop.fs.swifta.util.JsonUtil;
 import org.apache.hadoop.fs.swifta.util.SwiftObjectPath;
 import org.apache.hadoop.fs.swifta.util.SwiftUtils;
 import org.apache.http.conn.params.ConnRoutePNames;
-
-import java.io.EOFException;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
 
 /**
  * This implements the client-side of the Swift REST API.
@@ -353,8 +353,6 @@ public final class SwiftRestClient {
    * @param length file length
    * @return The input stream -which must be closed afterwards.
    * @throws IOException Problems
-   * @throws SwiftException swift specific error
-   * @throws FileNotFoundException path is not there
    */
   public HttpBodyContent getData(URI url, long offset, long end) throws IOException {
     if (offset < 0) {
@@ -380,9 +378,7 @@ public final class SwiftRestClient {
    * @param offset offset from file beginning
    * @param length file length
    * @return The input stream -which must be closed afterwards.
-   * @throws IOException Problems
-   * @throws SwiftException swift specific error
-   * @throws FileNotFoundException path is not there
+   * @throws IOException the exception
    */
   public HttpBodyContent getData(SwiftObjectPath path, long offset, long length) throws IOException {
     preRemoteCommand("getData");
@@ -422,7 +418,6 @@ public final class SwiftRestClient {
    *
    * @param uri file URI
    * @return object length
-   * @throws SwiftException on swift-related issues
    * @throws IOException on network/IO problems
    */
   public long getContentLength(final URI uri) throws IOException {
@@ -932,8 +927,6 @@ public final class SwiftRestClient {
    *
    * @param containerName the container name
    * @throws IOException IO problems
-   * @throws SwiftBadRequestException invalid container name
-   * @throws SwiftInvalidResponseException error from the server
    */
   public void createContainer(String containerName) throws IOException {
     SwiftObjectPath objectPath = new SwiftObjectPath(containerName, "");

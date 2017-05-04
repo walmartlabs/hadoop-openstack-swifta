@@ -15,6 +15,13 @@
 
 package org.apache.hadoop.fs.swifta.snative;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,13 +31,6 @@ import org.apache.hadoop.fs.swifta.exceptions.SwiftException;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftInternalStateException;
 import org.apache.hadoop.fs.swifta.metrics.MetricsFactory;
 import org.apache.hadoop.fs.swifta.util.SwiftUtils;
-
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * Output stream, buffers data on local disk. Writes to Swift on the close() method, unless the file

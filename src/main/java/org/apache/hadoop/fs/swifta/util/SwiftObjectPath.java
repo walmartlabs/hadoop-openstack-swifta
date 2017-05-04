@@ -15,12 +15,12 @@
 
 package org.apache.hadoop.fs.swifta.util;
 
+import java.net.URI;
+import java.util.regex.Pattern;
+
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftConfigurationException;
 import org.apache.hadoop.fs.swifta.http.RestClientBindings;
-
-import java.net.URI;
-import java.util.regex.Pattern;
 
 /**
  * Swift hierarchy mapping of (container, path).

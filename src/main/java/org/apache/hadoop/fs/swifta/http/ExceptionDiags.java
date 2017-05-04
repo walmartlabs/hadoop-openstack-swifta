@@ -15,15 +15,15 @@
 
 package org.apache.hadoop.fs.swifta.http;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.ConnectException;
 import java.net.NoRouteToHostException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Variant of Hadoop Netutils exception wrapping with URI awareness and available in branch-1 too.

@@ -15,16 +15,15 @@
 
 package org.apache.hadoop.fs.swifta.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class ThreadManager {
 
@@ -43,11 +42,13 @@ public class ThreadManager {
     threadPool = this.createThreadManager(minPoolSize, maxPoolSize, new PriorityThreadFactory());
   }
 
-  private ThreadPoolExecutor createThreadManager(int coreThreads, int totalThreads, ThreadFactory factory) {
+  private ThreadPoolExecutor createThreadManager(int coreThreads, int totalThreads,
+      ThreadFactory factory) {
     if (factory == null) {
       factory = Executors.defaultThreadFactory();
     }
-    return new ThreadPoolExecutor(coreThreads, totalThreads, 120, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), factory);
+    return new ThreadPoolExecutor(coreThreads, totalThreads, 120, TimeUnit.SECONDS,
+        new LinkedBlockingQueue<Runnable>(), factory);
   }
 
   public void createThreadManager(int maxPoolSize) {
@@ -57,13 +58,14 @@ public class ThreadManager {
 
   private void createThreadManager(int minPoolSize, int maxPoolSize) {
     if (LOG.isDebugEnabled()) {
-      LOG.debug("Max threads in pool is " + maxPoolSize + ", min threads in pool is " + minPoolSize);
+      LOG.debug(
+          "Max threads in pool is " + maxPoolSize + ", min threads in pool is " + minPoolSize);
     }
     ThreadPoolExecutor pool = this.createThreadManager(minPoolSize, maxPoolSize, null);
     pool.allowCoreThreadTimeOut(true);
     threadPool = pool;
   }
-  
+
   private int getRightThread(int maxPoolSize) {
     if (maxPoolSize < 1) {
       maxPoolSize = ThreadUtils.getMaxThread();
@@ -75,15 +77,22 @@ public class ThreadManager {
     return this.threadPool;
   }
 
+  /**
+   * Shut down the thread pool. 
+   */
   public void shutdown() {
     if (threadPool != null && !threadPool.isShutdown()) {
       threadPool.shutdown();
     }
   }
 
+  /**
+   * Clean up the thread pool.
+   */
   public void cleanup() {
     try {
-      if (threadPool != null && !this.threadPool.awaitTermination(AWAIT_TIMEOUT, TimeUnit.SECONDS)) {
+      if (threadPool != null
+          && !this.threadPool.awaitTermination(AWAIT_TIMEOUT, TimeUnit.SECONDS)) {
         this.threadPool.shutdownNow();
       }
     } catch (Exception e) {

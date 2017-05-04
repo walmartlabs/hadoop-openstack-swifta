@@ -37,6 +37,11 @@ public class Duration {
     return humanTime(value());
   }
 
+  /**
+   * Get the human time.
+   * @param time the time
+   * @return the human time
+   */
   public static String humanTime(long time) {
     long seconds = (time / 1000);
     long minutes = (seconds / 60);

@@ -17,7 +17,7 @@ package org.apache.hadoop.fs.swifta;
 
 import static org.apache.hadoop.fs.swifta.util.SwiftTestUtils.assertPathExists;
 import static org.apache.hadoop.fs.swifta.util.SwiftTestUtils.cleanupInTeardown;
-import static org.apache.hadoop.fs.swifta.util.SwiftTestUtils.getServiceURI;
+import static org.apache.hadoop.fs.swifta.util.SwiftTestUtils.getServiceUri;
 import static org.apache.hadoop.fs.swifta.util.SwiftTestUtils.noteAction;
 
 import org.apache.commons.logging.Log;
@@ -121,7 +121,7 @@ public class SwiftFileSystemBaseTest extends Assert implements SwiftTestConstant
   }
 
   protected URI getFilesystemURI() throws URISyntaxException, IOException {
-    return getServiceURI(createConfiguration());
+    return getServiceUri(createConfiguration());
   }
 
   protected SwiftNativeFileSystem createSwiftFS() throws IOException {

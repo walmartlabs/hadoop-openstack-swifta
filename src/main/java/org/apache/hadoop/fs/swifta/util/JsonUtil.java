@@ -15,17 +15,16 @@
 
 package org.apache.hadoop.fs.swifta.util;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+
 import org.apache.hadoop.fs.swifta.exceptions.SwiftJsonMarshallingException;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.CollectionType;
 import org.codehaus.jackson.type.TypeReference;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
-
 
 public class JsonUtil {
   private static ObjectMapper jsonMapper = new ObjectMapper();
@@ -41,7 +40,6 @@ public class JsonUtil {
    * @param object The object to convert.
    * @return The JSON string representation.
    * @throws IOException IO issues
-   * @throws SwiftJsonMarshallingException failure to generate JSON
    */
   public static String toJson(Object object) throws IOException {
     Writer json = new StringWriter();

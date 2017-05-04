@@ -58,7 +58,6 @@
         <maven.test.skip>false</maven.test.skip>
       </properties>
     </profile>
-
   </profiles>
 
   <build>
@@ -70,13 +69,27 @@
         <version>2.17</version>
         <configuration>
           <configLocation>${project.basedir}/src/main/resource/checkstyle/checks.xml</configLocation>
-          <includeTestSourceDirectory>true</includeTestSourceDirectory>
-          <excludes>**/org/apache/hadoop/fs/swifta/**/*Test*</excludes>
           <encoding>UTF-8</encoding>
           <consoleOutput>true</consoleOutput>
           <failsOnError>true</failsOnError>
           <linkXRef>false</linkXRef>
         </configuration>
+        <executions>
+          <execution>
+            <id>checkstyle</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>7.7</version>
+          </dependency>
+        </dependencies>
       </plugin>
       <!-- FindBugs -->
       <plugin>

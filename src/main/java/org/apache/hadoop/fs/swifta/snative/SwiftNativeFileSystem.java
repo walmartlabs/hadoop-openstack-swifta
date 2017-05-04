@@ -15,6 +15,14 @@
 
 package org.apache.hadoop.fs.swifta.snative;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -38,14 +46,6 @@ import org.apache.hadoop.fs.swifta.util.DurationStats;
 import org.apache.hadoop.fs.swifta.util.SwiftObjectPath;
 import org.apache.hadoop.fs.swifta.util.SwiftUtils;
 import org.apache.hadoop.util.Progressable;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Swift file system implementation. Extends Hadoop FileSystem
@@ -430,7 +430,8 @@ public class SwiftNativeFileSystem extends FileSystem {
       // the exception and do not create the container
       if (!store.doesExistContainer(directory)) {
         throw new FileNotFoundException("Container root of the path " + directory.getName()
-            + " does not exist, please manually create the container using mkdir before creating the path");
+            + " does not exist, please manually create the container using mkdir "
+            + " before creating the path");
       } else {
         // if the container of the directory exist, create the directory
         boolean shouldCreate = shouldCreate(directory);

@@ -15,10 +15,11 @@
 
 package org.apache.hadoop.fs.swifta.auth.entities;
 
+import java.util.List;
+
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import java.util.List;
 
 /**
  * Describes Openstack Swift REST endpoints. THIS FILE IS MAPPED BY JACKSON TO AND FROM JSON. DO NOT

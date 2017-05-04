@@ -15,11 +15,11 @@
 
 package org.apache.hadoop.fs.swifta.auth;
 
+import java.util.List;
+
 import org.apache.hadoop.fs.swifta.auth.entities.AccessToken;
 import org.apache.hadoop.fs.swifta.auth.entities.Catalog;
 import org.apache.hadoop.fs.swifta.auth.entities.User;
-
-import java.util.List;
 
 /**
  * Response from KeyStone deserialized into AuthenticationResponse class. THIS FILE IS MAPPED BY

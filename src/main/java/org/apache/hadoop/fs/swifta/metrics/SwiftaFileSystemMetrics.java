@@ -15,13 +15,13 @@
 
 package org.apache.hadoop.fs.swifta.metrics;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftMetricWrongParametersException;
 import org.apache.hadoop.fs.swifta.snative.SwiftNativeFileSystem;
-
-import java.util.Map;
-import java.util.WeakHashMap;
 
 public class SwiftaFileSystemMetrics implements SwiftMetric {
 

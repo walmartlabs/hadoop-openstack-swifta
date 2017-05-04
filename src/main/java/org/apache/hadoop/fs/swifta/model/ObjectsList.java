@@ -15,10 +15,10 @@
 
 package org.apache.hadoop.fs.swifta.model;
 
-import org.apache.hadoop.fs.FileStatus;
-
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.hadoop.fs.FileStatus;
 
 /**
  * List of objects from cloud.

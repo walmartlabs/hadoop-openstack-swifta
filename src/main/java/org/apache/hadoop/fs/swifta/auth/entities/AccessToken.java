@@ -15,9 +15,10 @@
 
 package org.apache.hadoop.fs.swifta.auth.entities;
 
+import java.util.Objects;
+
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
-import java.util.Objects;
 
 /**
  * Access token representation of Openstack Keystone authentication. Class holds token id, tenant

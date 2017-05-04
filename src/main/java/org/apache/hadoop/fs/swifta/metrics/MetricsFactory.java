@@ -11,12 +11,12 @@
 
 package org.apache.hadoop.fs.swifta.metrics;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftMetricWrongParametersException;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class MetricsFactory {
 
@@ -26,6 +26,11 @@ public class MetricsFactory {
 
   private SwiftMetric metric;
 
+  /**
+   * Get the metrics factory.
+   * @param clazz the class
+   * @return the metrics factory
+   */
   @SuppressWarnings("rawtypes")
   public static MetricsFactory getMetricsFactory(Class clazz) {
     String name = clazz.getSimpleName();
@@ -55,10 +60,18 @@ public class MetricsFactory {
     return metricsMap.get(name);
   }
 
+  /**
+   * The constructor for metrics factory.
+   * @param metric the metric
+   */
   private MetricsFactory(SwiftMetric metric) {
     this.metric = metric;
   }
 
+  /**
+   * Add the metrics for the objects.
+   * @param objects the objects
+   */
   public void increase(Object... objects) {
     try {
       metric.increase(objects);
@@ -67,6 +80,10 @@ public class MetricsFactory {
     }
   }
 
+  /**
+   * Remove the metrics for the objects.
+   * @param objects the objects
+   */
   public void remove(Object... objects) {
     try {
       metric.remove(objects);

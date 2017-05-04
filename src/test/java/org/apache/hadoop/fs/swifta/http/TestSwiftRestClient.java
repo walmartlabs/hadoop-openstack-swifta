@@ -46,9 +46,9 @@ public class TestSwiftRestClient implements SwiftTestConstants {
   @Before
   public void setup() throws IOException {
     conf = new Configuration();
-    runTests = SwiftTestUtils.hasServiceURI(conf);
+    runTests = SwiftTestUtils.hasServiceUri(conf);
     if (runTests) {
-      serviceURI = SwiftTestUtils.getServiceURI(conf);
+      serviceURI = SwiftTestUtils.getServiceUri(conf);
     }
   }
 

@@ -15,10 +15,10 @@
 
 package org.apache.hadoop.fs.swifta.exceptions;
 
-import org.apache.commons.httpclient.HttpMethod;
-
 import java.io.IOException;
 import java.net.URI;
+
+import org.apache.commons.httpclient.HttpMethod;
 
 /**
  * Exception raised when the HTTP code is invalid. The status code, method name and operation URI
@@ -32,6 +32,14 @@ public class SwiftInvalidResponseException extends SwiftConnectionException {
   public final URI uri;
   public String body; // DTBFDTECH-261: To avoid an initial problem by java reflection.
 
+  /**
+   * The constructor for SwiftInvalidResponseException.
+   * 
+   * @param message the message
+   * @param statusCode the status code
+   * @param operation the operation
+   * @param uri the uri
+   */
   public SwiftInvalidResponseException(String message, int statusCode, String operation, URI uri) {
     super(message);
     this.statusCode = statusCode;
@@ -40,6 +48,14 @@ public class SwiftInvalidResponseException extends SwiftConnectionException {
     this.body = "";
   }
 
+  /**
+   * The constructor for SwiftInvalidResponseException.
+   * 
+   * @param message the message
+   * @param operation the status code
+   * @param uri the uri
+   * @param method the method
+   */
   public SwiftInvalidResponseException(String message, String operation, URI uri,
       HttpMethod method) {
     super(message);

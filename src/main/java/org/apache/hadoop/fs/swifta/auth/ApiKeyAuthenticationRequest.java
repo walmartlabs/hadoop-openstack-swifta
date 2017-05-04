@@ -15,9 +15,9 @@
 
 package org.apache.hadoop.fs.swifta.auth;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
 import java.util.Objects;
+
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Class that represents authentication request to Openstack Keystone. Contains basic authentication

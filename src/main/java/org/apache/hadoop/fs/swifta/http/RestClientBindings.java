@@ -40,18 +40,18 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_SERV
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_TENANT_PROPERTY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_USERNAME_PROPERTY;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.swifta.exceptions.SwiftConfigurationException;
-
 import java.net.URI;
 import java.util.Properties;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.swifta.exceptions.SwiftConfigurationException;
+
 /**
  * This class implements the binding logic between Hadoop configurations and the swift rest client.
- * <p/>
+ * <p>
  * The swift rest client takes a Properties instance containing the string values it uses to bind to
  * a swift endpoint.
- * <p/>
+ * </p>
  * This class extracts the values for a specific filesystem endpoint and then builds an appropriate
  * Properties file.
  */
@@ -70,6 +70,13 @@ public final class RestClientBindings {
     return SWIFT_SERVICE_PREFIX + service;
   }
 
+  /**
+   * Bind.
+   * @param fsUri the file system URI
+   * @param conf the configuration
+   * @return the properties
+   * @throws SwiftConfigurationException the exception
+   */
   public static Properties bind(URI fsUri, Configuration conf) throws SwiftConfigurationException {
     String host = fsUri.getHost();
     if (host == null || host.isEmpty()) {
@@ -84,7 +91,7 @@ public final class RestClientBindings {
    * Build a properties instance bound to the configuration file -using the filesystem URI as the
    * source of the information.
    *
-   * @param fsURI filesystem URI
+   * @param service service
    * @param conf configuration
    * @return a properties file with the instance-specific properties extracted and bound to the
    *         swift client properties.

@@ -29,7 +29,7 @@ public class ThreadUtils {
   /**
    * Terminate a thread.
    * 
-   * @param t Thread to terminate.
+   * @param thread Thread to terminate.
    * @param timeoutToDie milliseconds
    * @return Is terminated.
    */

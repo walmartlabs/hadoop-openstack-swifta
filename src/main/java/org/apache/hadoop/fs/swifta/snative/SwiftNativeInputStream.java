@@ -11,6 +11,9 @@
 
 package org.apache.hadoop.fs.swifta.snative;
 
+import java.io.EOFException;
+import java.io.IOException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSInputStream;
@@ -23,9 +26,6 @@ import org.apache.hadoop.fs.swifta.http.HttpInputStreamWithRelease;
 import org.apache.hadoop.fs.swifta.metrics.MetricsFactory;
 import org.apache.hadoop.fs.swifta.util.SwiftUtils;
 import org.apache.hadoop.io.IOUtils;
-
-import java.io.EOFException;
-import java.io.IOException;
 
 /**
  * The input stream from remote Swift blobs. The class attempts to be buffer aware, and react to a forward seek operation by trying to scan ahead through the current block of data to find it. This

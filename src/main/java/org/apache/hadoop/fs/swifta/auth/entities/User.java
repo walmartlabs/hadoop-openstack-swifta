@@ -15,11 +15,11 @@
 
 package org.apache.hadoop.fs.swifta.auth.entities;
 
+import java.util.List;
+
 import org.apache.hadoop.fs.swifta.auth.Roles;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
-
-import java.util.List;
 
 /**
  * Describes user entity in Keystone In different Swift installations User is represented

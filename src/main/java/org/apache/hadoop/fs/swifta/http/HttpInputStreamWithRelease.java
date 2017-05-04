@@ -15,13 +15,6 @@
 
 package org.apache.hadoop.fs.swifta.http;
 
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.swifta.exceptions.SwiftConnectionClosedException;
-import org.apache.hadoop.fs.swifta.util.SwiftUtils;
-import org.apache.hadoop.io.IOUtils;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
@@ -29,6 +22,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Objects;
+
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.swifta.exceptions.SwiftConnectionClosedException;
+import org.apache.hadoop.fs.swifta.util.SwiftUtils;
+import org.apache.hadoop.io.IOUtils;
 
 /**
  * This replaces the input stream release class from JetS3t and AWS; # Failures in the constructor
@@ -72,6 +72,13 @@ public class HttpInputStreamWithRelease extends InputStream {
    */
   private String reasonClosed = "unopened";
 
+  /**
+   * The constructor for HttpInputStreamWithRelease.
+   * @param uri the uri
+   * @param method the method
+   * @param bufferSize the buffer size
+   * @throws IOException the exception
+   */
   public HttpInputStreamWithRelease(final URI uri, final HttpMethod method, final int bufferSize)
       throws IOException {
     this.uri = uri;

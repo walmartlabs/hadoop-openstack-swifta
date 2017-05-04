@@ -26,6 +26,13 @@ public final class RangeInputStream extends InputStream {
   private long mark = 0;
   private final InputStream in;
 
+  /**
+   * The constructor for RangeInputStream.
+   * @param in the input stream
+   * @param offset the offset
+   * @param length the length
+   * @param isClose whether closable
+   */
   public RangeInputStream(InputStream in, long offset, long length, boolean isClose) {
     this.in = in;
     this.cur = 0;

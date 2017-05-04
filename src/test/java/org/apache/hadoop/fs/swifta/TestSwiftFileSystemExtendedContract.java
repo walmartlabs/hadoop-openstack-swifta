@@ -85,13 +85,13 @@ public class TestSwiftFileSystemExtendedContract extends SwiftFileSystemBaseTest
   @Test(timeout = SWIFT_TEST_TIMEOUT)
   public void testConfDefinesFilesystem() throws Throwable {
     Configuration conf = new Configuration();
-    SwiftTestUtils.getServiceURI(conf);
+    SwiftTestUtils.getServiceUri(conf);
   }
 
   @Test(timeout = SWIFT_TEST_TIMEOUT)
   public void testConfIsValid() throws Throwable {
     Configuration conf = new Configuration();
-    URI fsURI = SwiftTestUtils.getServiceURI(conf);
+    URI fsURI = SwiftTestUtils.getServiceUri(conf);
     RestClientBindings.bind(fsURI, conf);
   }
 

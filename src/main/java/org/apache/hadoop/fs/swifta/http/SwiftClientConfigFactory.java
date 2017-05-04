@@ -15,18 +15,24 @@
 
 package org.apache.hadoop.fs.swifta.http;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.swifta.exceptions.SwiftConfigurationException;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.swifta.exceptions.SwiftConfigurationException;
 
 public class SwiftClientConfigFactory {
 
   private static final Map<String, SwiftClientConfig> multiClouds =
       new ConcurrentHashMap<String, SwiftClientConfig>();
 
-
+  /**
+   * Get the instance of the Swift ClientConfig factory.
+   * @param service the service name
+   * @param conf the configuration
+   * @return the swift client configuration
+   * @throws SwiftConfigurationException the swift configuration exception
+   */
   public static SwiftClientConfig getInstance(String service, Configuration conf)
       throws SwiftConfigurationException {
     if (multiClouds.get(service) == null) {

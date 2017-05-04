@@ -15,9 +15,9 @@
 
 package org.apache.hadoop.fs.swifta.auth.entities;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-
 import java.net.URI;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * Openstack Swift endpoint description. THIS FILE IS MAPPED BY JACKSON TO AND FROM JSON. DO NOT

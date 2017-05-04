@@ -1,16 +1,12 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
- * agreements. See the NOTICE file distributed with this work for additional information regarding
- * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License. You may obtain a
- * copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
+ * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package org.apache.hadoop.fs.swifta.http;
@@ -98,8 +94,7 @@ public class SwiftClientConfig {
   private URI authUri;
 
   /**
-   * Swift region. Some OpenStack installations has more than one region. In this case user can
-   * specify the region with which Hadoop will be working.
+   * Swift region. Some OpenStack installations has more than one region. In this case user can specify the region with which Hadoop will be working.
    */
   private String region;
 
@@ -129,8 +124,7 @@ public class SwiftClientConfig {
   private AuthenticationRequest authRequest;
 
   /**
-   * This auth request is similar to @see authRequest, with one difference: it has another json
-   * representation when authRequest one is not applicable.
+   * This auth request is similar to @see authRequest, with one difference: it has another json representation when authRequest one is not applicable.
    */
   private AuthenticationRequest keystoneAuthRequest;
 
@@ -256,8 +250,7 @@ public class SwiftClientConfig {
    * @param service which cloud
    * @param container which container
    * @param conf The configuration to use to extract the binding
-   * @throws SwiftConfigurationException the configuration is not valid for defining a rest client
-   *         against the service
+   * @throws SwiftConfigurationException the configuration is not valid for defining a rest client against the service
    */
   public SwiftClientConfig(String service, Configuration conf) throws SwiftConfigurationException {
     this.service = service;
@@ -297,18 +290,14 @@ public class SwiftClientConfig {
     maxInParallelUpload = conf.getInt(SWIFT_MAX_CONNECTIONS_FOR_UPLOAD, DEFAULT_CONNECTIONS);
 
     if (apiKey == null && password == null) {
-      throw new SwiftConfigurationException("Configuration for " + filesystemUri
-          + " must contain either " + SWIFT_PASSWORD_PROPERTY + " or " + SWIFT_APIKEY_PROPERTY);
+      throw new SwiftConfigurationException("Configuration for " + filesystemUri + " must contain either " + SWIFT_PASSWORD_PROPERTY + " or " + SWIFT_APIKEY_PROPERTY);
     }
     // create the (reusable) authentication request
     if (password != null) {
-      authRequest =
-          new PasswordAuthenticationRequest(tenant, new PasswordCredentials(username, password));
+      authRequest = new PasswordAuthenticationRequest(tenant, new PasswordCredentials(username, password));
     } else {
-      authRequest =
-          new ApiKeyAuthenticationRequest(tenant, new ApiKeyCredentials(username, apiKey));
-      keystoneAuthRequest =
-          new KeyStoneAuthRequest(tenant, new KeystoneApiKeyCredentials(username, apiKey));
+      authRequest = new ApiKeyAuthenticationRequest(tenant, new ApiKeyCredentials(username, apiKey));
+      keystoneAuthRequest = new KeyStoneAuthRequest(tenant, new KeystoneApiKeyCredentials(username, apiKey));
     }
     locationAware = "true".equals(props.getProperty(SWIFT_LOCATION_AWARE_PROPERTY, "false"));
 
@@ -331,23 +320,18 @@ public class SwiftClientConfig {
 
       blocksizeKb = conf.getInt(SWIFT_BLOCKSIZE, DEFAULT_SWIFT_BLOCKSIZE);
       if (blocksizeKb <= 0) {
-        throw new SwiftConfigurationException(
-            "Invalid blocksize set in " + SWIFT_BLOCKSIZE + ": " + blocksizeKb);
+        throw new SwiftConfigurationException("Invalid blocksize set in " + SWIFT_BLOCKSIZE + ": " + blocksizeKb);
       }
       partSizeKb = conf.getLong(SWIFT_PARTITION_SIZE, DEFAULT_SWIFT_PARTITION_SIZE);
-      inputBufferSize =
-          conf.getInt(SWIFT_INPUT_STREAM_BUFFER_SIZE, DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE);
-      outputBufferSize =
-          conf.getInt(SWIFT_OUTPUT_STREAM_BUFFER_SIZE, DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE);
+      inputBufferSize = conf.getInt(SWIFT_INPUT_STREAM_BUFFER_SIZE, DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE);
+      outputBufferSize = conf.getInt(SWIFT_OUTPUT_STREAM_BUFFER_SIZE, DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE);
       if (partSizeKb <= 0) {
-        throw new SwiftConfigurationException(
-            "Invalid partition size set in " + SWIFT_PARTITION_SIZE + ": " + partSizeKb);
+        throw new SwiftConfigurationException("Invalid partition size set in " + SWIFT_PARTITION_SIZE + ": " + partSizeKb);
       }
 
       bufferSizeKb = conf.getInt(SWIFT_REQUEST_SIZE, DEFAULT_SWIFT_REQUEST_SIZE);
       if (bufferSizeKb <= 0) {
-        throw new SwiftConfigurationException(
-            "Invalid buffer size set in " + SWIFT_REQUEST_SIZE + ": " + bufferSizeKb);
+        throw new SwiftConfigurationException("Invalid buffer size set in " + SWIFT_REQUEST_SIZE + ": " + bufferSizeKb);
       }
     } catch (NumberFormatException e) {
       // convert exceptions raised parsing integers and longs into
@@ -358,20 +342,16 @@ public class SwiftClientConfig {
     if (LOG.isDebugEnabled()) {
       // everything you need for diagnostics. The password is omitted.
       serviceDescription = String.format(
-          "Service={%s} uri={%s}" + " tenant={%s} user={%s} region={%s}" + " publicURL={%b}"
-              + " location aware={%b}" + " partition size={%d KB}, buffer size={%d KB}"
-              + " block size={%d KB}" + " connect timeout={%d}, retry count={%d}"
-              + " socket timeout={%d}" + " throttle delay={%d}",
-          serviceProvider, stringAuthUri, tenant, username, region != null ? region : "(none)",
-          usePublicUrl, locationAware, partSizeKb, bufferSizeKb, blocksizeKb, connectTimeout,
-          retryCount, socketTimeout, throttleDelay);
+          "Service={%s} uri={%s}" + " tenant={%s} user={%s} region={%s}" + " publicURL={%b}" + " location aware={%b}" + " partition size={%d KB}, buffer size={%d KB}" + " block size={%d KB}"
+              + " connect timeout={%d}, retry count={%d}" + " socket timeout={%d}" + " throttle delay={%d}",
+          serviceProvider, stringAuthUri, tenant, username, region != null ? region : "(none)", usePublicUrl, locationAware, partSizeKb, bufferSizeKb, blocksizeKb, connectTimeout, retryCount,
+          socketTimeout, throttleDelay);
       LOG.debug(serviceDescription);
     }
     try {
       this.authUri = new URI(stringAuthUri);
     } catch (URISyntaxException e) {
-      throw new SwiftConfigurationException(
-          "The " + SWIFT_AUTH_PROPERTY + " property was incorrect: " + stringAuthUri, e);
+      throw new SwiftConfigurationException("The " + SWIFT_AUTH_PROPERTY + " property was incorrect: " + stringAuthUri, e);
     }
   }
 

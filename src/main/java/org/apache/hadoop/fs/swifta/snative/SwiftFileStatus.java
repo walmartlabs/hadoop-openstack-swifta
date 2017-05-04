@@ -21,7 +21,8 @@ import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.fs.swifta.util.SwiftObjectPath;
 
 /**
- * A subclass of {@link FileStatus} that contains the Swift-specific rules of when a file is considered to be a directory.
+ * A subclass of {@link FileStatus} that contains the Swift-specific rules of when a file is
+ * considered to be a directory.
  */
 public class SwiftFileStatus extends FileStatus {
 
@@ -29,21 +30,27 @@ public class SwiftFileStatus extends FileStatus {
 
   public SwiftFileStatus() {}
 
-  public SwiftFileStatus(long length, boolean isdir, int blockReplication, long blocksize, long modificationTime, Path path, SwiftObjectPath objectManifest) {
+  public SwiftFileStatus(long length, boolean isdir, int blockReplication, long blocksize,
+      long modificationTime, Path path, SwiftObjectPath objectManifest) {
     super(length, isdir, blockReplication, blocksize, modificationTime, path);
     this.objectManifest = objectManifest;
   }
 
-  public SwiftFileStatus(long length, boolean isdir, int blockReplication, long blocksize, long modificationTime, Path path) {
+  public SwiftFileStatus(long length, boolean isdir, int blockReplication, long blocksize,
+      long modificationTime, Path path) {
     super(length, isdir, blockReplication, blocksize, modificationTime, path);
   }
 
-  public SwiftFileStatus(long length, boolean isdir, int blockReplication, long blocksize, long modificationTime, long accessTime, FsPermission permission, String owner, String group, Path path) {
-    super(length, isdir, blockReplication, blocksize, modificationTime, accessTime, permission, owner, group, path);
+  public SwiftFileStatus(long length, boolean isdir, int blockReplication, long blocksize,
+      long modificationTime, long accessTime, FsPermission permission, String owner, String group,
+      Path path) {
+    super(length, isdir, blockReplication, blocksize, modificationTime, accessTime, permission,
+        owner, group, path);
   }
 
   /**
-   * Declare that the path represents a directory, which in the SwiftNativeFileSystem means "is a directory or a 0 byte file".
+   * Declare that the path represents a directory, which in the SwiftNativeFileSystem means "is a
+   * directory or a 0 byte file".
    *
    * @return true if the status is considered to be a file
    */
@@ -53,7 +60,8 @@ public class SwiftFileStatus extends FileStatus {
   }
 
   /**
-   * A entry is a file if it is not a directory. By implementing it <i>and not marking as an override</i> this subclass builds and runs in both Hadoop versions.
+   * A entry is a file if it is not a directory. By implementing it <i>and not marking as an
+   * override</i> this subclass builds and runs in both Hadoop versions.
    * 
    * @return the opposite value to {@link #isDir()}
    */

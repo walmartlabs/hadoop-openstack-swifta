@@ -15,17 +15,18 @@
 
 package org.apache.hadoop.fs.swifta.metrics;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.swifta.exceptions.SwiftMetricWrongParametersException;
-
 import java.io.InputStream;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.swifta.exceptions.SwiftMetricWrongParametersException;
+
 public class InputstreamMetrics implements SwiftMetric {
   private static final Log LOG = LogFactory.getLog(InputstreamMetrics.class);
-  private static final Map<InputStream, String> inputStreams = new WeakHashMap<InputStream, String>();
+  private static final Map<InputStream, String> inputStreams =
+      new WeakHashMap<InputStream, String>();
   private static final int MAX = 500;
   private String name; // Metric name.
 

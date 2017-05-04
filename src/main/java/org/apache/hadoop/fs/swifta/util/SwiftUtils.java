@@ -15,17 +15,17 @@
 
 package org.apache.hadoop.fs.swifta.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.swifta.exceptions.SwiftException;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import org.apache.commons.logging.Log;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.swifta.exceptions.SwiftException;
 
 /**
  * Various utility classes for SwiftFS support.
@@ -211,6 +211,12 @@ public final class SwiftUtils {
     return buf.toString();
   }
 
+  /**
+   * Get the file stats in string.
+   * @param stats the file status
+   * @param separator the separator
+   * @return the file stats in string 
+   */
   public static String fileStatsToString(FileStatus[] stats, String separator) {
     StringBuilder buf = new StringBuilder(stats.length * 128);
     for (int i = 0; i < stats.length; i++) {

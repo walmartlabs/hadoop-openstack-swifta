@@ -15,6 +15,10 @@
 
 package org.apache.hadoop.fs.swifta.http;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
@@ -22,9 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.swifta.util.ThreadUtils;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class HttpClientManager {
 
@@ -37,6 +38,12 @@ public class HttpClientManager {
 
   private static Object lock = new Object();
 
+  /**
+   * Constructor for MultiThreadedHttpConnectionManager.
+   * 
+   * @param clientConfig the clientConfig
+   * @return the multithreaded manager
+   */
   public static MultiThreadedHttpConnectionManager getHttpManager(SwiftClientConfig clientConfig) {
     if (connectionManager == null) {
       synchronized (lock) {
@@ -76,7 +83,9 @@ public class HttpClientManager {
     connParam.setTcpNoDelay(Boolean.TRUE);
     connectionManager.setParams(connParam);
     // Connection eviction
-    ScheduledExecutorService scheduledExeService = Executors.newScheduledThreadPool(1, new DaemonThreadFactory(THREAD_NAME));
-    scheduledExeService.scheduleAtFixedRate(new IdleConnectionMonitorThread(connectionManager), INITAL_DELAY, PERIOD, TimeUnit.SECONDS);
+    ScheduledExecutorService scheduledExeService =
+        Executors.newScheduledThreadPool(1, new DaemonThreadFactory(THREAD_NAME));
+    scheduledExeService.scheduleAtFixedRate(new IdleConnectionMonitorThread(connectionManager),
+        INITAL_DELAY, PERIOD, TimeUnit.SECONDS);
   }
 }

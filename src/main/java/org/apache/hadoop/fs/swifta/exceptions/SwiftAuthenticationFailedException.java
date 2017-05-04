@@ -15,10 +15,10 @@
 
 package org.apache.hadoop.fs.swifta.exceptions;
 
+import java.net.URI;
+
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
-
-import java.net.URI;
 
 /**
  * An exception raised when an authentication request was rejected.

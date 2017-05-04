@@ -11,9 +11,9 @@
 
 package org.apache.hadoop.fs.swifta.snative;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
 import java.util.Date;
+
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Java mapping of Swift JSON file status. THIS FILE IS MAPPED BY JACKSON TO AND FROM JSON. DO NOT RENAME OR MODIFY FIELDS AND THEIR ACCESSORS.

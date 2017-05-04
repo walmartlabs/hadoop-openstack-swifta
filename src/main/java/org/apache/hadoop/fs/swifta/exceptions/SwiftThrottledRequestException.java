@@ -15,9 +15,9 @@
 
 package org.apache.hadoop.fs.swifta.exceptions;
 
-import org.apache.commons.httpclient.HttpMethod;
-
 import java.net.URI;
+
+import org.apache.commons.httpclient.HttpMethod;
 
 /**
  * Exception raised if a Swift endpoint returned a HTTP response indicating the caller is being

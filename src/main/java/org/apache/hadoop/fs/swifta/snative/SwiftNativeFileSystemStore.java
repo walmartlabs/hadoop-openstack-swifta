@@ -205,7 +205,7 @@ public class SwiftNativeFileSystemStore {
    * @param path path of final final
    * @throws IOException
    */
-  public void createManifestForPartUpload(Path path) throws IOException {
+  public void createManifestForPartUpload(Path path, long fileLen) throws IOException {
     SwiftObjectPath p = toObjectPath(path);
     String pathString = p.toUriPath();
     if (!pathString.endsWith("/")) {
@@ -214,10 +214,11 @@ public class SwiftNativeFileSystemStore {
     if (pathString.startsWith("/")) {
       pathString = pathString.substring(1);
     }
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Final writes x-object-manifest for header path:" + pathString);
+    if (LOG.isInfoEnabled()) {
+      LOG.info("Final writes x-object-manifest for header path:" + pathString);
     }
-    swiftRestClient.upload(p, new ByteArrayInputStream(zeroByte), 0, new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString));
+    swiftRestClient.upload(p, new ByteArrayInputStream(zeroByte), 0, new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString),
+        new Header(SwiftProtocolConstants.USER_CUSTOM_DATA, Long.toString(fileLen)));
   }
 
   /**
@@ -472,8 +473,8 @@ public class SwiftNativeFileSystemStore {
     byte[] bytes = null;
     try {
       bytes = swiftRestClient.listDeepObjectsInDirectory(path, listDeep, marker);
-      if (LOG.isDebugEnabled()) {
-        LOG.debug(new String(bytes) + " from path: " + path.toString());
+      if (LOG.isInfoEnabled()) {
+        LOG.info(new String(bytes) + " from path: " + path.toString());
       }
     } catch (FileNotFoundException e) {
       if (LOG.isDebugEnabled()) {
@@ -542,9 +543,18 @@ public class SwiftNativeFileSystemStore {
     if (LOG.isDebugEnabled()) {
       LOG.debug("Marker:" + marker);
     }
+    long fileLen = 0;
     for (SwiftObjectFileStatus status : fileStatusList) {
       if (status.getName() != null) {
-        files.add(new SwiftFileStatus(status.getBytes(), status.getBytes() == 0, 1, getBlocksize(), status.getLastModified().getTime(), getCorrectSwiftPath(new Path(status.getName()))));
+        fileLen = status.getFileLen() == null ? 0L : Long.parseLong(status.getFileLen());
+        if (fileLen < 1) {
+          files.add(new SwiftFileStatus(status.getBytes(), status.getBytes() == 0, 1, getBlocksize(), status.getLastModified().getTime(), getCorrectSwiftPath(new Path(status.getName()))));
+        } else {
+          if (!extractDigits(status.getName())) {
+            LOG.info("Check pattern not match:" + status.getName());
+            files.add(new SwiftFileStatus(fileLen, Boolean.FALSE, 1, getBlocksize(), status.getLastModified().getTime(), getCorrectSwiftPath(new Path(status.getName()))));
+          }
+        }
       }
     }
     if (LOG.isDebugEnabled()) {
@@ -554,6 +564,15 @@ public class SwiftNativeFileSystemStore {
     objects.setFiles(files);
     objects.setMarker(marker);
     return objects;
+  }
+
+  private static boolean extractDigits(final String in) {
+    final Pattern p = Pattern.compile("^(\\d{6})$");
+    final Matcher m = p.matcher(in);
+    if (m.find()) {
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -910,7 +929,7 @@ public class SwiftNativeFileSystemStore {
           if (!newPrefixName.endsWith("/")) {
             newPrefixName = newPrefixName.concat("/");
           }
-          createManifestForPartUpload(newPrefixPath);
+          createManifestForPartUpload(newPrefixPath, srcMetadata.getLen());
           ThreadManager tm = this.getThreadManager(childStats);
           Map<String, Future<Boolean>> copies = new HashMap<String, Future<Boolean>>();
           for (FileStatus s : childStats) {

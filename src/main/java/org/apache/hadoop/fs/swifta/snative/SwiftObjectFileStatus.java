@@ -1,16 +1,12 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
- * agreements. See the NOTICE file distributed with this work for additional information regarding
- * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License. You may obtain a
- * copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
+ * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package org.apache.hadoop.fs.swifta.snative;
@@ -20,11 +16,10 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import java.util.Date;
 
 /**
- * Java mapping of Swift JSON file status. THIS FILE IS MAPPED BY JACKSON TO AND FROM JSON. DO NOT
- * RENAME OR MODIFY FIELDS AND THEIR ACCESSORS.
+ * Java mapping of Swift JSON file status. THIS FILE IS MAPPED BY JACKSON TO AND FROM JSON. DO NOT RENAME OR MODIFY FIELDS AND THEIR ACCESSORS.
  */
 
-class SwiftObjectFileStatus {
+ class SwiftObjectFileStatus {
 
   private static final String SLASH = "/";
   private long bytes;
@@ -35,11 +30,15 @@ class SwiftObjectFileStatus {
   private Date lastModified;
   private String name;
   private String subdir;
+  /**
+   * This field name maybe changed, hold the position here.
+   */
+  @JsonProperty("user_custom_data")
+  private String fileLen;
 
   SwiftObjectFileStatus() {}
 
-  SwiftObjectFileStatus(long bytes, String contentType, String hash, Date lastModified,
-      String name) {
+  SwiftObjectFileStatus(long bytes, String contentType, String hash, Date lastModified, String name) {
     this.bytes = bytes;
     this.contentType = contentType;
     this.hash = hash;
@@ -76,7 +75,8 @@ class SwiftObjectFileStatus {
   }
 
   public void setLastModified(Date lastModified) {
-    this.lastModified = lastModified;
+    this.lastModified = lastModified == null ? lastModified : new Date(lastModified.getTime());
+    //this.lastModified = lastModified;
   }
 
   public String getName() {
@@ -111,5 +111,13 @@ class SwiftObjectFileStatus {
     }
 
     return SLASH.concat(path);
+  }
+
+  public String getFileLen() {
+    return fileLen;
+  }
+
+  public void setFileLen(String fileLen) {
+    this.fileLen = fileLen;
   }
 }

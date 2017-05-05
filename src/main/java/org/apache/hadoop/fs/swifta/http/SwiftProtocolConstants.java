@@ -68,6 +68,11 @@ public class SwiftProtocolConstants {
    * Swift-specific header: object manifest used in the final upload of a multipart operation: {@value}
    */
   public static final String X_OBJECT_MANIFEST = "X-Object-Manifest";
+
+  /**
+   * Swift-specific header: object manifest used in the final upload of a multipart operation: {@value}
+   */
+  public static final String USER_CUSTOM_DATA = "X-Manifest-Total-Size";
   /**
    * Swift-specific header -#of objects in a container: {@value}
    */

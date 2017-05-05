@@ -128,7 +128,7 @@ public class SwiftNativeOutputStreamMultipartNoSplit extends SwiftOutputStream {
       long len = backupFile.length();
       if (len >= this.filePartSize) {
         inParallelPartUpload();
-        nativeStore.createManifestForPartUpload(keypath);
+        nativeStore.createManifestForPartUpload(keypath, this.bytesUploaded);
       } else {
         uploadOnClose(keypath);
       }

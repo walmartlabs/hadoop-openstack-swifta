@@ -125,7 +125,7 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
       Path keypath = new Path(key);
       if (partUpload) {
         partUpload(true);
-        nativeStore.createManifestForPartUpload(keypath);
+        nativeStore.createManifestForPartUpload(keypath, this.bytesUploaded);
       } else {
         uploadOnClose(keypath);
       }

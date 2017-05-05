@@ -7,9 +7,6 @@ import java.util.List;
 
 /**
  * List of objects from cloud.
- * 
- * @author rzhan33
- *
  */
 public class ObjectsList {
 

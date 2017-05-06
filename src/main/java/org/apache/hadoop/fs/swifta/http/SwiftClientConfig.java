@@ -232,6 +232,7 @@ public class SwiftClientConfig {
    */
   private int maxInParallelUpload;
 
+
   /**
    * Create a Swift Client config instance.
    *

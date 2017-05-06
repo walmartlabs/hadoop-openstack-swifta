@@ -186,13 +186,8 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
       this.cleanUploadThread();
       Path keypath = new Path(key);
       if (partUpload) {
-<<<<<<< HEAD
-        uploadParts();
-        nativeStore.createManifestForPartUpload(keypath, this.bytesUploaded.get());
-=======
         // uploadParts();
         nativeStore.createManifestForPartUpload(keypath);
->>>>>>> af48e3c... Expose the in parallel threads in configuration. Improve the performance of multipart_split.
       } else {
         uploadOnClose(keypath);
       }

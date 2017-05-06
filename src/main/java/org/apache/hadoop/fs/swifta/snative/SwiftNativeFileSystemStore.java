@@ -226,6 +226,27 @@ public class SwiftNativeFileSystemStore {
   }
 
   /**
+   * Tell the Swift server to expect a multi-part upload by submitting a 0-byte file with the X-Object-Manifest header.
+   *
+   * @param path path of final final
+   * @throws IOException
+   */
+  public void createManifestForPartUpload(Path path) throws IOException {
+    SwiftObjectPath p = toObjectPath(path);
+    String pathString = p.toUriPath();
+    if (!pathString.endsWith("/")) {
+      pathString = pathString.concat("/");
+    }
+    if (pathString.startsWith("/")) {
+      pathString = pathString.substring(1);
+    }
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Final writes x-object-manifest for header path:" + pathString);
+    }
+    swiftRestClient.upload(p, new ByteArrayInputStream(zeroByte), 0, new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString));
+  }
+
+  /**
    * Get the metadata of an object.
    *
    * @param path path

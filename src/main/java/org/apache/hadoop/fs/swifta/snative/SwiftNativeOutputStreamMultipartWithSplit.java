@@ -35,10 +35,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -55,7 +56,7 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
   private long filePartSize;
   private String key;
   private BufferedOutputStream backupStream;
-  private SwiftNativeFileSystemStore nativeStore;
+  private final SwiftNativeFileSystemStore nativeStore;
   private boolean closed;
   private long blockOffset;
   private long bytesWritten;
@@ -65,11 +66,10 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
   /**
    * The minimum files to trigger a background upload.
    */
-  static final int BACKGROUND_UPLOAD_MIN_BATCH_SIZE = 8;
-  static final int BACKGROUND_UPLOAD_BATCH_SIZE = BACKGROUND_UPLOAD_MIN_BATCH_SIZE - 1;
+  static final int BACKGROUND_UPLOAD_BATCH_SIZE = 20;
   final byte[] oneByte = new byte[1];
   final String backupDir;
-  ConcurrentLinkedQueue<BackupFile> backupFiles;
+  BlockingQueue<BackupFile> backupFiles;
 
   private AtomicInteger partNumber;
 
@@ -103,7 +103,7 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
     bytesUploaded = new AtomicLong(0);
     this.filePartSize = 1024L * partSizeKB;
     backupDir = UUID.randomUUID().toString();
-    backupFiles = new ConcurrentLinkedQueue<BackupFile>();
+    backupFiles = new LinkedBlockingQueue<BackupFile>();
     newDir = new File(dir, backupDir);
     newDir.deleteOnExit();
     if (!newDir.exists()) {
@@ -129,7 +129,7 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
     }
     File tmp = newBackupFile(partNumber);
     file = new BackupFile(tmp, partNumber, new BufferedOutputStream(new FileOutputStream(tmp), outputBufferSize));
-    backupFiles.add(file);
+    backupFiles.offer(file);
     backupStream = file.getOutput();
   }
 
@@ -179,21 +179,27 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
       if (backupStream != null) {
         backupStream.close();
       }
-      this.cleanUploadThread();
       this.cleanCloseThread();
       closed = true;
       this.waitToFinish(closes);
+
+      this.cleanUploadThread();
       Path keypath = new Path(key);
       if (partUpload) {
+<<<<<<< HEAD
         uploadParts();
         nativeStore.createManifestForPartUpload(keypath, this.bytesUploaded.get());
+=======
+        // uploadParts();
+        nativeStore.createManifestForPartUpload(keypath);
+>>>>>>> af48e3c... Expose the in parallel threads in configuration. Improve the performance of multipart_split.
       } else {
         uploadOnClose(keypath);
       }
 
     } finally {
       cleanBackupFiles();
-      this.cleanUploadThread();
+      // this.cleanUploadThread();
       this.clean();
       metric.remove(this);
       metric.report();
@@ -222,22 +228,21 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
     }
   }
 
-
-  private void uploadParts() throws IOException {
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Using muli-parts upload with threads " + backupFiles.size());
-    }
-    final ThreadManager tm = new ThreadManager();
-    tm.createThreadManager(backupFiles.size());
-
-    for (final BackupFile file : backupFiles) {
-      this.doUpload(tm, file, file.getPartNumber());
-    }
-    tm.shutdown();
-    // Prevent incomplete read before a full upload.
-    this.waitToFinish(uploads);
-    this.cleanUp(tm);
-  }
+  // private void uploadParts() throws IOException {
+  // if (LOG.isDebugEnabled()) {
+  // LOG.debug("Using muli-parts upload with threads " + backupFiles.size());
+  // }
+  // final ThreadManager tm = new ThreadManager();
+  // tm.createThreadManager(backupFiles.size());
+  //
+  // for (final BackupFile file : backupFiles) {
+  // this.doUpload(tm, file, file.getPartNumber());
+  // }
+  // tm.shutdown();
+  // // Prevent incomplete read before a full upload.
+  // this.waitToFinish(uploads);
+  // this.cleanUp(tm);
+  // }
 
   @SuppressWarnings("rawtypes")
   Future doClose(final ThreadManager tm, final OutputStream out, final BackupFile file) {
@@ -407,7 +412,8 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
      * No race condition here. Upload files ahead if need.
      */
     if (uploadThread == null && partUpload) {
-      uploadThread = new AsynchronousUpload(backupFiles, this);
+      int maxThreads = nativeStore.getMaxInParallelUpload() < 1 ? SwiftNativeOutputStreamMultipartWithSplit.BACKGROUND_UPLOAD_BATCH_SIZE : nativeStore.getMaxInParallelUpload();
+      uploadThread = new AsynchronousUpload(backupFiles, this, maxThreads);
       uploadThread.start();
     }
   }
@@ -422,7 +428,7 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
       } catch (ExecutionException e) {
         e.printStackTrace();
       } finally {
-        task.cancel(Boolean.TRUE);
+        task.cancel(Boolean.FALSE);
       }
     }
     tasks.clear();
@@ -430,12 +436,12 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
     return Boolean.TRUE;
   }
 
-  private void cleanUp(ThreadManager tm) {
-    if (tm != null) {
-      tm.cleanup();
-      tm = null;
-    }
-  }
+  // private void cleanUp(ThreadManager tm) {
+  // if (tm != null) {
+  // tm.cleanup();
+  // tm = null;
+  // }
+  // }
 
   /**
    * Upload a single partition. This deletes the local backing-file, and re-opens it to create a new one.
@@ -547,6 +553,10 @@ class BackupFile implements Serializable {
   private volatile boolean isClosed;
   Object lock = new Object();
 
+  public BackupFile() {
+    this.file = null;
+  }
+
   public BackupFile(File file, int partNumber, BufferedOutputStream output) {
     this.file = file;
     this.partNumber = partNumber;
@@ -590,21 +600,27 @@ class BackupFile implements Serializable {
 
 class AsynchronousUpload extends Thread {
   private static final Log LOG = LogFactory.getLog(AsynchronousUpload.class);
-  private ConcurrentLinkedQueue<BackupFile> queue;
+  private BlockingQueue<BackupFile> queue;
   private volatile boolean execute;
   private SwiftNativeOutputStreamMultipartWithSplit out;
   private volatile boolean isFinished;
+  private int maxThreads;
 
-  public AsynchronousUpload(ConcurrentLinkedQueue<BackupFile> queue, SwiftNativeOutputStreamMultipartWithSplit out) {
+  public AsynchronousUpload(BlockingQueue<BackupFile> queue, SwiftNativeOutputStreamMultipartWithSplit out, int maxThreads) {
     super();
     this.queue = queue;
     this.execute = Boolean.TRUE;
     this.out = out;
     this.isFinished = Boolean.FALSE;
+    this.maxThreads = maxThreads;
   }
 
   public void close() {
     this.execute = Boolean.FALSE;
+    /**
+     * Terminal object
+     */
+    queue.offer(new BackupFile());
     while (!isFinished) {
       try {
         Thread.sleep(1);
@@ -617,55 +633,70 @@ class AsynchronousUpload extends Thread {
   @SuppressWarnings("rawtypes")
   @Override
   public void run() {
-    while (this.execute) {
-      ThreadManager tm = null;
-      try {
-        List<Future> uploads = null;
-        // List<BackupFile> deletes = new ArrayList<BackupFile>();
+    // while (this.execute) {
+    ThreadManager tm = null;
+    try {
+      tm = new ThreadManager();
+      tm.createThreadManager(maxThreads);
 
+      List<Future> uploads = null;
+      /**
+       * Don't trigger background upload.
+       */
+      // if (queue.size() < SwiftNativeOutputStreamMultipartWithSplit.BACKGROUND_UPLOAD_MIN_BATCH_SIZE) {
+      // continue;
+      // }
+      // int i = 0;
+      // while (i < SwiftNativeOutputStreamMultipartWithSplit.BACKGROUND_UPLOAD_BATCH_SIZE) {
+      BackupFile pFile = null;
+      while (this.execute) {
+        // i++;
         /**
-         * Don't trigger background upload.
+         * Get current file, but not upload it.
          */
-        if (queue.size() < SwiftNativeOutputStreamMultipartWithSplit.BACKGROUND_UPLOAD_MIN_BATCH_SIZE) {
+        BackupFile cFile = queue.take();
+        /**
+         * Only upload if previous file exist to avoid upload unfinished file chunk.
+         */
+        if (pFile == null) {
+          pFile = cFile;
           continue;
         }
-        // List<BackupFile> files = new ArrayList<BackupFile>(queue);
-        int i = 0;
-        while (i < SwiftNativeOutputStreamMultipartWithSplit.BACKGROUND_UPLOAD_BATCH_SIZE) {
-          i++;
-          BackupFile file = queue.poll();
-          if (LOG.isDebugEnabled()) {
-            LOG.debug(file.getPartNumber() + ",Start background upload for: " + file.getUploadFile().getName() + ";" + file.getUploadFile().length());
-          }
-          if (tm == null) {
-            tm = new ThreadManager();
-            tm.createThreadManager(SwiftNativeOutputStreamMultipartWithSplit.BACKGROUND_UPLOAD_BATCH_SIZE);
-          }
-          uploads = out.doUpload(tm, file, file.getPartNumber());
+        if (LOG.isDebugEnabled()) {
+          LOG.debug(pFile.getPartNumber() + ",Start background upload for: " + pFile.getUploadFile().getName() + ";" + pFile.getUploadFile().length());
         }
-        // files = null;
-        if (tm != null) {
-          tm.shutdown();
-        }
-        if (uploads != null) {
-          out.waitToFinish(uploads);
-          uploads.clear();
-        }
-        Thread.sleep(1);
+        uploads = out.doUpload(tm, pFile, pFile.getPartNumber());
 
-      } catch (InterruptedException e) {
-        this.execute = Boolean.FALSE;
-      } catch (Exception e) {
-        e.printStackTrace();
-        LOG.error("Error happen during upload, " + e.getMessage());
-        this.execute = Boolean.FALSE;
-      } finally {
-        if (tm != null) {
-          tm.cleanup();
-          tm = null;
+        if (cFile.getUploadFile() == null) {
+          break;
         }
+        pFile = cFile;
       }
+      if (tm != null) {
+        tm.shutdown();
+      }
+      if (uploads != null) {
+        out.waitToFinish(uploads);
+        uploads.clear();
+      }
+      // Thread.sleep(1);
+
     }
-    isFinished = Boolean.TRUE;
+    // catch (InterruptedException e) {
+    // this.execute = Boolean.FALSE;
+    // }
+    catch (Exception e) {
+      e.printStackTrace();
+      LOG.error("Error happen during upload, " + e.getMessage());
+    } finally {
+      if (tm != null) {
+        tm.cleanup();
+        tm = null;
+      }
+      this.execute = Boolean.FALSE;
+      isFinished = Boolean.TRUE;
+    }
+    // }
+
   }
 }

@@ -115,6 +115,10 @@ public class SwiftNativeFileSystemStore {
     return "SwiftNativeFileSystemStore with " + swiftRestClient;
   }
 
+  public int getMaxInParallelUpload() {
+    return this.swiftRestClient.getClientConfig().getMaxInParallelUpload();
+  }
+
   /**
    * Create the swift output stream
    * 

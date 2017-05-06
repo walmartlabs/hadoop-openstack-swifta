@@ -203,7 +203,7 @@ public class SwiftProtocolConstants {
   /**
    * The pool size for thread manager.
    */
-  public static final String SWIFT_MAX_CONNECTIONS_FOR_DELETE = FS_SWIFT + ".connections.max.delete";
+  public static final String SWIFT_MAX_CONNECTIONS_IN_POOL = FS_SWIFT + ".connections.max.delete";
 
   /**
    * The max threads for a parallel copy.

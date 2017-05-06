@@ -99,7 +99,7 @@ import java.util.List;
 public final class SwiftRestClient {
 
   private static final Log LOG = LogFactory.getLog(SwiftRestClient.class);
-  private static final int TOLERANT_TIME = 60000;
+  private static final int TOLERANT_TIME = 120000;
 
 
   /**

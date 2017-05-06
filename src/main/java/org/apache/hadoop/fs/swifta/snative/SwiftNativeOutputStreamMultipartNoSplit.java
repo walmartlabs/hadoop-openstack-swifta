@@ -144,7 +144,8 @@ public class SwiftNativeOutputStreamMultipartNoSplit extends SwiftOutputStream {
     long off = 0;
     int numberOfParts = (int) (len / this.filePartSize);
     numberOfParts = len % this.filePartSize > 0 ? numberOfParts + 1 : numberOfParts;
-    ThreadManager tm = new ThreadManager(numberOfParts, numberOfParts);
+    int maxThreads = nativeStore.getMaxInParallelUpload() < 1 ? numberOfParts : nativeStore.getMaxInParallelUpload();
+    ThreadManager tm = new ThreadManager(maxThreads, maxThreads);
     List<Future> uploads = new ArrayList<Future>();
     while (remain > 0) {
       long uploadLen = remain > this.filePartSize ? filePartSize : remain;

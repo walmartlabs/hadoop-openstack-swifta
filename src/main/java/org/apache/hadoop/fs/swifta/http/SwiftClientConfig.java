@@ -23,6 +23,7 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_OUTP
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_LAZY_SEEK;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_LOCATION_AWARE_PROPERTY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_CONNECTIONS_FOR_COPY;
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_CONNECTIONS_FOR_UPLOAD;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_CONNECTIONS_IN_POOL;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_HOST_CONNECTIONS;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_TOTAL_CONNECTIONS;
@@ -226,7 +227,10 @@ public class SwiftClientConfig {
    */
   private int maxThreadsForCopy;
 
-
+  /**
+   * Max threads for upload.
+   */
+  private int maxInParallelUpload;
 
   /**
    * Create a Swift Client config instance.
@@ -270,6 +274,8 @@ public class SwiftClientConfig {
     maxThreadsInPool = conf.getInt(SWIFT_MAX_CONNECTIONS_IN_POOL, DEFAULT_CONNECTIONS);
 
     maxThreadsForCopy = conf.getInt(SWIFT_MAX_CONNECTIONS_FOR_COPY, DEFAULT_COPY_CONNECTIONS);
+
+    maxInParallelUpload = conf.getInt(SWIFT_MAX_CONNECTIONS_FOR_UPLOAD, DEFAULT_CONNECTIONS);
 
     if (apiKey == null && password == null) {
       throw new SwiftConfigurationException("Configuration for " + filesystemURI + " must contain either " + SWIFT_PASSWORD_PROPERTY + " or " + SWIFT_APIKEY_PROPERTY);
@@ -618,6 +624,10 @@ public class SwiftClientConfig {
 
   public long getCacheLiveTime() {
     return cacheLiveTime;
+  }
+
+  public int getMaxInParallelUpload() {
+    return maxInParallelUpload;
   }
 
   public WritePolicies getWritePolicy() {

@@ -214,8 +214,8 @@ public class SwiftNativeFileSystemStore {
     if (pathString.startsWith("/")) {
       pathString = pathString.substring(1);
     }
-    if (LOG.isInfoEnabled()) {
-      LOG.info("Final writes x-object-manifest for header path:" + pathString);
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Final writes x-object-manifest for header path:" + pathString);
     }
     swiftRestClient.upload(p, new ByteArrayInputStream(zeroByte), 0, new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString),
         new Header(SwiftProtocolConstants.USER_CUSTOM_DATA, Long.toString(fileLen)));
@@ -473,8 +473,8 @@ public class SwiftNativeFileSystemStore {
     byte[] bytes = null;
     try {
       bytes = swiftRestClient.listDeepObjectsInDirectory(path, listDeep, marker);
-      if (LOG.isInfoEnabled()) {
-        LOG.info(new String(bytes) + " from path: " + path.toString());
+      if (LOG.isDebugEnabled()) {
+        LOG.debug(new String(bytes) + " from path: " + path.toString());
       }
     } catch (FileNotFoundException e) {
       if (LOG.isDebugEnabled()) {
@@ -550,10 +550,10 @@ public class SwiftNativeFileSystemStore {
         if (fileLen < 1) {
           files.add(new SwiftFileStatus(status.getBytes(), status.getBytes() == 0, 1, getBlocksize(), status.getLastModified().getTime(), getCorrectSwiftPath(new Path(status.getName()))));
         } else {
-          if (!extractDigits(status.getName())) {
-            LOG.info("Check pattern not match:" + status.getName());
-            files.add(new SwiftFileStatus(fileLen, Boolean.FALSE, 1, getBlocksize(), status.getLastModified().getTime(), getCorrectSwiftPath(new Path(status.getName()))));
-          }
+          // if (!extractDigits(status.getName())) {
+          // LOG.info("Check pattern not match:" + status.getName());
+          files.add(new SwiftFileStatus(fileLen, Boolean.FALSE, 1, getBlocksize(), status.getLastModified().getTime(), getCorrectSwiftPath(new Path(status.getName()))));
+          // }
         }
       }
     }

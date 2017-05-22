@@ -369,7 +369,7 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
         LOG.debug("Blocking write now, queue size is " + backupFiles.size());
       }
       try {
-        Thread.sleep(1000);
+        this.wait(1000);
       } catch (InterruptedException e) {
         // Ignore
       }

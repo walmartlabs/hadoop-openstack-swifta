@@ -361,19 +361,6 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
     }
     // validate the output stream
     verifyOpen();
-    /**
-     * Wait upload to finish.
-     */
-    while (uploadThread.isFull()) {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Blocking write now, queue size is " + backupFiles.size());
-      }
-      try {
-        this.wait(1000);
-      } catch (InterruptedException e) {
-        // Ignore
-      }
-    }
     this.autoWriteToSplittedBackupStream(buffer, offset, len);
   }
 
@@ -396,6 +383,19 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
    */
   private void autoWriteToSplittedBackupStream(byte[] buffer, int offset, int len) throws IOException {
 
+    /**
+     * Wait upload to finish.
+     */
+    while (uploadThread.isFull()) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Blocking write now, queue size is " + backupFiles.size());
+      }
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        // Ignore
+      }
+    }
     while (len > 0) {
       if ((blockOffset + len) >= filePartSize) {
         int subLen = (int) (filePartSize - blockOffset);

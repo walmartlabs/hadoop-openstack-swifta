@@ -199,10 +199,10 @@ public class SwiftNativeFileSystemStore {
       stringPath = stringPath.concat("/").concat(partitionFilename);
     }
     SwiftObjectPath p = new SwiftObjectPath(toDirPath(path).getContainer(), stringPath);
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("[uploadFilePart] Upload parts to server length:" + length + " partNumber: " + partNumber + "" + p.toUriPath());
-    }
     swiftRestClient.upload(p, inputStream, length);
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("[uploadFilePart] Uploaded a part to server, file length:" + length + " partNumber: " + partNumber + "" + p.toUriPath());
+    }
   }
 
   /**

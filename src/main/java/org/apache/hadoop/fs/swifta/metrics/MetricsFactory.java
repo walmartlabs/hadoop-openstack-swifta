@@ -3,6 +3,7 @@ package org.apache.hadoop.fs.swifta.metrics;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftMetricWrongParametersException;
+import org.apache.hadoop.fs.swifta.snative.SwiftNativeOutputStreamMultipartWithSplitBlock;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,6 +36,8 @@ public class MetricsFactory {
         metricsMap.put(name, new MetricsFactory(new OutputstreamMetrics("Total opened SwiftNativeOutputStreamMultipartWithSplit connections to cloud.")));
       } else if ("SwiftNativeOutputStreamMultiPartSingleThread".equals(name)) {
         metricsMap.put(name, new MetricsFactory(new OutputstreamMetrics("Total opened SwiftNativeOutputStreamMultiPartSingleThread connections to cloud.")));
+      } else if ("SwiftNativeOutputStreamMultipartWithSplitBlock".equals(name)) {
+        metricsMap.put(name, new MetricsFactory(new OutputstreamMetrics("Total opened SwiftNativeOutputStreamMultipartWithSplitBlock connections to cloud.")));
       } else {
         throw new UnsupportedOperationException("This method has not supported yet!");
       }

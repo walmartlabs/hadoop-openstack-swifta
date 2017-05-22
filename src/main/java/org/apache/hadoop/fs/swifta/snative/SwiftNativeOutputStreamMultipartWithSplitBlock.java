@@ -77,11 +77,12 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
   @SuppressWarnings("rawtypes")
   final List<Future> closes;
   final File dir;
-  private AsynchronousUploadBlock uploadThread;
+  private AsynchronousUpload uploadThread;
   private int outputBufferSize = DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE;
   private ThreadManager closeThreads = null;
   private BackupFile file;
   private File newDir;
+  private int maxThreads;
 
   /**
    * Create an output stream.
@@ -361,12 +362,33 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
     }
     // validate the output stream
     verifyOpen();
+    this.waitForWriting();
     this.autoWriteToSplittedBackupStream(buffer, offset, len);
   }
 
   @Override
   protected void finalize() throws Throwable {
     this.clean();
+  }
+
+  /**
+   * Wait upload to finish.
+   */
+  private synchronized void waitForWriting() {
+
+    if (uploadThread == null) {
+      return;
+    }
+    while (backupFiles.size() > maxThreads) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Blocking write now, queue size is " + backupFiles.size());
+      }
+      try {
+        this.wait(1000);
+      } catch (InterruptedException e) {
+        // Ignore
+      }
+    }
   }
 
   /**
@@ -383,19 +405,6 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
    */
   private void autoWriteToSplittedBackupStream(byte[] buffer, int offset, int len) throws IOException {
 
-    /**
-     * Wait upload to finish.
-     */
-    while (uploadThread.isFull()) {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Blocking write now, queue size is " + backupFiles.size());
-      }
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-        // Ignore
-      }
-    }
     while (len > 0) {
       if ((blockOffset + len) >= filePartSize) {
         int subLen = (int) (filePartSize - blockOffset);
@@ -419,8 +428,8 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
      * No race condition here. Upload files ahead if need.
      */
     if (uploadThread == null && partUpload) {
-      int maxThreads = nativeStore.getMaxInParallelUpload() < 1 ? SwiftNativeOutputStreamMultipartWithSplitBlock.BACKGROUND_UPLOAD_BATCH_SIZE : nativeStore.getMaxInParallelUpload();
-      uploadThread = new AsynchronousUploadBlock(backupFiles, this, maxThreads);
+      maxThreads = nativeStore.getMaxInParallelUpload() < 1 ? SwiftNativeOutputStreamMultipartWithSplitBlock.BACKGROUND_UPLOAD_BATCH_SIZE : nativeStore.getMaxInParallelUpload();
+      uploadThread = new AsynchronousUpload(backupFiles, this, maxThreads);
       uploadThread.start();
     }
   }

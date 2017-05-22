@@ -637,6 +637,8 @@ public class SwiftClientConfig {
       cur = WritePolicies.MULTIPART_SINGLE_THREAD;
     } else if (WritePolicies.MULTIPART_NO_SPLIT.name().equalsIgnoreCase(writePolicy)) {
       cur = WritePolicies.MULTIPART_NO_SPLIT;
+    } else if (WritePolicies.MULTIPART_SPLIT_BLOCK.name().equalsIgnoreCase(writePolicy)) {
+      cur = WritePolicies.MULTIPART_SPLIT_BLOCK;
     } else {
       cur = WritePolicies.MULTIPART_SPLIT;
     }

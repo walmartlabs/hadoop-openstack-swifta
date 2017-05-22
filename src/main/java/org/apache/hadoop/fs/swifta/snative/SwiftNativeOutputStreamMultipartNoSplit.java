@@ -158,7 +158,7 @@ public class SwiftNativeOutputStreamMultipartNoSplit extends SwiftOutputStream {
   }
 
   @SuppressWarnings("rawtypes")
-  boolean waitToFinish(List<Future> tasks) {
+  public boolean waitToFinish(List<Future> tasks) {
     for (Future task : tasks) {
       try {
         task.get();

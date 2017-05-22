@@ -46,9 +46,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * Output stream, buffers data on local disk. Writes to Swift on the close() method, unless the file is significantly large that it is being written as partitions. In this case, the first partition is
  * written on the first write that puts data over the partition, as may later writes. The close() then causes the final partition to be written, along with a partition manifest.
  */
-public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream {
-  private static final Log LOG = LogFactory.getLog(SwiftNativeOutputStreamMultipartWithSplit.class);
-  private static final MetricsFactory metric = MetricsFactory.getMetricsFactory(SwiftNativeOutputStreamMultipartWithSplit.class);
+public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputStream {
+  private static final Log LOG = LogFactory.getLog(SwiftNativeOutputStreamMultipartWithSplitBlock.class);
+  private static final MetricsFactory metric = MetricsFactory.getMetricsFactory(SwiftNativeOutputStreamMultipartWithSplitBlock.class);
 
   private static final int ATTEMPT_LIMIT = 3;
 
@@ -77,7 +77,7 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
   @SuppressWarnings("rawtypes")
   final List<Future> closes;
   final File dir;
-  private AsynchronousUpload uploadThread;
+  private AsynchronousUploadBlock uploadThread;
   private int outputBufferSize = DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE;
   private ThreadManager closeThreads = null;
   private BackupFile file;
@@ -93,7 +93,7 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
    * @throws IOException
    */
   @SuppressWarnings("rawtypes")
-  public SwiftNativeOutputStreamMultipartWithSplit(Configuration conf, SwiftNativeFileSystemStore nativeStore, String key, long partSizeKB, int outputBufferSize) throws IOException {
+  public SwiftNativeOutputStreamMultipartWithSplitBlock(Configuration conf, SwiftNativeFileSystemStore nativeStore, String key, long partSizeKB, int outputBufferSize) throws IOException {
     dir = new File(conf.get("hadoop.tmp.dir"));
     this.key = key;
     this.nativeStore = nativeStore;
@@ -361,6 +361,16 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
     }
     // validate the output stream
     verifyOpen();
+    /**
+     * Wait upload to finish.
+     */
+    while (uploadThread.isFull()) {
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        // Ignore
+      }
+    }
     this.autoWriteToSplittedBackupStream(buffer, offset, len);
   }
 
@@ -406,8 +416,8 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
      * No race condition here. Upload files ahead if need.
      */
     if (uploadThread == null && partUpload) {
-      int maxThreads = nativeStore.getMaxInParallelUpload() < 1 ? SwiftNativeOutputStreamMultipartWithSplit.BACKGROUND_UPLOAD_BATCH_SIZE : nativeStore.getMaxInParallelUpload();
-      uploadThread = new AsynchronousUpload(backupFiles, this, maxThreads);
+      int maxThreads = nativeStore.getMaxInParallelUpload() < 1 ? SwiftNativeOutputStreamMultipartWithSplitBlock.BACKGROUND_UPLOAD_BATCH_SIZE : nativeStore.getMaxInParallelUpload();
+      uploadThread = new AsynchronousUploadBlock(backupFiles, this, maxThreads);
       uploadThread.start();
     }
   }
@@ -429,13 +439,6 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
     tasks = null;
     return Boolean.TRUE;
   }
-
-  // private void cleanUp(ThreadManager tm) {
-  // if (tm != null) {
-  // tm.cleanup();
-  // tm = null;
-  // }
-  // }
 
   /**
    * Upload a single partition. This deletes the local backing-file, and re-opens it to create a new one.
@@ -536,3 +539,5 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
         + partUpload + ", nativeStore=" + nativeStore + ", bytesWritten=" + bytesWritten + ", bytesUploaded=" + bytesUploaded + '}';
   }
 }
+
+

@@ -308,6 +308,6 @@ public class SwiftProtocolConstants {
    *
    */
   public static enum WritePolicies {
-    MULTIPART_SINGLE_THREAD, MULTIPART_SPLIT, MULTIPART_NO_SPLIT;
+    MULTIPART_SINGLE_THREAD, MULTIPART_SPLIT, MULTIPART_NO_SPLIT, MULTIPART_SPLIT_BLOCK;
   }
 }

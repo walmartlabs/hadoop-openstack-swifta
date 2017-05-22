@@ -135,6 +135,8 @@ public class SwiftNativeFileSystemStore {
         return new SwiftNativeOutputStreamMultipartWithSplit(this.conf, this, path.toUri().toString(), getPartsizeKB(), getOutputBufferSize());
       case MULTIPART_SINGLE_THREAD:
         return new SwiftNativeOutputStreamMultiPartSingleThread(this.conf, this, path.toUri().toString(), getPartsizeKB());
+      case MULTIPART_SPLIT_BLOCK:
+        return new SwiftNativeOutputStreamMultipartWithSplitBlock(this.conf, this, path.toUri().toString(), getPartsizeKB(), getOutputBufferSize());
       default:
         return new SwiftNativeOutputStreamMultipartWithSplit(this.conf, this, path.toUri().toString(), getPartsizeKB(), getOutputBufferSize());
     }

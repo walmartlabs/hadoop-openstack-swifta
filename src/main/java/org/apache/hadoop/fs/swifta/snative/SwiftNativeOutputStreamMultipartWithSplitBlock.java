@@ -365,6 +365,9 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
      * Wait upload to finish.
      */
     while (uploadThread.isFull()) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Blocking write now, queue size is " + backupFiles.size());
+      }
       try {
         Thread.sleep(1000);
       } catch (InterruptedException e) {

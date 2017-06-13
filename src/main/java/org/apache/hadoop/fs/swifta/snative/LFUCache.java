@@ -3,10 +3,9 @@ package org.apache.hadoop.fs.swifta.snative;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 
 public class LFUCache<T> {
 
@@ -15,7 +14,7 @@ public class LFUCache<T> {
   /**
    * Store node position in doubly linked list <key, Node>.
    */
-  private Map<String, LFUNode> positionNodes = new ConcurrentHashMap<String, LFUNode>();
+  private Map<String, LFUNode> positionNodes = new HashMap<String, LFUNode>();
 
   /**
    * Store access count and most recently used node among all of the same access count nodes <access_count, most_recently_node>.
@@ -204,5 +203,4 @@ public class LFUCache<T> {
     }
 
   }
-
 }

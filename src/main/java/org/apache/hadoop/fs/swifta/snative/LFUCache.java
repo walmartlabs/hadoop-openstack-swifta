@@ -4,7 +4,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 public class LFUCache<T> {
 
@@ -34,15 +36,9 @@ public class LFUCache<T> {
     this.liveTime = liveTime;
   }
 
-  public T get(String key) {
+  public synchronized T get(String key) {
     LFUNode node = positionNodes.get(key);
-    if (node == null) {
-      return null;
-    }
-    if (this.expireCache(node, key)) {
-      return null;
-    }
-    return increaseCount(key);
+    return (node == null) ? null : (this.expireCache(node, key) ? null : increaseCount(key));
   }
 
   /**
@@ -50,7 +46,7 @@ public class LFUCache<T> {
    * 
    * @param node
    */
-  private synchronized boolean expireCache(LFUNode node, String key) {
+  private boolean expireCache(LFUNode node, String key) {
 
     if (node.val == null || node.val.isExpired(liveTime)) {
       if (LOG.isDebugEnabled()) {

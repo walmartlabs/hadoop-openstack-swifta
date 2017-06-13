@@ -82,8 +82,8 @@ public class SwiftNativeFileSystemStore {
   /**
    * LRU Cache.
    */
-  private static LRUCache<Header[]> lru1;
-  private static LRUCache<Header[]> lru2;
+  private static LFUCache<Header[]> cache1;
+  private static LFUCache<Header[]> cache2;
   private static byte[] zeroByte = new byte[0];
   private Configuration conf;
 
@@ -101,11 +101,11 @@ public class SwiftNativeFileSystemStore {
     this.swiftRestClient = new SwiftRestClient(fsURI, configuration);
     metric.increase(this);
     metric.report();
-    if (lru1 == null) {
-      lru1 = new LRUCache<Header[]>(swiftRestClient.getClientConfig().getLruCacheSize(), swiftRestClient.getClientConfig().getCacheLiveTime());
+    if (cache1 == null) {
+      cache1 = new LFUCache<Header[]>(swiftRestClient.getClientConfig().getLruCacheSize(), swiftRestClient.getClientConfig().getCacheLiveTime());
     }
-    if (lru2 == null) {
-      lru2 = new LRUCache<Header[]>(swiftRestClient.getClientConfig().getLruCacheSize(), swiftRestClient.getClientConfig().getCacheLiveTime());
+    if (cache2 == null) {
+      cache2 = new LFUCache<Header[]>(swiftRestClient.getClientConfig().getLruCacheSize(), swiftRestClient.getClientConfig().getCacheLiveTime());
     }
 
   }
@@ -301,17 +301,17 @@ public class SwiftNativeFileSystemStore {
     return new SwiftFileStatus(length, isDir, 1, getBlocksize(), lastModified, correctSwiftPath, objectManifest);
   }
 
-  private Header[] handleCache(LRUCache<Header[]> lru, String path) {
+  private Header[] handleCache(LFUCache<Header[]> lru, String path) {
     if (!swiftRestClient.getClientConfig().isUseHeaderCache()) {
       return null;
     }
     if (LOG.isDebugEnabled() && lru.get(path) != null) {
-      LOG.debug("[stat:newest]Found cache for " + path + "; cache size is " + lru1.getSize());
+      LOG.debug("[stat:newest]Found cache for " + path + "; cache size is " + cache1.getSize());
     }
     return lru.get(path);
   }
 
-  private void setCache(LRUCache<Header[]> lru, String path, Header[] headers) {
+  private void setCache(LFUCache<Header[]> lru, String path, Header[] headers) {
     if (swiftRestClient.getClientConfig().isUseHeaderCache() && headers != null) {
       lru.set(path, headers);
     }
@@ -320,16 +320,16 @@ public class SwiftNativeFileSystemStore {
   private Header[] stat(SwiftObjectPath objectPath, boolean newest) throws IOException {
     Header[] headers = null;
     if (newest) {
-      headers = this.handleCache(lru1, objectPath.toUriPath());
+      headers = this.handleCache(cache1, objectPath.toUriPath());
       if (headers == null) {
         headers = swiftRestClient.headRequest("getObjectMetadata-newest", objectPath, SwiftRestClient.NEWEST);
-        this.setCache(lru1, objectPath.toUriPath(), headers);
+        this.setCache(cache1, objectPath.toUriPath(), headers);
       }
     } else {
-      headers = this.handleCache(lru2, objectPath.toUriPath());
+      headers = this.handleCache(cache2, objectPath.toUriPath());
       if (headers == null) {
         headers = swiftRestClient.headRequest("getObjectMetadata", objectPath);
-        this.setCache(lru2, objectPath.toUriPath(), headers);
+        this.setCache(cache2, objectPath.toUriPath(), headers);
       }
     }
     return headers;
@@ -689,8 +689,8 @@ public class SwiftNativeFileSystemStore {
       if (LOG.isDebugEnabled()) {
         LOG.debug("LRU cache: Deleting path " + path);
       }
-      lru1.remove(path);
-      lru2.remove(path);
+      cache1.remove(path);
+      cache2.remove(path);
     }
   }
 

@@ -1104,7 +1104,7 @@ public final class SwiftRestClient {
       if (processor instanceof GetStreamMethodProcessor) {
         // Do not close connection here.
       } else {
-        // LOG.info("Close connection " + processor.getClass());
+        LOG.debug("Close connection " + processor.getClass());
         method.releaseConnection();
       }
       duration.finished();

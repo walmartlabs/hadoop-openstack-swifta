@@ -24,7 +24,7 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_LAZY
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_LOCATION_AWARE_PROPERTY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_CONNECTIONS_FOR_COPY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_CONNECTIONS_FOR_UPLOAD;
-import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_CONNECTIONS_IN_POOL;
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_CONNECTIONS_FOR_DELETE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_HOST_CONNECTIONS;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_MAX_TOTAL_CONNECTIONS;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_PARTITION_SIZE;
@@ -271,7 +271,7 @@ public class SwiftClientConfig {
     isLazySeek = conf.getBoolean(SWIFT_LAZY_SEEK, Boolean.FALSE);
     useHeaderCache = conf.getBoolean(USE_HEADER_CACHE, Boolean.TRUE);
 
-    maxThreadsInPool = conf.getInt(SWIFT_MAX_CONNECTIONS_IN_POOL, DEFAULT_CONNECTIONS);
+    maxThreadsInPool = conf.getInt(SWIFT_MAX_CONNECTIONS_FOR_DELETE, DEFAULT_CONNECTIONS);
 
     maxThreadsForCopy = conf.getInt(SWIFT_MAX_CONNECTIONS_FOR_COPY, DEFAULT_COPY_CONNECTIONS);
 

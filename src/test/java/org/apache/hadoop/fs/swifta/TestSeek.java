@@ -222,12 +222,7 @@ public class TestSeek extends SwiftFileSystemBaseTest {
     createFile(testSeekFile, block);
     instream = fs.open(testSeekFile);
     instream.seek(39999);
-    // Lazy seek
-    if (isLazySeek) {
-      assertEquals(0, instream.getPos());
-    } else {
-      assertEquals(39999, instream.getPos());
-    }
+    assertEquals(39999, instream.getPos());
 
     //assertEquals(0, instream.getPos());
     assertTrue(-1 != instream.read());

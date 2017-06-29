@@ -124,6 +124,9 @@ class SwiftNativeInputStream extends FSInputStream {
   public synchronized int read() throws IOException {
     verifyOpen();
     int result = -1;
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Read() api be invoked!");
+    }
     try {
       result = httpStream.read();
     } catch (IOException e) {

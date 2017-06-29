@@ -364,14 +364,14 @@ public final class SwiftRestClient {
    * @throws SwiftException swift specific error
    * @throws FileNotFoundException path is not there
    */
-  public HttpBodyContent getData(URI url, long offset, long length) throws IOException {
+  public HttpBodyContent getData(URI url, long offset, long end) throws IOException {
     if (offset < 0) {
-      throw new SwiftException("Invalid offset: " + offset + " in getDataAsInputStream( url=" + url + ", offset=" + offset + ", length =" + length + ")");
+      throw new SwiftException("Invalid offset: " + offset + " in getDataAsInputStream( url=" + url + ", offset=" + offset + ", end =" + end + ")");
     }
-    if (length <= 0) {
-      throw new SwiftException("Invalid length: " + length + " in getDataAsInputStream( url=" + url + ", offset=" + offset + ", length =" + length + ")");
+    if (end < offset) {
+      throw new SwiftException("Invalid end: " + end + " in getDataAsInputStream( url=" + url + ", offset=" + offset + ", end =" + end + ")");
     }
-    final String range = String.format(SWIFT_RANGE_HEADER_FORMAT_PATTERN, offset, length - 1);
+    final String range = String.format(SWIFT_RANGE_HEADER_FORMAT_PATTERN, offset, end - 1);
     if (LOG.isDebugEnabled()) {
       String msg = String.format("Get data %s, from %s", range, url);
       LOG.debug(msg);

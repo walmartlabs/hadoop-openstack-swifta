@@ -102,9 +102,9 @@ class SwiftNativeInputStream extends FSInputStream {
    */
   private synchronized void incPos(int offset) {
     pos += offset;
-    nextReadPosition += offset;
+    nextReadPosition = pos;
     // rangeOffset += offset;
-    SwiftUtils.trace(LOG, "Inc: pos=%d nextReadPosition=%d", pos, nextReadPosition);
+    SwiftUtils.debug(LOG, "Inc: pos=%d nextReadPosition=%d", pos, nextReadPosition);
   }
 
   /**
@@ -116,6 +116,7 @@ class SwiftNativeInputStream extends FSInputStream {
   private synchronized void updateStartOfBufferPosition(long seekPos) {
     // reset the seek pointer
     pos = seekPos;
+    nextReadPosition = seekPos;
     SwiftUtils.trace(LOG, "Move: pos=%d; nextReadPosition=%d; contentLength=%d", pos, nextReadPosition, contentLength);
   }
 
@@ -146,16 +147,13 @@ class SwiftNativeInputStream extends FSInputStream {
     SwiftUtils.debug(LOG, "read(buffer, %d, %d)", off, len);
     SwiftUtils.validateReadArgs(b, off, len);
     int result = -1;
-    if (this.contentLength == 0) {
+    if (this.contentLength == 0 || nextReadPosition >= contentLength) {
       return result;
     }
     try {
       verifyOpen();
       if (isLazy) {
-        if (nextReadPosition >= contentLength) {
-          return result;
-        }
-        seekStream();
+        seekStream(nextReadPosition);
       }
       result = httpStream.read(b, off, len);
     } catch (IOException e) {
@@ -280,11 +278,12 @@ class SwiftNativeInputStream extends FSInputStream {
   @Override
   public synchronized void seek(long targetPos) throws IOException {
     if (targetPos < 0) {
-      throw new IOException("Negative Seek offset not supported");
+      throw new IOException("Negative Seek offset not supported.");
     }
+
     nextReadPosition = targetPos;
     if (!isLazy) {
-      seekStream();
+      seekStream(targetPos);
     }
   }
 
@@ -305,7 +304,7 @@ class SwiftNativeInputStream extends FSInputStream {
 
     if (offset < 0) {
       LOG.debug("seek is backwards");
-    } else if ((targetPos < this.contentLength)) {
+    } else if ((targetPos <= this.contentLength)) {
       // if the seek is in range of that requested, scan forwards
       // instead of closing and re-opening a new HTTP connection
       if (LOG.isDebugEnabled()) {
@@ -339,12 +338,11 @@ class SwiftNativeInputStream extends FSInputStream {
    * 
    * @throws IOException
    */
-  private synchronized void seekStream() throws IOException {
-    if (httpStream != null && nextReadPosition == pos) {
-      // already at specified position
+  private synchronized void seekStream(long targetPos) throws IOException {
+    if (targetPos == pos) {
       return;
     }
-    realSeek(nextReadPosition);
+    realSeek(targetPos);
   }
 
   /**
@@ -355,14 +353,14 @@ class SwiftNativeInputStream extends FSInputStream {
    */
   private synchronized void fillBuffer(long targetPos) throws IOException {
     SwiftUtils.debug(LOG, "Fetching %d bytes starting at %d", (this.contentLength - targetPos + 1), targetPos);
-    HttpBodyContent blob = nativeStore.getObject(path, targetPos, contentLength);
+    HttpBodyContent blob = nativeStore.getObject(path, targetPos, this.contentLength);
     httpStream = blob.getInputStream();
     updateStartOfBufferPosition(targetPos);
   }
 
   @Override
   public synchronized long getPos() throws IOException {
-    return pos;
+    return nextReadPosition;
   }
 
   /**

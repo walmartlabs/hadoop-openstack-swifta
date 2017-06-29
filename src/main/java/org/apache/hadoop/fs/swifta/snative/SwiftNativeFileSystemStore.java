@@ -464,7 +464,7 @@ public class SwiftNativeFileSystemStore {
    * @return an input stream that must be closed
    * @throws IOException IO problems
    */
-  public HttpBodyContent getObject(Path path, long byteRangeStart, long length) throws IOException {
+  public HttpBodyContent getObject(Path path, long byteRangeStart, long byteRangeEnd) throws IOException {
     List<String> locations = getDataLocalEndpoints(path);
 
     for (String url : locations) {
@@ -472,12 +472,12 @@ public class SwiftNativeFileSystemStore {
         LOG.debug("Reading " + path + " from location: " + url);
       }
       try {
-        return swiftRestClient.getData(new URI(url), byteRangeStart, length);
+        return swiftRestClient.getData(new URI(url), byteRangeStart, byteRangeEnd);
       } catch (Exception e) {
         // Ignore
       }
     }
-    return swiftRestClient.getData(toObjectPath(path), byteRangeStart, length);
+    return swiftRestClient.getData(toObjectPath(path), byteRangeStart, byteRangeEnd);
   }
 
   /**

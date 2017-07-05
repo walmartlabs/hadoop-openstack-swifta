@@ -1,16 +1,47 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
- * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
- * License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the License for the specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 
 package org.apache.hadoop.fs.swifta.snative;
+
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpStatus;
@@ -40,33 +71,6 @@ import org.apache.hadoop.net.ScriptBasedMapping;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.codehaus.jackson.map.type.CollectionType;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.net.InetAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * File system store implementation. Makes REST requests, parses data from responses.
  */
@@ -79,9 +83,7 @@ public class SwiftNativeFileSystemStore {
   private URI uri;
   private SwiftRestClient swiftRestClient;
   private DNSToSwitchMapping dnsToSwitchMapping;
-  /**
-   * LRU Cache.
-   */
+
   private static LFUCache<Header[]> cache1;
   private static LFUCache<Header[]> cache2;
   private static byte[] zeroByte = new byte[0];
@@ -90,7 +92,8 @@ public class SwiftNativeFileSystemStore {
   /**
    * Initialize the filesystem store -this creates the REST client binding.
    *
-   * @param fsURI URI of the filesystem, which is used to map to the filesystem-specific options in the configuration file
+   * @param fsURI URI of the filesystem, which is used to map to the filesystem-specific options in
+   *        the configuration file
    * @param configuration configuration
    * @throws IOException on any failure.
    */
@@ -120,11 +123,11 @@ public class SwiftNativeFileSystemStore {
   }
 
   /**
-   * Create the swift output stream
+   * Create the swift output stream.
    * 
    * @param path path to write to
    * @return the new file
-   * @throws IOException
+   * @throws IOException IOException
    */
   protected SwiftOutputStream createSwiftOutputStream(Path path) throws IOException {
     WritePolicies policy = this.swiftRestClient.getClientConfig().getWritePolicy();
@@ -146,7 +149,8 @@ public class SwiftNativeFileSystemStore {
   /**
    * Get the default blocksize of this (bound) filesystem
    * 
-   * @return the blocksize returned for all FileStatus queries, which is used by the MapReduce splitter.
+   * @return the blocksize returned for all FileStatus queries, which is used by the MapReduce
+   *         splitter.
    */
   public long getBlocksize() {
     return 1024L * swiftRestClient.getClientConfig().getBlocksizeKb();
@@ -206,10 +210,12 @@ public class SwiftNativeFileSystemStore {
   }
 
   /**
-   * Tell the Swift server to expect a multi-part upload by submitting a 0-byte file with the X-Object-Manifest header.
+   * Tell the Swift server to expect a multi-part upload by submitting a 0-byte file with the
+   * X-Object-Manifest header.
    *
    * @param path path of final final
-   * @throws IOException
+   * @param fileLen file length
+   * @throws IOException IOException
    */
   public void createManifestForPartUpload(Path path, long fileLen) throws IOException {
     SwiftObjectPath p = toObjectPath(path);
@@ -228,10 +234,11 @@ public class SwiftNativeFileSystemStore {
   }
 
   /**
-   * Tell the Swift server to expect a multi-part upload by submitting a 0-byte file with the X-Object-Manifest header.
+   * Tell the Swift server to expect a multi-part upload by submitting a 0-byte file with the
+   * X-Object-Manifest header.
    *
    * @param path path of final final
-   * @throws IOException
+   * @throws IOException IOException
    */
   public void createManifestForPartUpload(Path path) throws IOException {
     SwiftObjectPath p = toObjectPath(path);
@@ -246,18 +253,6 @@ public class SwiftNativeFileSystemStore {
       LOG.debug("Final writes x-object-manifest for header path:" + pathString);
     }
     swiftRestClient.upload(p, new ByteArrayInputStream(zeroByte), 0, new Header(SwiftProtocolConstants.X_OBJECT_MANIFEST, pathString));
-  }
-
-  /**
-   * Get the metadata of an object.
-   *
-   * @param path path
-   * @return file metadata. -or null if no headers were received back from the server.
-   * @throws IOException on a problem
-   * @throws FileNotFoundException if there is nothing at the end
-   */
-  public SwiftFileStatus getObjectMetadata(Path path) throws IOException {
-    return getObjectMetadata(path, true);
   }
 
   /**
@@ -278,13 +273,23 @@ public class SwiftNativeFileSystemStore {
    * Get the metadata of an object.
    *
    * @param path path
-   * @param newest flag to say "set the newest header", otherwise take any entry
    * @return file metadata. -or null if no headers were received back from the server.
+   * @throws IOException on a problem
+   */
+  public SwiftFileStatus getObjectMetadata(Path path) throws IOException {
+    return getObjectMetadata(path, true);
+  }
+
+  /**
+   * Get the metadata of an object.
+   *
+   * @param path path
+   * @param newest flag to say "set the newest header", otherwise take any entry
+   * @return file status
    * @throws IOException on a problem
    * @throws FileNotFoundException if there is nothing at the end
    */
   public SwiftFileStatus getObjectMetadata(Path path, boolean newest) throws IOException, FileNotFoundException {
-
     SwiftObjectPath objectPath = toObjectPath(path);
     final Header[] headers = stat(objectPath, newest);
     // no headers is treated as a missing file
@@ -391,8 +396,40 @@ public class SwiftNativeFileSystemStore {
     return swiftRestClient.getData(toObjectPath(path), SwiftRestClient.NEWEST);
   }
 
+
+
   /**
-   * Returns list of endpoints for given swift path that are local for the host. List is returned in order of preference.
+   * Get the input stream starting from a specific point.
+   *
+   * @param path path to object
+   * @param byteRangeStart starting point
+   * @param byteRangeEnd end index
+   * @return an input stream that must be closed
+   * @throws IOException IO problems
+   */
+  public HttpBodyContent getObject(Path path, long byteRangeStart, long byteRangeEnd) throws IOException {
+    List<String> locations = getDataLocalEndpoints(path);
+
+    for (String url : locations) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Reading " + path + " from location: " + url);
+      }
+      try {
+        return swiftRestClient.getData(new URI(url), byteRangeStart, byteRangeEnd);
+      } catch (Exception e) {
+        // Ignore
+      }
+    }
+    return swiftRestClient.getData(toObjectPath(path), byteRangeStart, byteRangeEnd);
+  }
+
+  /**
+   * Returns list of endpoints for given swift path that are local for the host. List is returned in
+   * order of preference.
+   *
+   * @param path path
+   * @return list of locations
+   * @throws IOException IOException
    */
   private List<String> getDataLocalEndpoints(Path path) throws IOException {
     final String hostRack = getHostRack();
@@ -422,7 +459,8 @@ public class SwiftNativeFileSystemStore {
   }
 
   /**
-   * Returns similarity index for two racks. Bigger numbers correspond to closer location. Zero corresponds to different racks.
+   * Returns similarity index for two racks. Bigger numbers correspond to closer location. Zero
+   * corresponds to different racks.
    *
    * @param rack1 path to rack1
    * @param rack2 path to rack2
@@ -450,45 +488,18 @@ public class SwiftNativeFileSystemStore {
   }
 
   private String getRack(String url) {
-    List<String> list = dnsToSwitchMapping.resolve(Arrays.asList(url)); // Temporary avoid the index
-                                                                        // issue
+    // Temporary avoid the index issue.
+    List<String> list = dnsToSwitchMapping.resolve(Arrays.asList(url));
     return list.size() == 0 ? "" : dnsToSwitchMapping.resolve(Arrays.asList(url)).get(0);
-  }
-
-  /**
-   * Get the input stream starting from a specific point.
-   *
-   * @param path path to object
-   * @param byteRangeStart starting point
-   * @param length no. of bytes
-   * @return an input stream that must be closed
-   * @throws IOException IO problems
-   */
-  public HttpBodyContent getObject(Path path, long byteRangeStart, long byteRangeEnd) throws IOException {
-    List<String> locations = getDataLocalEndpoints(path);
-
-    for (String url : locations) {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Reading " + path + " from location: " + url);
-      }
-      try {
-        return swiftRestClient.getData(new URI(url), byteRangeStart, byteRangeEnd);
-      } catch (Exception e) {
-        // Ignore
-      }
-    }
-    return swiftRestClient.getData(toObjectPath(path), byteRangeStart, byteRangeEnd);
   }
 
   /**
    * List a directory. This is O(n) for the number of objects in this path.
    *
-   *
-   *
    * @param path working path
    * @param listDeep ask for all the data
    * @param newest ask for the newest data
-   * @param newest where to start listing
+   * @param marker where to start listing
    * @return Collection of file statuses
    * @throws IOException IO problems
    * @throws FileNotFoundException if the path does not exist
@@ -611,7 +622,7 @@ public class SwiftNativeFileSystemStore {
    * Create a directory.
    *
    * @param path path
-   * @throws IOException
+   * @throws IOException IOException
    */
   public void createDirectory(Path path) throws IOException {
     innerCreateDirectory(toDirPathCreate(path));
@@ -620,9 +631,8 @@ public class SwiftNativeFileSystemStore {
   /**
    * Create a container.
    * 
-   * @param containerPath container path
-   * @return true if the container doesn't exist and creation succeeds
-   * @throws IOException
+   * @param path container path
+   * @throws IOException IOException
    */
   public void createContainer(Path path) throws IOException {
     SwiftObjectPath swiftObjectPath = toDirPath(path);
@@ -633,9 +643,9 @@ public class SwiftNativeFileSystemStore {
   /**
    * Does the container of the path exist.
    * 
-   * @param containerPath container path
+   * @param path container path
    * @return true if the container creation succeeds
-   * @throws IOException
+   * @throws IOException IOException
    */
   public boolean doesExistContainer(Path path) throws IOException {
     SwiftObjectPath swiftObjectPath = toDirPath(path);
@@ -644,7 +654,8 @@ public class SwiftNativeFileSystemStore {
   }
 
   /**
-   * The inner directory creation option. This only creates the dir at the given path, not any parent dirs.
+   * The inner directory creation option. This only creates the dir at the given path, not any
+   * parent dirs.
    * 
    * @param swiftObjectPath swift object path at which a 0-byte blob should be put
    * @throws IOException IO problems
@@ -715,7 +726,7 @@ public class SwiftNativeFileSystemStore {
   /**
    * deletes a batch of objects from Swift.
    *
-   * @param path path to delete
+   * @param statuses file details
    * @throws IOException on a failure
    */
   public void deleteObjects(List<FileStatus> statuses) throws IOException {
@@ -792,7 +803,8 @@ public class SwiftNativeFileSystemStore {
    *
    * @param path object path
    * @return true if the metadata of an object could be retrieved
-   * @throws IOException IO problems other than FileNotFound, which is downgraded to an object does not exist return code
+   * @throws IOException IO problems other than FileNotFound, which is downgraded to an object does
+   *         not exist return code
    */
   public boolean objectExists(Path path) throws IOException {
     return objectExists(toObjectPath(path));
@@ -803,7 +815,8 @@ public class SwiftNativeFileSystemStore {
    *
    * @param path swift object path
    * @return true if the metadata of an object could be retrieved
-   * @throws IOException IO problems other than FileNotFound, which is downgraded to an object does not exist return code
+   * @throws IOException IO problems other than FileNotFound, which is downgraded to an object does
+   *         not exist return code
    */
   public boolean objectExists(SwiftObjectPath path) throws IOException {
     try {
@@ -828,7 +841,8 @@ public class SwiftNativeFileSystemStore {
   }
 
   /**
-   * Rename through copy-and-delete. this is a consequence of the Swift filesystem using the path as the hash into the Distributed Hash Table, "the ring" of filenames.
+   * Rename through copy-and-delete. this is a consequence of the Swift filesystem using the path as
+   * the hash into the Distributed Hash Table, "the ring" of filenames.
    * <p/>
    * Because of the nature of the operation, it is not atomic.
    *
@@ -836,7 +850,8 @@ public class SwiftNativeFileSystemStore {
    * @param dst destination
    * @throws IOException IO failure
    * @throws SwiftOperationFailedException if the rename failed
-   * @throws FileNotFoundException if the source directory is missing, or the parent directory of the destination
+   * @throws FileNotFoundException if the source directory is missing, or the parent directory of
+   *         the destination
    */
   public void rename(final Path src, final Path dst) throws FileNotFoundException, SwiftOperationFailedException, IOException {
     if (LOG.isDebugEnabled()) {
@@ -1122,6 +1137,13 @@ public class SwiftNativeFileSystemStore {
     }
   }
 
+  /**
+   * Do the copy.
+   * 
+   * @param srcKey src
+   * @param dstKey dest
+   * @throws IOException IOException
+   */
   public void copy(Path srcKey, Path dstKey) throws IOException {
     SwiftObjectPath srcObject = toObjectPath(srcKey);
     SwiftObjectPath destObject = toObjectPath(dstKey);
@@ -1130,7 +1152,8 @@ public class SwiftNativeFileSystemStore {
 
 
   /**
-   * Copy an object then, if the copy worked, delete it. If the copy failed, the source object is not deleted.
+   * Copy an object then, if the copy worked, delete it. If the copy failed, the source object is
+   * not deleted.
    *
    * @param srcObject source object path
    * @param destObject destination object path
@@ -1166,7 +1189,8 @@ public class SwiftNativeFileSystemStore {
   }
 
   /**
-   * Take a Hadoop path and return one which uses the URI prefix and authority of this FS. It doesn't make a relative path absolute.
+   * Take a Hadoop path and return one which uses the URI prefix and authority of this FS. It
+   * doesn't make a relative path absolute.
    * 
    * @param path path in
    * @return path with a URI bound to this FS
@@ -1252,18 +1276,24 @@ public class SwiftNativeFileSystemStore {
 
 
   /**
-   * Delete the entire tree. This is an internal one with slightly different behavior: if an entry is missing, a {@link FileNotFoundException} is raised. This lets the caller distinguish a file not
-   * found with other reasons for failure, so handles race conditions in recursive directory deletes better.
+   * Delete the entire tree. This is an internal one with slightly different behavior: if an entry
+   * is missing, a {@link FileNotFoundException} is raised. This lets the caller distinguish a file
+   * not found with other reasons for failure, so handles race conditions in recursive directory
+   * deletes better.
    * <p/>
-   * The problem being addressed is: caller A requests a recursive directory of directory /dir ; caller B requests a delete of a file /dir/file, between caller A enumerating the files contents, and
-   * requesting a delete of /dir/file. We want to recognise the special case "directed file is no longer there" and not convert that into a failure
+   * The problem being addressed is: caller A requests a recursive directory of directory /dir ;
+   * caller B requests a delete of a file /dir/file, between caller A enumerating the files
+   * contents, and requesting a delete of /dir/file. We want to recognise the special case "directed
+   * file is no longer there" and not convert that into a failure
    *
    * @param absolutePath the path to delete.
-   * @param recursive if path is a directory and set to true, the directory is deleted else throws an exception if the directory is not empty case of a file the recursive can be set to either true or
-   *        false.
+   * @param recursive if path is a directory and set to true, the directory is deleted else throws
+   *        an exception if the directory is not empty case of a file the recursive can be set to
+   *        either true or false.
    * @return true if the object was deleted
    * @throws IOException IO problems
-   * @throws FileNotFoundException if a file/dir being deleted is not there - this includes entries below the specified path, (if the path is a dir and recursive is true)
+   * @throws FileNotFoundException if a file/dir being deleted is not there - this includes entries
+   *         below the specified path, (if the path is a dir and recursive is true)
    */
   public boolean delete(Path absolutePath, boolean recursive) throws IOException {
     Path swiftPath = getCorrectSwiftPath(absolutePath);

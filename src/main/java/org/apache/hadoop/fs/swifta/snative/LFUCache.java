@@ -1,23 +1,24 @@
 package org.apache.hadoop.fs.swifta.snative;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class LFUCache<T> {
 
-  private final static Log LOG = LogFactory.getLog(LFUCache.class);
+  private static final Log LOG = LogFactory.getLog(LFUCache.class);
 
   /**
-   * Store node position in doubly linked list <key, Node>.
+   * Store node position in doubly linked list [key, Node].
    */
   private Map<String, LFUNode> positionNodes = new HashMap<String, LFUNode>();
 
   /**
-   * Store access count and most recently used node among all of the same access count nodes <access_count, most_recently_node>.
+   * Store access count and most recently used node among all of the same access count nodes
+   * [access_count, most_recently_node].
    */
   private Map<Integer, LFUNode> countMap = new ConcurrentHashMap<Integer, LFUNode>();
   private int capacity;
@@ -28,6 +29,12 @@ public class LFUCache<T> {
 
   private long liveTime;
 
+  /**
+   * Create a new cache.
+   *
+   * @param capacity capacity
+   * @param liveTime live time
+   */
   public LFUCache(int capacity, long liveTime) {
     this.capacity = capacity;
     tail = new LFUNode(null, null);
@@ -41,9 +48,11 @@ public class LFUCache<T> {
   }
 
   /**
-   * Expires cache.
+   * Expire the cache.
    * 
-   * @param node
+   * @param node node to check
+   * @param key key
+   * @return Has expired
    */
   private boolean expireCache(LFUNode node, String key) {
 
@@ -61,8 +70,8 @@ public class LFUCache<T> {
   /**
    * Insert node post behind node pre.
    * 
-   * @param pre
-   * @param post
+   * @param pre previous node
+   * @param post next node
    */
   private synchronized void insert(LFUNode pre, LFUNode post) {
 
@@ -81,6 +90,12 @@ public class LFUCache<T> {
     post.next = next;
   }
 
+  /**
+   * Set value.
+   *
+   * @param key key
+   * @param value value
+   */
   public synchronized void set(String key, T value) {
     LFUNode n = positionNodes.get(key);
     LFUNode recentlyUsed = countMap.get(1);
@@ -109,17 +124,19 @@ public class LFUCache<T> {
   /**
    * Increase access time and adjust position in double linked list.
    * 
-   * @param key
-   * @return
+   * @param key key in map
+   * @return value
    */
   private synchronized T increaseCount(String key) {
     LFUNode curNode = positionNodes.get(key);
-    if (curNode == null)
+    if (curNode == null) {
       return null;
+    }
     LFUNode recentlyUsed = countMap.get(curNode.count + 1);
     if (recentlyUsed == null) {
       /**
-       * If the count+1 number not in map, which means it can insert right after most recently used node with the same count.
+       * If the count+1 number not in map, which means it can insert right after most recently used
+       * node with the same count.
        */
       recentlyUsed = countMap.get(curNode.count);
     }
@@ -147,9 +164,10 @@ public class LFUCache<T> {
   }
 
   /**
-   * When removing a record from countMap, always try to find if other node with the same count can promoted to most recently used node. Otherwise delete the record only.
+   * When removing a record from countMap, always try to find if other node with the same count can
+   * promoted to most recently used node. Otherwise delete the record only.
    * 
-   * @param node
+   * @param node which node
    */
   private void updateFrequence(LFUNode node) {
     if (countMap.get(node.count) == node) {
@@ -161,10 +179,21 @@ public class LFUCache<T> {
     }
   }
 
+  /**
+   * Get size.
+   *
+   * @return size
+   */
   public int getSize() {
     return positionNodes.size();
   }
 
+  /**
+   * Remove key.
+   * 
+   * @param key key
+   * @return if removed
+   */
   public synchronized boolean remove(String key) {
     LFUNode node = positionNodes.get(key);
     if (node == null) {
@@ -184,8 +213,9 @@ public class LFUCache<T> {
     LFUNode pre = node.pre;
     LFUNode post = node.next;
     pre.next = post;
-    if (post != null)
+    if (post != null) {
       post.pre = pre;
+    }
     positionNodes.remove(node.key);
 
   }
@@ -194,7 +224,8 @@ public class LFUCache<T> {
     String key;
     CacheObject<T> val;
     int count;
-    LFUNode pre, next;
+    LFUNode pre;
+    LFUNode next;
 
     public LFUNode(String key, CacheObject<T> val) {
       this.key = key;

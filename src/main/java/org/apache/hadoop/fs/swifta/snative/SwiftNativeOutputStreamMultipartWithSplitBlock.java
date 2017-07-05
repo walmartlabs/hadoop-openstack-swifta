@@ -1,28 +1,21 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
- * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
- * License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the License for the specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.apache.hadoop.fs.swifta.snative;
 
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.swifta.exceptions.SwiftException;
-import org.apache.hadoop.fs.swifta.metrics.MetricsFactory;
-import org.apache.hadoop.fs.swifta.util.SwiftUtils;
-import org.apache.hadoop.fs.swifta.util.ThreadManager;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -42,9 +35,22 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.swifta.exceptions.SwiftException;
+import org.apache.hadoop.fs.swifta.metrics.MetricsFactory;
+import org.apache.hadoop.fs.swifta.util.SwiftUtils;
+import org.apache.hadoop.fs.swifta.util.ThreadManager;
+
 /**
- * Output stream, buffers data on local disk. Writes to Swift on the close() method, unless the file is significantly large that it is being written as partitions. In this case, the first partition is
- * written on the first write that puts data over the partition, as may later writes. The close() then causes the final partition to be written, along with a partition manifest.
+ * Output stream, buffers data on local disk. Writes to Swift on the close() method, unless the file
+ * is significantly large that it is being written as partitions. In this case, the first partition
+ * is written on the first write that puts data over the partition, as may later writes. The close()
+ * then causes the final partition to be written, along with a partition manifest.
  */
 public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputStream {
   private static final Log LOG = LogFactory.getLog(SwiftNativeOutputStreamMultipartWithSplitBlock.class);
@@ -91,7 +97,7 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
    * @param nativeStore native store to write through
    * @param key the key to write
    * @param partSizeKB the partition size
-   * @throws IOException
+   * @throws IOException IOException
    */
   @SuppressWarnings("rawtypes")
   public SwiftNativeOutputStreamMultipartWithSplitBlock(Configuration conf, SwiftNativeFileSystemStore nativeStore, String key, long partSizeKB, int outputBufferSize) throws IOException {
@@ -147,7 +153,7 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
   /**
    * Flush the local backing stream. This does not trigger a flush of data to the remote blobstore.
    * 
-   * @throws IOException
+   * @throws IOException IOException
    */
   @Override
   public synchronized void flush() throws IOException {
@@ -166,7 +172,8 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
   }
 
   /**
-   * Close the stream. This will trigger the upload of all locally cached data to the remote blobstore.
+   * Close the stream. This will trigger the upload of all locally cached data to the remote
+   * blobstore.
    * 
    * @throws IOException IO problems uploading the data.
    */
@@ -223,22 +230,6 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
     }
   }
 
-  // private void uploadParts() throws IOException {
-  // if (LOG.isDebugEnabled()) {
-  // LOG.debug("Using muli-parts upload with threads " + backupFiles.size());
-  // }
-  // final ThreadManager tm = new ThreadManager();
-  // tm.createThreadManager(backupFiles.size());
-  //
-  // for (final BackupFile file : backupFiles) {
-  // this.doUpload(tm, file, file.getPartNumber());
-  // }
-  // tm.shutdown();
-  // // Prevent incomplete read before a full upload.
-  // this.waitToFinish(uploads);
-  // this.cleanUp(tm);
-  // }
-
   @SuppressWarnings("rawtypes")
   Future doClose(final ThreadManager tm, final OutputStream out, final BackupFile file) {
     return tm.getPool().submit(new Callable<Boolean>() {
@@ -262,6 +253,9 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
     });
   }
 
+  /**
+   * Do upload.
+   */
   @SuppressWarnings("rawtypes")
   public List<Future> doUpload(final ThreadManager tm, final BackupFile uploadFile, final int partNumber) {
     uploads.add(tm.getPool().submit(new Callable<Boolean>() {
@@ -291,7 +285,8 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
   }
 
   /**
-   * Upload a file when closed, either in one go, or, if the file is already partitioned, by uploading the remaining partition and a manifest.
+   * Upload a file when closed, either in one go, or, if the file is already partitioned, by
+   * uploading the remaining partition and a manifest.
    * 
    * @param keypath key as a path
    * @throws IOException IO Problems
@@ -434,6 +429,9 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
     }
   }
 
+  /**
+   * Wait to finish.
+   */
   @SuppressWarnings("rawtypes")
   public boolean waitToFinish(List<Future> tasks) {
     for (Future task : tasks) {
@@ -453,7 +451,8 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
   }
 
   /**
-   * Upload a single partition. This deletes the local backing-file, and re-opens it to create a new one.
+   * Upload a single partition. This deletes the local backing-file, and re-opens it to create a new
+   * one.
    * 
    * @param closingUpload is this the final upload of an upload
    * @throws IOException on IO problems
@@ -506,7 +505,7 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
   }
 
   /**
-   * Get the file partition size
+   * Get the file partition size.
    * 
    * @return the partition size
    */
@@ -526,7 +525,8 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
   }
 
   /**
-   * Get the number of bytes written to the output stream. This should always be less than or equal to bytesUploaded.
+   * Get the number of bytes written to the output stream. This should always be less than or equal
+   * to bytesUploaded.
    * 
    * @return the number of bytes written to this stream
    */
@@ -536,7 +536,8 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
   }
 
   /**
-   * Get the number of bytes uploaded to remote Swift cluster. bytesUploaded -bytesWritten = the number of bytes left to upload.
+   * Get the number of bytes uploaded to remote Swift cluster. bytesUploaded -bytesWritten = the
+   * number of bytes left to upload.
    * 
    * @return the number of bytes written to the remote endpoint
    */

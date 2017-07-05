@@ -70,8 +70,7 @@ public class SwiftNativeOutputStreamMultipartNoSplit extends SwiftOutputStream {
    * @param partSizeKb the partition size
    * @throws IOException the exception
    */
-  public SwiftNativeOutputStreamMultipartNoSplit(Configuration conf,
-      SwiftNativeFileSystemStore nativeStore, String key, long partSizeKb) throws IOException {
+  public SwiftNativeOutputStreamMultipartNoSplit(Configuration conf, SwiftNativeFileSystemStore nativeStore, String key, long partSizeKb) throws IOException {
     this.conf = conf;
     this.key = key;
     this.backupFile = newBackupFile();
@@ -158,9 +157,7 @@ public class SwiftNativeOutputStreamMultipartNoSplit extends SwiftOutputStream {
     List<Future> uploads = new ArrayList<Future>();
     while (remain > 0) {
       long uploadLen = remain > this.filePartSize ? filePartSize : remain;
-      uploads.add(this.doUpload(tm,
-          new RangeInputStream(new FileInputStream(backupFile), off, uploadLen, Boolean.TRUE),
-          partNumber++, uploadLen));
+      uploads.add(this.doUpload(tm, new RangeInputStream(new FileInputStream(backupFile), off, uploadLen, Boolean.TRUE), partNumber++, uploadLen));
       off += uploadLen;
       remain -= uploadLen;
     }
@@ -168,6 +165,9 @@ public class SwiftNativeOutputStreamMultipartNoSplit extends SwiftOutputStream {
 
   }
 
+  /**
+   * Wait to finish.
+   */
   @SuppressWarnings("rawtypes")
   public boolean waitToFinish(List<Future> tasks) {
     for (Future task : tasks) {
@@ -187,8 +187,7 @@ public class SwiftNativeOutputStreamMultipartNoSplit extends SwiftOutputStream {
   }
 
   @SuppressWarnings("rawtypes")
-  Future doUpload(final ThreadManager tm, final InputStream in, final int partNumber,
-      final long len) {
+  Future doUpload(final ThreadManager tm, final InputStream in, final int partNumber, final long len) {
     return tm.getPool().submit(new Callable<Boolean>() {
       public Boolean call() throws Exception {
         try {
@@ -229,8 +228,7 @@ public class SwiftNativeOutputStreamMultipartNoSplit extends SwiftOutputStream {
 
   private long uploadFileAttempt(Path keypath, int attempt) throws IOException {
     long uploadLen = backupFile.length();
-    SwiftUtils.debug(LOG, "Closing write of file %s;" + " localfile=%s of length %d - attempt %d",
-        key, backupFile, uploadLen, attempt);
+    SwiftUtils.debug(LOG, "Closing write of file %s;" + " localfile=%s of length %d - attempt %d", key, backupFile, uploadLen, attempt);
     FileInputStream in = null;
     try {
       in = new FileInputStream(backupFile);
@@ -343,10 +341,7 @@ public class SwiftNativeOutputStreamMultipartNoSplit extends SwiftOutputStream {
 
   @Override
   public String toString() {
-    return "SwiftNativeOutputStreamMultipartNoSplit{" + ", key='" + key + '\'' + ", backupFile="
-        + backupFile + ", closed=" + closed + ", filePartSize=" + filePartSize + ", partNumber="
-        + partNumber + ", blockOffset=" + blockOffset + ", partUpload=" + partUpload
-        + ", nativeStore=" + nativeStore + ", bytesWritten=" + bytesWritten + ", bytesUploaded="
-        + bytesUploaded + '}';
+    return "SwiftNativeOutputStreamMultipartNoSplit{" + ", key='" + key + '\'' + ", backupFile=" + backupFile + ", closed=" + closed + ", filePartSize=" + filePartSize + ", partNumber=" + partNumber
+        + ", blockOffset=" + blockOffset + ", partUpload=" + partUpload + ", nativeStore=" + nativeStore + ", bytesWritten=" + bytesWritten + ", bytesUploaded=" + bytesUploaded + '}';
   }
 }

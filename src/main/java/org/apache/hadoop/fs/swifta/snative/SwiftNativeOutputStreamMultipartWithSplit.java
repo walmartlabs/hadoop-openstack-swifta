@@ -54,7 +54,8 @@ import org.apache.hadoop.fs.swifta.util.ThreadManager;
  */
 public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream {
   private static final Log LOG = LogFactory.getLog(SwiftNativeOutputStreamMultipartWithSplit.class);
-  private static final MetricsFactory metric = MetricsFactory.getMetricsFactory(SwiftNativeOutputStreamMultipartWithSplit.class);
+  private static final MetricsFactory metric =
+      MetricsFactory.getMetricsFactory(SwiftNativeOutputStreamMultipartWithSplit.class);
 
   private static final int ATTEMPT_LIMIT = 3;
 
@@ -99,7 +100,9 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
    * @throws IOException IOException
    */
   @SuppressWarnings("rawtypes")
-  public SwiftNativeOutputStreamMultipartWithSplit(Configuration conf, SwiftNativeFileSystemStore nativeStore, String key, long partSizeKB, int outputBufferSize) throws IOException {
+  public SwiftNativeOutputStreamMultipartWithSplit(Configuration conf,
+      SwiftNativeFileSystemStore nativeStore, String key, long partSizeKB, int outputBufferSize)
+      throws IOException {
     dir = new File(conf.get("hadoop.tmp.dir"));
     this.key = key;
     this.nativeStore = nativeStore;
@@ -133,7 +136,8 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
       closes.add(this.doClose(closeThreads, oldStream, file));
     }
     File tmp = newBackupFile(partNumber);
-    file = new BackupFile(tmp, partNumber, new BufferedOutputStream(new FileOutputStream(tmp), outputBufferSize));
+    file = new BackupFile(tmp, partNumber,
+        new BufferedOutputStream(new FileOutputStream(tmp), outputBufferSize));
     backupFiles.offer(file);
     backupStream = file.getOutput();
   }
@@ -256,12 +260,14 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
    * Do the actually upload.
    */
   @SuppressWarnings("rawtypes")
-  public List<Future> doUpload(final ThreadManager tm, final BackupFile uploadFile, final int partNumber) {
+  public List<Future> doUpload(final ThreadManager tm, final BackupFile uploadFile,
+      final int partNumber) {
     uploads.add(tm.getPool().submit(new Callable<Boolean>() {
       public Boolean call() throws Exception {
         try {
           if (LOG.isDebugEnabled()) {
-            LOG.debug("Upload file " + uploadFile.getUploadFile().getName() + ";partNumber=" + partNumber + ";len=" + uploadFile.getUploadFile().length());
+            LOG.debug("Upload file " + uploadFile.getUploadFile().getName() + ";partNumber="
+                + partNumber + ";len=" + uploadFile.getUploadFile().length());
           }
           partUpload(uploadFile.getUploadFile(), partNumber);
           return Boolean.TRUE;
@@ -316,7 +322,8 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
 
   private long uploadFileAttempt(Path keypath, int attempt, File backupFile) throws IOException {
     long uploadLen = backupFile.length();
-    SwiftUtils.debug(LOG, "Closing write of file %s;" + " localfile=%s of length %d - attempt %d", key, backupFile, uploadLen, attempt);
+    SwiftUtils.debug(LOG, "Closing write of file %s;" + " localfile=%s of length %d - attempt %d",
+        key, backupFile, uploadLen, attempt);
     FileInputStream inputStream = null;
     try {
       inputStream = new FileInputStream(backupFile);
@@ -376,7 +383,8 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
    * @param len length of write.
    * @throws IOException backup stream write failing
    */
-  private void autoWriteToSplittedBackupStream(byte[] buffer, int offset, int len) throws IOException {
+  private void autoWriteToSplittedBackupStream(byte[] buffer, int offset, int len)
+      throws IOException {
 
     while (len > 0) {
       if ((blockOffset + len) >= filePartSize) {
@@ -401,7 +409,9 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
      * No race condition here. Upload files ahead if need.
      */
     if (uploadThread == null && partUpload) {
-      int maxThreads = nativeStore.getMaxInParallelUpload() < 1 ? SwiftNativeOutputStreamMultipartWithSplit.BACKGROUND_UPLOAD_BATCH_SIZE : nativeStore.getMaxInParallelUpload();
+      int maxThreads = nativeStore.getMaxInParallelUpload() < 1
+          ? SwiftNativeOutputStreamMultipartWithSplit.BACKGROUND_UPLOAD_BATCH_SIZE
+          : nativeStore.getMaxInParallelUpload();
       uploadThread = new AsynchronousUpload(backupFiles, this, maxThreads);
       uploadThread.start();
     }
@@ -463,7 +473,8 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
     }
   }
 
-  private long uploadFilePartAttempt(final int attempt, final File backupFile, final int partNumber) throws IOException {
+  private long uploadFilePartAttempt(final int attempt, final File backupFile, final int partNumber)
+      throws IOException {
     long uploadLen = backupFile.length();
     BufferedInputStream inputStream = null;
     FileInputStream input = null;
@@ -526,7 +537,9 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
 
   @Override
   public String toString() {
-    return "SwiftNativeOutputStreamMultipartWithSplit{" + ", key='" + key + '\'' + ", closed=" + closed + ", filePartSize=" + filePartSize + ", blockOffset=" + blockOffset + ", partUpload="
-        + partUpload + ", nativeStore=" + nativeStore + ", bytesWritten=" + bytesWritten + ", bytesUploaded=" + bytesUploaded + '}';
+    return "SwiftNativeOutputStreamMultipartWithSplit{" + ", key='" + key + '\'' + ", closed="
+        + closed + ", filePartSize=" + filePartSize + ", blockOffset=" + blockOffset
+        + ", partUpload=" + partUpload + ", nativeStore=" + nativeStore + ", bytesWritten="
+        + bytesWritten + ", bytesUploaded=" + bytesUploaded + '}';
   }
 }

@@ -43,7 +43,8 @@ class SwiftObjectFileStatus {
 
   SwiftObjectFileStatus() {}
 
-  SwiftObjectFileStatus(long bytes, String contentType, String hash, Date lastModified, String name) {
+  SwiftObjectFileStatus(long bytes, String contentType, String hash, Date lastModified,
+      String name) {
     this.bytes = bytes;
     this.contentType = contentType;
     this.hash = hash;

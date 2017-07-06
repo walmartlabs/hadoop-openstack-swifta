@@ -1,12 +1,16 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright
- * ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the
- * License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the License for the specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.apache.hadoop.fs.swifta.http;
@@ -14,7 +18,8 @@ package org.apache.hadoop.fs.swifta.http;
 import org.apache.hadoop.util.VersionInfo;
 
 /**
- * Constants used in the Swift REST protocol, and in the properties used to configure the {@link SwiftRestClient}.
+ * Constants used in the Swift REST protocol, and in the properties used to configure the
+ * {@link SwiftRestClient}.
  */
 public class SwiftProtocolConstants {
 
@@ -69,22 +74,26 @@ public class SwiftProtocolConstants {
   public static final String SERVICE_CATALOG_SWIFT = "swift";
 
   /**
-   * Section in the JSON catalog provided after auth listing the cloudfiles; this is an alternate catalog entry name {@value}.
+   * Section in the JSON catalog provided after auth listing the cloudfiles; this is an alternate
+   * catalog entry name {@value}.
    */
   public static final String SERVICE_CATALOG_CLOUD_FILES = "cloudFiles";
 
   /**
-   * Section in the JSON catalog provided after auth listing the object store; this is an alternate catalog entry name {@value}.
+   * Section in the JSON catalog provided after auth listing the object store; this is an alternate
+   * catalog entry name {@value}.
    */
   public static final String SERVICE_CATALOG_OBJECT_STORE = "object-store";
 
   /**
-   * Swift-specific header: object manifest used in the final upload of a multipart operation: {@value}.
+   * Swift-specific header: object manifest used in the final upload of a multipart operation:
+   * {@value}.
    */
   public static final String X_OBJECT_MANIFEST = "X-Object-Manifest";
 
   /**
-   * Swift-specific header: object manifest used in the final upload of a multipart operation: {@value}.
+   * Swift-specific header: object manifest used in the final upload of a multipart operation:
+   * {@value}.
    */
   public static final String USER_CUSTOM_DATA = "X-Manifest-Total-Size";
   /**
@@ -135,7 +144,8 @@ public class SwiftProtocolConstants {
   public static final String SWIFT_WRITE_POLICY = FS_SWIFT + ".write.policy";
 
   /**
-   * The default socket timeout in millis {@value}. This controls how long the connection waits for responses from servers.
+   * The default socket timeout in millis {@value}. This controls how long the connection waits for
+   * responses from servers.
    */
   public static final int DEFAULT_SOCKET_TIMEOUT = 60000;
 
@@ -206,7 +216,8 @@ public class SwiftProtocolConstants {
    */
   public static final String SWIFT_INPUT_STREAM_BUFFER_SIZE = FS_SWIFT + ".inputstream.buffersize";
 
-  public static final String SWIFT_OUTPUT_STREAM_BUFFER_SIZE = FS_SWIFT + ".outputstream.buffersize";
+  public static final String SWIFT_OUTPUT_STREAM_BUFFER_SIZE =
+      FS_SWIFT + ".outputstream.buffersize";
 
   /**
    * HttpClient: set the maximum number of connections allowed.
@@ -221,7 +232,8 @@ public class SwiftProtocolConstants {
   /**
    * The delete pool size for thread manager.
    */
-  public static final String SWIFT_MAX_CONNECTIONS_FOR_DELETE = FS_SWIFT + ".connections.max.delete";
+  public static final String SWIFT_MAX_CONNECTIONS_FOR_DELETE =
+      FS_SWIFT + ".connections.max.delete";
 
   /**
    * The max threads for a parallel copy.
@@ -231,7 +243,8 @@ public class SwiftProtocolConstants {
   /**
    * The max threads for a parallel upload.
    */
-  public static final String SWIFT_MAX_CONNECTIONS_FOR_UPLOAD = FS_SWIFT + ".connections.max.upload";
+  public static final String SWIFT_MAX_CONNECTIONS_FOR_UPLOAD =
+      FS_SWIFT + ".connections.max.upload";
 
   public static final String LRU_SIZE = FS_SWIFT + ".cache.size";
 
@@ -245,7 +258,8 @@ public class SwiftProtocolConstants {
   /**
    * The user agent sent in requests.
    */
-  public static final String SWIFT_USER_AGENT = "Apache Hadoop Swifta Client " + VersionInfo.getBuildVersion();
+  public static final String SWIFT_USER_AGENT =
+      "Apache Hadoop Swifta Client " + VersionInfo.getBuildVersion();
 
   /**
    * Key for passing the service name as a property - not read from the configuration: {@value}.

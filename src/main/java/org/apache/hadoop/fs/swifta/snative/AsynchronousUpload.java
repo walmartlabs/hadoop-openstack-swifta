@@ -38,7 +38,8 @@ public class AsynchronousUpload extends Thread {
    * @param out the output stream
    * @param maxThreads max threads to run upload
    */
-  public AsynchronousUpload(BlockingQueue<BackupFile> queue, SwiftOutputStream out, int maxThreads) {
+  public AsynchronousUpload(BlockingQueue<BackupFile> queue, SwiftOutputStream out,
+      int maxThreads) {
     super();
     this.queue = queue;
     this.execute = Boolean.TRUE;
@@ -92,7 +93,8 @@ public class AsynchronousUpload extends Thread {
           continue;
         }
         if (LOG.isDebugEnabled()) {
-          LOG.debug(backFile.getPartNumber() + ",Start background upload for: " + backFile.getUploadFile().getName() + ";" + backFile.getUploadFile().length());
+          LOG.debug(backFile.getPartNumber() + ",Start background upload for: "
+              + backFile.getUploadFile().getName() + ";" + backFile.getUploadFile().length());
         }
         uploads = out.doUpload(tm, backFile, backFile.getPartNumber());
 

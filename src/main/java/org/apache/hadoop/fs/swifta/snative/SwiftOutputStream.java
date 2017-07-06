@@ -47,7 +47,8 @@ public abstract class SwiftOutputStream extends OutputStream {
   }
 
   @SuppressWarnings("rawtypes")
-  public List<Future> doUpload(final ThreadManager tm, final BackupFile uploadFile, final int partNumber) throws SwiftUnsupportedFeatureException {
+  public List<Future> doUpload(final ThreadManager tm, final BackupFile uploadFile,
+      final int partNumber) throws SwiftUnsupportedFeatureException {
     throw new SwiftUnsupportedFeatureException(MSG_NOT_SUPPORT);
   }
 

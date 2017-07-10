@@ -223,7 +223,7 @@ public class SwiftNativeOutputStreamMultipartNoSplit extends SwiftOutputStream {
         bytesUploaded += uploadFileAttempt(keypath, attempt);
         uploadSuccess = true;
       } catch (IOException e) {
-        LOG.info("Upload failed " + e, e);
+        LOG.error("Upload failed! You may not have write permission.");
         if (attempt > ATTEMPT_LIMIT) {
           throw e;
         }

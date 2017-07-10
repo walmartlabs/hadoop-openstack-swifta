@@ -199,7 +199,7 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
       Path keypath = new Path(key);
       if (partUpload) {
         // uploadParts();
-        nativeStore.createManifestForPartUpload(keypath);
+        nativeStore.createManifestForPartUpload(keypath, this.bytesUploaded.get());
       } else {
         uploadOnClose(keypath);
       }

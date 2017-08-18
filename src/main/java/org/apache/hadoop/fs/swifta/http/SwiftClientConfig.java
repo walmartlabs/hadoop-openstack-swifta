@@ -198,6 +198,8 @@ public class SwiftClientConfig {
 
   private long partSizeKb;
 
+  private long partSizeBytes;
+
   /**
    * The blocksize of this FS.
    */
@@ -343,7 +345,7 @@ public class SwiftClientConfig {
         throw new SwiftConfigurationException(
             "Invalid partition size set in " + SWIFT_PARTITION_SIZE + ": " + partSizeKb);
       }
-
+      partSizeBytes = partSizeKb << 10;
       bufferSizeKb = conf.getInt(SWIFT_REQUEST_SIZE, DEFAULT_SWIFT_REQUEST_SIZE);
       if (bufferSizeKb <= 0) {
         throw new SwiftConfigurationException(
@@ -568,6 +570,10 @@ public class SwiftClientConfig {
 
   public void setPartSizeKb(int partSizeKb) {
     this.partSizeKb = partSizeKb;
+  }
+
+  public long getPartSizeBytes() {
+    return partSizeBytes;
   }
 
   public int getBlocksizeKb() {

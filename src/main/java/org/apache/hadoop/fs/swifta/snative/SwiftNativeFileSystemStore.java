@@ -170,6 +170,10 @@ public class SwiftNativeFileSystemStore {
     return swiftRestClient.getClientConfig().getPartSizeKb();
   }
 
+  public long getPartsizeBytes() {
+    return swiftRestClient.getClientConfig().getPartSizeBytes();
+  }
+
   public int getOutputBufferSize() {
     return swiftRestClient.getClientConfig().getOutputBufferSize();
   }
@@ -990,12 +994,11 @@ public class SwiftNativeFileSystemStore {
           // copyObject(srcObject, destPath);
           // this.createManifestForPartUpload(getCorrectSwiftPath(destPath));
 
-          Path newPrefixPath = getCorrectSwiftPath(destObject);
+          final Path newPrefixPath = getCorrectSwiftPath(destObject);
           String newPrefixName = newPrefixPath.toUri().getPath();
           if (!newPrefixName.endsWith("/")) {
             newPrefixName = newPrefixName.concat("/");
           }
-          createManifestForPartUpload(newPrefixPath, srcMetadata.getLen());
           ThreadManager tm = this.getThreadManager(childStats);
           Map<String, Future<Boolean>> copies = new HashMap<String, Future<Boolean>>();
           for (FileStatus s : childStats) {
@@ -1025,6 +1028,7 @@ public class SwiftNativeFileSystemStore {
                   if (!swiftRestClient.copyObject(srcSeg, destSeg)) {
                     throw new SwiftException("Copy of " + srcSeg + " to " + destSeg + "failed");
                   }
+                  createManifestForPartUpload(newPrefixPath, srcMetadata.getLen());
                   return true;
                 } catch (IOException e) {
                   return false;
@@ -1082,13 +1086,13 @@ public class SwiftNativeFileSystemStore {
         Map<String, Future<Boolean>> copies = new HashMap<String, Future<Boolean>>();
         ThreadManager tm = this.getThreadManager(childStats);
         try {
-          for (FileStatus fileStatus : childStats) {
+          for (final FileStatus fileStatus : childStats) {
             final Path copySourcePath = fileStatus.getPath();
             // String copySourceURI = copySourcePath.toUri().toString();
             final SwiftObjectPath copySrcPath = toObjectPath(copySourcePath);
             String copyDestSubPath = copySrcPath.toUriPath().substring(prefixStripCount);
 
-            Path copyDestPath = new Path(targetPath, copyDestSubPath);
+            final Path copyDestPath = new Path(targetPath, copyDestSubPath);
             if (LOG.isDebugEnabled()) {
               // trace to debug some low-level rename path problems; retained
               // in case they ever come back.
@@ -1100,6 +1104,10 @@ public class SwiftNativeFileSystemStore {
               public Boolean call() throws Exception {
                 try {
                   copyThenDeleteObject(copySrcPath, copyDestination);
+                  // Bug fix: DTBFDP-80.
+                  if (fileStatus.getLen() > getPartsizeBytes()) {
+                    createManifestForPartUpload(copyDestPath, fileStatus.getLen());
+                  }
                   return true;
                 } catch (IOException e) {
                   return false;

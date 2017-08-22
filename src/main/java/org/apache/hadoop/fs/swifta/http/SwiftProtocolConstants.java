@@ -179,7 +179,7 @@ public class SwiftProtocolConstants {
   /**
    * The default blocksize for filesystems in KB: {@value}.
    */
-  public static final int DEFAULT_SWIFT_BLOCKSIZE = 128 * 1024;
+  public static final int DEFAULT_SWIFT_BLOCKSIZE = 128 << 10;
 
   /**
    * The partition size for all filesystems in KB: {@value}.
@@ -194,7 +194,7 @@ public class SwiftProtocolConstants {
   /**
    * The default partition size for uploads: {@value}.
    */
-  public static final long DEFAULT_SWIFT_PARTITION_SIZE = 4608 * 1024L;
+  public static final long DEFAULT_SWIFT_PARTITION_SIZE = 4608 << 10;
 
   /**
    * The request size for reads in KB: {@value}.

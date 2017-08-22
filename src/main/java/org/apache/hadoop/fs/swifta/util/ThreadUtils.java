@@ -20,7 +20,8 @@ public class ThreadUtils {
    * Timeout for thread to die.
    */
   private static final int TIMEOUT = 1000;
-  private static final int THREADS_PER_PROCESSOR = 5;
+  // Default max threads.
+  private static final int DEFAULT_MAX_THREADS = 10;
 
   public static boolean terminate(Thread thread) {
     return ThreadUtils.terminate(thread, TIMEOUT);
@@ -53,7 +54,7 @@ public class ThreadUtils {
   }
 
   public static int getMaxThread() {
-    return Runtime.getRuntime().availableProcessors() * THREADS_PER_PROCESSOR;
+    return DEFAULT_MAX_THREADS;
   }
 
 }

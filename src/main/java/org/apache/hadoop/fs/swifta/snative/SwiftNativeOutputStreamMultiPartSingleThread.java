@@ -77,7 +77,7 @@ public class SwiftNativeOutputStreamMultiPartSingleThread extends SwiftOutputStr
     this.backupStream = new BufferedOutputStream(new FileOutputStream(backupFile));
     this.partNumber = 1;
     this.blockOffset = 0;
-    this.filePartSize = 1024L * partSizeKb;
+    this.filePartSize = partSizeKb << 10;
     metric.increase(key, this);
     metric.report();
   }

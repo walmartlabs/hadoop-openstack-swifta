@@ -109,7 +109,7 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
     this.blockOffset = 0;
     this.partNumber = new AtomicInteger(1);
     bytesUploaded = new AtomicLong(0);
-    this.filePartSize = 1024L * partSizeKB;
+    this.filePartSize = partSizeKB << 10;
     backupDir = UUID.randomUUID().toString();
     backupFiles = new LinkedBlockingQueue<BackupFile>();
     newDir = new File(dir, backupDir);

@@ -290,7 +290,7 @@ public class SwiftClientConfig {
     this.cacheLiveTime = conf.getLong(LRU_LIVE_TIME, DEFAULT_EXPIRES_TIME);
     // Default set to false.
     isLazySeek = conf.getBoolean(SWIFT_LAZY_SEEK, Boolean.FALSE);
-    useHeaderCache = conf.getBoolean(USE_HEADER_CACHE, Boolean.TRUE);
+    useHeaderCache = conf.getBoolean(USE_HEADER_CACHE, Boolean.FALSE);
 
     maxThreadsInPool = conf.getInt(SWIFT_MAX_CONNECTIONS_FOR_DELETE, DEFAULT_CONNECTIONS);
 

@@ -84,7 +84,7 @@ public class SwiftClientConfig {
 
   private static final int DEFAULT_CONNECTIONS = 0; // Default set to 0.
 
-  private static final int DEFAULT_COPY_CONNECTIONS = 0; // Default set to 0.
+  private static final int DEFAULT_COPY_CONNECTIONS = 100; // Default set to 100.
 
   private static final int DEFAULT_LRU_SIZE = 1000;
 

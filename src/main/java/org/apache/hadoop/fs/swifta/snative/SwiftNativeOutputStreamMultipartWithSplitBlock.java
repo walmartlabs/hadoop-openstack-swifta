@@ -271,6 +271,9 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
             LOG.debug("Upload file " + uploadFile.getUploadFile().getName() + ";partNumber="
                 + partNumber + ";len=" + uploadFile.getUploadFile().length());
           }
+          if (uploadFile.getOutput() != null) {
+            uploadFile.getOutput().close();
+          }
           partUpload(uploadFile.getUploadFile(), partNumber);
           return Boolean.TRUE;
         } catch (IOException e) {

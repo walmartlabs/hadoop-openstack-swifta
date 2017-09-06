@@ -209,7 +209,7 @@ public class SwiftProtocolConstants {
   /**
    * The default buffer size for inputStream.
    */
-  public static final int DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE = 8192 * 1024;
+  public static final int DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE = 8192 * 10;
 
   public static final String HADOOP_TMP_DIR = "hadoop.tmp.dir";
   /**

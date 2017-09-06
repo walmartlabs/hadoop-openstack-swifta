@@ -16,7 +16,6 @@
 package org.apache.hadoop.fs.swifta.snative;
 
 import java.util.Date;
-
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**

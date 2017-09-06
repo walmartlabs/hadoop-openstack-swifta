@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -266,6 +265,7 @@ public class SwiftTestUtils extends org.junit.Assert {
    * @param fileSystem the file system
    * @param cleanupPath the path to clean up 
    */
+  @SuppressWarnings("deprecation")
   public static void cleanup(String action, FileSystem fileSystem, String cleanupPath) {
     noteAction(action);
     try {
@@ -353,6 +353,7 @@ public class SwiftTestUtils extends org.junit.Assert {
    * 
    * @param fileStatus stats to check
    */
+  @SuppressWarnings("deprecation")
   public static void assertIsDirectory(FileStatus fileStatus) {
     assertTrue("Should be a dir -but isn't: " + fileStatus, fileStatus.isDir());
   }
@@ -447,6 +448,7 @@ public class SwiftTestUtils extends org.junit.Assert {
    * @param filename name of the file
    * @throws IOException IO problems during file operations
    */
+  @SuppressWarnings("deprecation")
   public static void assertIsFile(FileSystem fileSystem, Path filename) throws IOException {
     assertPathExists(fileSystem, "Expected file", filename);
     FileStatus status = fileSystem.getFileStatus(filename);

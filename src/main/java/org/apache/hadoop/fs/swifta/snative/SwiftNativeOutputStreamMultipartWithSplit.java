@@ -16,6 +16,7 @@
 package org.apache.hadoop.fs.swifta.snative;
 
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE;
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.HADOOP_TMP_DIR;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -34,7 +35,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -103,7 +103,7 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
   public SwiftNativeOutputStreamMultipartWithSplit(Configuration conf,
       SwiftNativeFileSystemStore nativeStore, String key, long partSizeKB, int outputBufferSize)
       throws IOException {
-    dir = new File(conf.get("hadoop.tmp.dir"));
+    dir = new File(conf.get(HADOOP_TMP_DIR));
     this.key = key;
     this.nativeStore = nativeStore;
     this.blockOffset = 0;
@@ -449,8 +449,6 @@ public class SwiftNativeOutputStreamMultipartWithSplit extends SwiftOutputStream
    * @throws IOException on IO problems
    */
   private void partUpload(final File backupFile, final int partNumber) throws IOException {
-
-
 
     if (partUpload && backupFile.length() == 0) {
       // skipping the upload if

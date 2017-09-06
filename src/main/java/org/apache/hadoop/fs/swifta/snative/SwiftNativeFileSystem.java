@@ -22,7 +22,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -535,6 +534,7 @@ public class SwiftNativeFileSystem extends FileSystem {
    * 
    * @param permission Currently ignored.
    */
+  @SuppressWarnings("deprecation")
   @Override
   public FSDataOutputStream create(Path file, FsPermission permission, boolean overwrite,
       int bufferSize, short replication, long blockSize, Progressable progress) throws IOException {

@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Objects;
-
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -74,6 +73,7 @@ public class HttpInputStreamWithRelease extends InputStream {
 
   /**
    * The constructor for HttpInputStreamWithRelease.
+   *
    * @param uri the uri
    * @param method the method
    * @param bufferSize the buffer size

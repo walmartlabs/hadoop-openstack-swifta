@@ -38,6 +38,7 @@ public class ListObjectsRequest {
 
   /**
    * The constructor for the ListObjectsRequest.
+   *
    * @param path the swift object path
    * @param listDeep whether listing the deep directory
    * @param newest whether to retrieve the newest
@@ -53,6 +54,7 @@ public class ListObjectsRequest {
 
   /**
    * The constructor for the ListObjectsRequest.
+   *
    * @param path the path
    * @param listDeep whether listing the deep directory
    * @param newest whether to retrieve the newest

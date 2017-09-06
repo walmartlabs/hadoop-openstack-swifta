@@ -20,7 +20,10 @@ public class ThreadUtils {
    * Timeout for thread to die.
    */
   private static final int TIMEOUT = 1000;
-  // Default max threads.
+
+  /**
+   * Default max threads.
+   */
   private static final int DEFAULT_MAX_THREADS = 10;
 
   public static boolean terminate(Thread thread) {

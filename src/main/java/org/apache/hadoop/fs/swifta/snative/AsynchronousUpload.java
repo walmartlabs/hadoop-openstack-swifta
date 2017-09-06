@@ -18,11 +18,13 @@ package org.apache.hadoop.fs.swifta.snative;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.swifta.util.ThreadManager;
 
+/**
+ * Upload files asynchronously.
+ */
 public class AsynchronousUpload extends Thread {
   private static final Log LOG = LogFactory.getLog(AsynchronousUpload.class);
   private BlockingQueue<BackupFile> queue;
@@ -75,18 +77,15 @@ public class AsynchronousUpload extends Thread {
       tm.createThreadManager(maxThreads);
 
       List<Future> uploads = null;
-      /**
-       * Don't trigger background upload.
-       */
+
       BackupFile backFile = null;
       while (this.execute) {
-        // i++;
         /**
          * Get current file, but not upload it.
          */
         BackupFile curFile = queue.take();
         /**
-         * Only upload if previous file exist to avoid upload unfinished file chunk.
+         * Only upload if previous file exist to avoid uploading unfinished file split.
          */
         if (backFile == null) {
           backFile = curFile;

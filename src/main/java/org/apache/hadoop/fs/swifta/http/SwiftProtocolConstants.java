@@ -209,8 +209,9 @@ public class SwiftProtocolConstants {
   /**
    * The default buffer size for inputStream.
    */
-  public static final int DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE = 8192;
+  public static final int DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE = 8192 * 1024;
 
+  public static final String HADOOP_TMP_DIR = "hadoop.tmp.dir";
   /**
    * Buffer size for input stream in KB: {@value}.
    */
@@ -246,12 +247,12 @@ public class SwiftProtocolConstants {
   public static final String SWIFT_MAX_CONNECTIONS_FOR_UPLOAD =
       FS_SWIFT + ".connections.max.upload";
 
-  public static final String LRU_SIZE = FS_SWIFT + ".cache.size";
+  public static final String CACHE_SIZE = FS_SWIFT + ".cache.size";
 
   /**
    * In milliseconds.
    */
-  public static final String LRU_LIVE_TIME = FS_SWIFT + ".cache.live.time";
+  public static final String CACHE_LIVE_TIME = FS_SWIFT + ".cache.live.time";
 
   public static final String HEADER_USER_AGENT = "User-Agent";
 

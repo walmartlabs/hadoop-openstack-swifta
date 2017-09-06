@@ -15,6 +15,8 @@
 
 package org.apache.hadoop.fs.swifta.snative;
 
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.HADOOP_TMP_DIR;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,7 +30,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,7 +84,7 @@ public class SwiftNativeOutputStreamMultipartNoSplit extends SwiftOutputStream {
   }
 
   private File newBackupFile() throws IOException {
-    File dir = new File(conf.get("hadoop.tmp.dir"));
+    File dir = new File(conf.get(HADOOP_TMP_DIR));
     if (!dir.exists()) {
       if (!dir.mkdirs() && !dir.exists()) {
         throw new SwiftException("Cannot create Swift buffer directory: " + dir);

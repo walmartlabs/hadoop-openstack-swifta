@@ -20,7 +20,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.NoSuchElementException;
-
 import org.apache.commons.logging.Log;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -72,6 +71,7 @@ public final class SwiftUtils {
    * @param fileStatus status to examine
    * @return true if we consider this status to be representative of a directory.
    */
+  @SuppressWarnings("deprecation")
   public static boolean isDirectory(FileStatus fileStatus) {
     return fileStatus.isDir() || isFilePretendingToBeDirectory(fileStatus);
   }

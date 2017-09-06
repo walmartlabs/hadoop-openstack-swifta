@@ -18,7 +18,6 @@ package org.apache.hadoop.fs.swifta.snative;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.Future;
-
 import org.apache.hadoop.fs.swifta.exceptions.SwiftUnsupportedFeatureException;
 import org.apache.hadoop.fs.swifta.util.ThreadManager;
 

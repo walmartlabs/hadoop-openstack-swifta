@@ -42,7 +42,6 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_USER
 
 import java.net.URI;
 import java.util.Properties;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftConfigurationException;
 
@@ -72,6 +71,7 @@ public final class RestClientBindings {
 
   /**
    * Bind.
+   *
    * @param fsUri the file system URI
    * @param conf the configuration
    * @return the properties

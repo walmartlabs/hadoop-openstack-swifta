@@ -17,7 +17,6 @@ package org.apache.hadoop.fs.swifta.http;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftConfigurationException;
 
@@ -28,6 +27,7 @@ public class SwiftClientConfigFactory {
 
   /**
    * Get the instance of the Swift ClientConfig factory.
+   *
    * @param service the service name
    * @param conf the configuration
    * @return the swift client configuration

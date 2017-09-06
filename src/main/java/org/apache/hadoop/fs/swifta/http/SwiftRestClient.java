@@ -48,7 +48,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
@@ -103,6 +102,7 @@ import org.apache.http.conn.params.ConnRoutePNames;
 public final class SwiftRestClient {
 
   private static final Log LOG = LogFactory.getLog(SwiftRestClient.class);
+  // Throw warning if server took longer than tolerant time.
   private static final int TOLERANT_TIME = 120000;
 
   /**
@@ -1113,7 +1113,7 @@ public final class SwiftRestClient {
               "Servers take more than " + times / 1000 + " seconds to response." + uri.toString());
         }
       } catch (IOException e) {
-        // rethrow with extra diagnostics and wiki links
+        // Re-throw with extra diagnostics and wiki links
         throw ExceptionDiags.wrapException(uri.toString(), method.getName(), e);
       }
 

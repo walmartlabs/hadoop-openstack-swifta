@@ -15,6 +15,8 @@
 
 package org.apache.hadoop.fs.swifta.http;
 
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.CACHE_LIVE_TIME;
+import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.CACHE_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_CONNECT_TIMEOUT;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_RETRY_AUTH_COUNT;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_RETRY_COUNT;
@@ -25,8 +27,6 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SW
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_SWIFT_REQUEST_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_THROTTLE_DELAY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.DEFAULT_WRITE_POLICY;
-import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.LRU_LIVE_TIME;
-import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.LRU_SIZE;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_APIKEY_PROPERTY;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_AUTH_ENDPOINT_PREFIX;
 import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.SWIFT_AUTH_PROPERTY;
@@ -62,7 +62,6 @@ import static org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants.USE_HEADER
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -86,7 +85,7 @@ public class SwiftClientConfig {
 
   private static final int DEFAULT_COPY_CONNECTIONS = 100; // Default set to 100.
 
-  private static final int DEFAULT_LRU_SIZE = 1000;
+  private static final int DEFAULT_CACHE_SIZE = 1000;
 
   /**
    * In milliseconds.
@@ -220,10 +219,10 @@ public class SwiftClientConfig {
   /**
    * The LRU cache size for the HEAD requests.
    */
-  private int lruCacheSize;
+  private int cacheSize;
 
   /**
-   * The time the LRU cache lives.
+   * The cache lives time.
    */
   private long cacheLiveTime;
 
@@ -286,8 +285,8 @@ public class SwiftClientConfig {
 
     maxTotalConnections = conf.getInt(SWIFT_MAX_TOTAL_CONNECTIONS, DEFAULT_CONNECTIONS);
 
-    lruCacheSize = conf.getInt(LRU_SIZE, DEFAULT_LRU_SIZE);
-    this.cacheLiveTime = conf.getLong(LRU_LIVE_TIME, DEFAULT_EXPIRES_TIME);
+    cacheSize = conf.getInt(CACHE_SIZE, DEFAULT_CACHE_SIZE);
+    this.cacheLiveTime = conf.getLong(CACHE_LIVE_TIME, DEFAULT_EXPIRES_TIME);
     // Default set to false.
     isLazySeek = conf.getBoolean(SWIFT_LAZY_SEEK, Boolean.FALSE);
     useHeaderCache = conf.getBoolean(USE_HEADER_CACHE, Boolean.FALSE);
@@ -616,12 +615,8 @@ public class SwiftClientConfig {
     this.inputBufferSize = inputBufferSize;
   }
 
-  public int getLruCacheSize() {
-    return lruCacheSize;
-  }
-
-  public void setLruCacheSize(int lruCacheSize) {
-    this.lruCacheSize = lruCacheSize;
+  public int getCacheSize() {
+    return cacheSize;
   }
 
   public boolean isUseHeaderCache() {

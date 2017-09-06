@@ -18,7 +18,6 @@ package org.apache.hadoop.fs.swifta.http;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
@@ -82,7 +81,7 @@ public class HttpClientManager {
     connParam.setConnectionTimeout(clientConfig.getConnectTimeout());
     connParam.setTcpNoDelay(Boolean.TRUE);
     connectionManager.setParams(connParam);
-    // Connection eviction
+    // Connection eviction.
     ScheduledExecutorService scheduledExeService =
         Executors.newScheduledThreadPool(1, new DaemonThreadFactory(THREAD_NAME));
     scheduledExeService.scheduleAtFixedRate(new IdleConnectionMonitorThread(connectionManager),

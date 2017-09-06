@@ -17,7 +17,6 @@ package org.apache.hadoop.fs.swifta.snative;
 
 import java.io.EOFException;
 import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSInputStream;
@@ -112,7 +111,6 @@ class SwiftNativeInputStream extends FSInputStream {
   private synchronized void incPos(int offset) {
     pos += offset;
     nextReadPosition = pos;
-    // rangeOffset += offset;
     SwiftUtils.debug(LOG, "Inc: pos=%d nextReadPosition=%d", pos, nextReadPosition);
   }
 
@@ -249,21 +247,6 @@ class SwiftNativeInputStream extends FSInputStream {
     return "SwiftNativeInputStream" + " position=" + pos + " "
         + (httpStream != null ? httpStream.toString() : (" no input stream: " + reasonClosed));
   }
-
-  /**
-   * Treats any finalize() call without the input stream being closed as a serious problem, logging
-   * at error level.
-   * 
-   * @throws Throwable n/a
-   */
-  // @Override
-  // protected void finalize() throws Throwable {
-  // if (httpStream != null) {
-  // LOG.error("Input stream is leaking handles by not being closed() properly: "
-  // + httpStream.toString());
-  // }
-  // super.finalize();
-  // }
 
   /**
    * Read through the specified number of bytes. The implementation iterates a byte a time, which

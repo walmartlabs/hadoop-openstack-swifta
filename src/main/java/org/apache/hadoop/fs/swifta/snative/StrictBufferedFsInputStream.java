@@ -16,7 +16,6 @@
 package org.apache.hadoop.fs.swifta.snative;
 
 import java.io.IOException;
-
 import org.apache.hadoop.fs.BufferedFSInputStream;
 import org.apache.hadoop.fs.FSInputStream;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftConnectionClosedException;

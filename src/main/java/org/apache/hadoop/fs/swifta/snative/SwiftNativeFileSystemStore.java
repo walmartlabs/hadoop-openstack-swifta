@@ -42,7 +42,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
@@ -108,11 +107,11 @@ public class SwiftNativeFileSystemStore {
     metric.increase(this);
     metric.report();
     if (cache1 == null) {
-      cache1 = new LFUCache<Header[]>(swiftRestClient.getClientConfig().getLruCacheSize(),
+      cache1 = new LFUCache<Header[]>(swiftRestClient.getClientConfig().getCacheSize(),
           swiftRestClient.getClientConfig().getCacheLiveTime());
     }
     if (cache2 == null) {
-      cache2 = new LFUCache<Header[]>(swiftRestClient.getClientConfig().getLruCacheSize(),
+      cache2 = new LFUCache<Header[]>(swiftRestClient.getClientConfig().getCacheSize(),
           swiftRestClient.getClientConfig().getCacheLiveTime());
     }
 
@@ -409,7 +408,7 @@ public class SwiftNativeFileSystemStore {
         return swiftRestClient.getData(new URI(url), SwiftRestClient.NEWEST);
       } catch (Exception e) {
         // Ignore
-        // It is possible that endpoint doesn't contains needed data.
+        // It is possible that end point doesn't contains needed data.
       }
     }
 
@@ -471,7 +470,6 @@ public class SwiftNativeFileSystemStore {
     }
 
     Collections.sort(strLocations, new Comparator<String>() {
-      @Override
       public int compare(String o1, String o2) {
         Integer dst1 = similarityMap.get(o1);
         Integer dst2 = similarityMap.get(o2);
@@ -528,6 +526,7 @@ public class SwiftNativeFileSystemStore {
    * @throws IOException IO problems
    * @throws FileNotFoundException if the path does not exist
    */
+  @SuppressWarnings("deprecation")
   public ObjectsList listDirectory(SwiftObjectPath path, boolean listDeep, boolean newest,
       String marker) throws IOException {
     final ObjectsList objects = new ObjectsList();
@@ -655,13 +654,15 @@ public class SwiftNativeFileSystemStore {
    * @param path path
    * @throws IOException IOException
    */
+  // TODO: Use trailing slash to distinct from the dummy dir and zero byte file. Need swift server
+  // side support.
   public void createDirectory(Path path) throws IOException {
     innerCreateDirectory(toDirPathCreate(path));
   }
 
   /**
    * Create a container.
-   * 
+   *
    * @param path container path
    * @throws IOException IOException
    */

@@ -112,9 +112,6 @@ public final class SwiftRestClient {
    */
   public static final Header NEWEST = new Header(SwiftProtocolConstants.X_NEWEST, "true");
 
-  private static final MetricsFactory metric =
-      MetricsFactory.getMetricsFactory(SwiftRestClient.class);
-
   private boolean useKeystoneAuthentication = false;
 
   private final SwiftClientConfig clientConfig;
@@ -142,6 +139,8 @@ public final class SwiftRestClient {
   private URI objectLocationUri;
 
   private final DurationStatsTable durationStats = new DurationStatsTable();
+  private static final MetricsFactory metric =
+      MetricsFactory.getMetricsFactory(SwiftRestClient.class);
 
   /**
    * Get the object query endpoint. This is synchronized to handle a simultaneous update of all auth
@@ -833,15 +832,16 @@ public final class SwiftRestClient {
    *
    * @return authenticated access token
    */
-  public AccessToken authenticate() throws IOException {
+  public synchronized AccessToken authenticate() throws IOException {
     final AuthenticationRequest authenticationRequest;
     if (useKeystoneAuthentication) {
       authenticationRequest = this.clientConfig.getKeystoneAuthRequest();
     } else {
       authenticationRequest = this.clientConfig.getAuthRequest();
     }
-
-    LOG.debug("started authentication");
+    if(LOG.isDebugEnabled()){
+      LOG.debug("started authentication");
+    }
     return perform("authentication", this.clientConfig.getAuthUri(),
         new AuthenticationPost(authenticationRequest));
   }
@@ -1024,7 +1024,11 @@ public final class SwiftRestClient {
    */
   private void authIfNeeded() throws IOException {
     if (getEndpointUri() == null) {
-      authenticate();
+      synchronized (this) {
+        if (getEndpointUri() == null) {
+          authenticate();
+        }
+      }
     }
   }
 

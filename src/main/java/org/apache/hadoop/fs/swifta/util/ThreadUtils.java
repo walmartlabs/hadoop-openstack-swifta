@@ -24,7 +24,7 @@ public class ThreadUtils {
   /**
    * Default max threads.
    */
-  private static final int DEFAULT_MAX_THREADS = 10;
+  private static final int THREADS_PER_PROCESSOR = 6;
 
   public static boolean terminate(Thread thread) {
     return ThreadUtils.terminate(thread, TIMEOUT);
@@ -57,7 +57,7 @@ public class ThreadUtils {
   }
 
   public static int getMaxThread() {
-    return DEFAULT_MAX_THREADS;
+    return Runtime.getRuntime().availableProcessors() * THREADS_PER_PROCESSOR;
   }
 
 }

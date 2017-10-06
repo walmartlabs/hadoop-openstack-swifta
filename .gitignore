@@ -4,3 +4,5 @@
 .settings
 target/
 src/test/resources/
+.idea/
+*.iml

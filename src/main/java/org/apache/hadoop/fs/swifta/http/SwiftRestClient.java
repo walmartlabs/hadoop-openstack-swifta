@@ -563,7 +563,6 @@ public final class SwiftRestClient {
       if (object.startsWith("/")) {
         object = object.substring(1);
       }
-      object = SwiftUtils.encodeUrl(object);
       dataLocationUri = dataLocationUri.concat("/").concat(path.getContainer()).concat("/?prefix=")
           .concat(object);
       uri = new URI(dataLocationUri);
@@ -839,7 +838,7 @@ public final class SwiftRestClient {
     } else {
       authenticationRequest = this.clientConfig.getAuthRequest();
     }
-    if(LOG.isDebugEnabled()){
+    if (LOG.isDebugEnabled()) {
       LOG.debug("started authentication");
     }
     return perform("authentication", this.clientConfig.getAuthUri(),
@@ -1298,7 +1297,7 @@ public final class SwiftRestClient {
     try {
 
       dataLocationUri =
-          SwiftUtils.joinPaths(dataLocationUri, SwiftUtils.encodeUrl(path.toUriPath()));
+          SwiftUtils.joinPaths(dataLocationUri, SwiftUtils.decodeUrlNoCheck(path.toUriPath()));
       return new URI(dataLocationUri);
     } catch (URISyntaxException e) {
       throw new SwiftException("Failed to create URI from " + dataLocationUri, e);

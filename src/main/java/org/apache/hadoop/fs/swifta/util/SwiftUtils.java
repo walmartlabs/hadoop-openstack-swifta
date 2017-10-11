@@ -17,6 +17,7 @@ package org.apache.hadoop.fs.swifta.util;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -36,6 +37,8 @@ public final class SwiftUtils {
   private static final String SLASH = "/";
   private static final String COLON = ":";
   private static final String PLUS = "\\+";
+  private static final String PERCENT = "%";
+  private static final String PERCENT_ENCODE = "%25";
   private static final String COLON_ENCODE = "%3A";
   private static final String SLASH_ENCODE = "%2F";
   private static final String SPACE_ENCODE = "%20";
@@ -104,17 +107,30 @@ public final class SwiftUtils {
    * @return an encoded string
    * @throws SwiftException if the URL cannot be encoded
    */
-  public static String encodeUrl(String url) throws SwiftException {
+  @Deprecated
+  public static String encodeUrlOld(String url) throws SwiftException {
     if (url.matches(PATTERN)) {
       try {
         url = URLEncoder.encode(url, ENCODE);
-        url = url.replaceAll(PLUS, SPACE_ENCODE).replaceAll(SLASH_ENCODE, SLASH)
-            .replace(COLON_ENCODE, COLON);
+        url = url.replace(PLUS, SPACE_ENCODE).replace(SLASH_ENCODE, SLASH).replace(COLON_ENCODE,
+            COLON);
       } catch (UnsupportedEncodingException e) {
         throw new SwiftException("failed to encode URI", e);
       }
     }
     return url;
+  }
+
+  public static String decodeUrl(String url) throws SwiftException, UnsupportedEncodingException {
+    return URLDecoder.decode(url, ENCODE);
+  }
+
+  public static String decodeUrlNoCheck(String url) throws SwiftException {
+    return url.replace(PERCENT_ENCODE, PERCENT);
+  }
+
+  public static String encodeUrlNoCheck(String url) throws SwiftException {
+    return url.replace(PLUS, SPACE_ENCODE).replace(COLON, COLON_ENCODE);
   }
 
   /**
@@ -213,9 +229,10 @@ public final class SwiftUtils {
 
   /**
    * Get the file stats in string.
+   * 
    * @param stats the file status
    * @param separator the separator
-   * @return the file stats in string 
+   * @return the file stats in string
    */
   public static String fileStatsToString(FileStatus[] stats, String separator) {
     StringBuilder buf = new StringBuilder(stats.length * 128);

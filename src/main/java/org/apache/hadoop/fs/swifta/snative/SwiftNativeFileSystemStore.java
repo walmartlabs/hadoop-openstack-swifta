@@ -918,7 +918,7 @@ public class SwiftNativeFileSystemStore {
     // check to see if the destination parent directory exists
     Path srcParent = src.getParent();
     Path dstParent = dst.getParent();
-    if (dst.getName().equals(srcParent.getName())) {
+    if (dst.toUri().getPath().equals(srcParent.toUri().getPath())) {
       throw new SwiftOperationFailedException("src and dst refer to the same file or directory.");
     }
     // skip the overhead of a HEAD call if the src and dest share the same

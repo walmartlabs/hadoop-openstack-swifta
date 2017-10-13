@@ -349,8 +349,8 @@ public class SwiftNativeFileSystemStore {
       lastModified = System.currentTimeMillis();
     }
 
-    return new SwiftFileStatus(length, isDir, 1, getBlocksize(), lastModified, path,
-        objectManifest);
+    return new SwiftFileStatus(length, isDir, 1, getBlocksize(), lastModified,
+        getCorrectSwiftPath(path), objectManifest);
   }
 
   private Header[] handleCache(LFUCache<Header[]> lru, String path) {
@@ -612,13 +612,11 @@ public class SwiftNativeFileSystemStore {
         fileLen = status.getFileLen() == null ? 0L : Long.parseLong(status.getFileLen());
         if (fileLen < 1) {
           files.add(new SwiftFileStatus(status.getBytes(), status.getBytes() == 0, 1,
-              getBlocksize(), status.getLastModified().getTime(), new Path(status.getName())));
+              getBlocksize(), status.getLastModified().getTime(),
+              getCorrectSwiftPath(new Path(status.getName()))));
         } else {
-          // if (!extractDigits(status.getName())) {
-          // LOG.info("Check pattern not match:" + status.getName());
           files.add(new SwiftFileStatus(fileLen, Boolean.FALSE, 1, getBlocksize(),
-              status.getLastModified().getTime(), new Path(status.getName())));
-          // }
+              status.getLastModified().getTime(), getCorrectSwiftPath(new Path(status.getName()))));
         }
       }
     }
@@ -643,7 +641,7 @@ public class SwiftNativeFileSystemStore {
    */
   public ObjectsList listSubPaths(Path path, boolean recursive, boolean newest, String marker)
       throws IOException {
-    return listDirectory(toDirPath(path), recursive, newest, marker);
+    return listDirectory(toDirPath(getCorrectSwiftPath(path)), recursive, newest, marker);
   }
 
   /**
@@ -1240,11 +1238,10 @@ public class SwiftNativeFileSystemStore {
    * @return path with a URI bound to this FS
    * @throws SwiftException URI cannot be created.
    */
-  @Deprecated
-  public Path getCorrectSwiftPathOld(Path path) throws SwiftException {
+  public Path getCorrectSwiftPath(Path path) throws SwiftException {
     try {
-      return new Path(new URI(uri.getScheme(), uri.getAuthority(),
-          SwiftUtils.encodeUrlOld(path.toUri().getPath()), null, null));
+      return new Path(
+          new URI(uri.getScheme(), uri.getAuthority(), path.toUri().getPath(), null, null));
     } catch (URISyntaxException e) {
       throw new SwiftException("Specified path " + path + " is incorrect", e);
     }
@@ -1345,7 +1342,7 @@ public class SwiftNativeFileSystemStore {
    *         below the specified path, (if the path is a dir and recursive is true)
    */
   public boolean delete(Path absolutePath, boolean recursive) throws IOException {
-    Path swiftPath = absolutePath;
+    Path swiftPath = getCorrectSwiftPath(absolutePath);
     SwiftUtils.debug(LOG, "Deleting path '%s' recursive=%b", absolutePath, recursive);
     boolean askForNewest = true;
     SwiftFileStatus fileStatus = getObjectMetadata(swiftPath, askForNewest);

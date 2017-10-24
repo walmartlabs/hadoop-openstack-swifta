@@ -1369,7 +1369,7 @@ public class SwiftNativeFileSystemStore {
           return false;
         }
         int filecount = statuses.size();
-        SwiftUtils.debug(LOG, "Path '%s' %d status entries'", absolutePath, filecount);
+        // SwiftUtils.debug(LOG, "Path '%s' %d status entries'", absolutePath, filecount);
 
         if (filecount == 0) {
           // it's an empty directory or a path
@@ -1377,14 +1377,13 @@ public class SwiftNativeFileSystemStore {
           return true;
         }
 
-        if (LOG.isDebugEnabled()) {
-          SwiftUtils.debug(LOG, SwiftUtils.fileStatsToString(statuses, "\n"));
-        }
-
         if (filecount == 1 && swiftPath.equals(statuses.get(0).getPath())) {
           // 1 entry => simple file and it is the target
           // simple file: delete it
-          SwiftUtils.debug(LOG, "Deleting simple file %s", absolutePath);
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("Deleting simple file " + absolutePath);
+          }
+          // SwiftUtils.debug(LOG, "Deleting simple file %s", absolutePath);
           deleteObject(absolutePath);
           return true;
         }

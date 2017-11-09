@@ -121,7 +121,7 @@ public class SwiftProtocolConstants {
    */
   public static final int SC_TOO_MANY_REQUESTS_429 = 429;
 
-  public static final String FS_SWIFT = "fs.swift";
+  public static final String FS_SWIFT = "fs.swifta";
 
   /**
    * Prefix for all instance-specific values in the configuration: {@value}.

@@ -54,7 +54,7 @@ public class SwiftNativeFileSystem extends FileSystem {
   /**
    * Filesystem prefix: {@value}.
    */
-  public static final String SWIFT = "swift";
+  public static final String SWIFT = "swifta";
   private static final Log LOG = LogFactory.getLog(SwiftNativeFileSystem.class);
 
   /**

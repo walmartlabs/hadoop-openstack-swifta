@@ -70,7 +70,7 @@ public class TestRestClientBindings extends Assert implements SwiftTestConstants
 
   public void testPrefixBuilder() throws Throwable {
     String built = RestClientBindings.buildSwiftInstancePrefix(SERVICE);
-    assertEquals("fs.swift.service." + SERVICE, built);
+    assertEquals("fs.swifta.service." + SERVICE, built);
   }
 
   public void testBindAgainstConf() throws Exception {

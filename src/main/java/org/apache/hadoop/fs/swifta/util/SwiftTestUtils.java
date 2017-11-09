@@ -39,7 +39,7 @@ public class SwiftTestUtils extends org.junit.Assert {
 
   private static final Log LOG = LogFactory.getLog(SwiftTestUtils.class);
 
-  public static final String TEST_FS_SWIFT = "test.fs.swift.name";
+  public static final String TEST_FS_SWIFT = "test.fs.swifta.name";
   public static final String IO_FILE_BUFFER_SIZE = "io.file.buffer.size";
 
   /**

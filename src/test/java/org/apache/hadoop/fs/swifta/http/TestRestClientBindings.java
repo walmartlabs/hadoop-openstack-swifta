@@ -49,7 +49,6 @@ public class TestRestClientBindings extends Assert implements SwiftTestConstants
   private static final String AUTH_URL = "http://localhost:8080/auth";
   private static final String USER = "user";
   private static final String PASS = "pass";
-  private static final String TENANT = "tenant";
   private URI filesysURI;
   private Configuration conf;
 

@@ -46,7 +46,6 @@ public class TestReadPastBuffer extends SwiftFileSystemBaseTest {
 
   private Path testPath;
   private Path readFile;
-  private Path zeroByteFile;
   private FSDataInputStream instream;
 
 

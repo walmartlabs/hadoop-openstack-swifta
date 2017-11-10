@@ -18,13 +18,11 @@ package org.apache.hadoop.fs.swifta;
 import static org.apache.hadoop.fs.swifta.util.SwiftTestUtils.readBytesToString;
 import static org.apache.hadoop.fs.swifta.util.SwiftTestUtils.writeTextFile;
 
-import org.apache.hadoop.fs.BlockLocation;
+import java.io.EOFException;
+import java.io.IOException;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.junit.Test;
-
-import java.io.EOFException;
-import java.io.IOException;
 
 /**
  * Test filesystem read operations
@@ -34,6 +32,7 @@ public class TestSwiftFileSystemRead extends SwiftFileSystemBaseTest {
 
   /**
    * Read past the end of a file: expect the operation to fail
+   * 
    * @throws IOException
    */
   @Test(timeout = SWIFT_TEST_TIMEOUT)
@@ -47,45 +46,41 @@ public class TestSwiftFileSystemRead extends SwiftFileSystemBaseTest {
       readBytesToString(fs, filePath, 20);
       fail("expected an exception");
     } catch (EOFException e) {
-      //expected
+      // expected
     }
   }
 
   /**
    * Read and write some JSON
+   * 
    * @throws IOException
    */
   @Test(timeout = SWIFT_TEST_TIMEOUT)
   public void testRWJson() throws IOException {
-    final String message = "{" +
-                           " 'json': { 'i':43, 'b':true}," +
-                           " 's':'string'" +
-                           "}";
+    final String message = "{" + " 'json': { 'i':43, 'b':true}," + " 's':'string'" + "}";
     final Path filePath = new Path("/test/file.json");
 
     writeTextFile(fs, filePath, message, false);
     String readJson = readBytesToString(fs, filePath, message.length());
-    assertEquals(message,readJson);
-    //now find out where it is
+    assertEquals(message, readJson);
+    // now find out where it is
     FileStatus status = fs.getFileStatus(filePath);
-    BlockLocation[] locations = fs.getFileBlockLocations(status, 0, 10);
+    fs.getFileBlockLocations(status, 0, 10);
   }
 
   /**
    * Read and write some XML
+   * 
    * @throws IOException
    */
   @Test(timeout = SWIFT_TEST_TIMEOUT)
   public void testRWXML() throws IOException {
-    final String message = "<x>" +
-                           " <json i='43' 'b'=true/>" +
-                           " string" +
-                           "</x>";
+    final String message = "<x>" + " <json i='43' 'b'=true/>" + " string" + "</x>";
     final Path filePath = new Path("/test/file.xml");
 
     writeTextFile(fs, filePath, message, false);
     String read = readBytesToString(fs, filePath, message.length());
-    assertEquals(message,read);
+    assertEquals(message, read);
   }
 
 }

@@ -119,6 +119,7 @@ public class TestSwiftFileSystemDirectories extends SwiftFileSystemBaseTest {
    *
    * @throws Exception on failures
    */
+  @SuppressWarnings("deprecation")
   @Test(timeout = SWIFT_TEST_TIMEOUT)
   public void testMultiByteFilesAreFiles() throws Exception {
     Path src = path("/test/testMultiByteFilesAreFiles");

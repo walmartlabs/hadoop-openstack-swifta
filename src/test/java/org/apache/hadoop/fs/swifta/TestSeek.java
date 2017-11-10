@@ -119,7 +119,7 @@ public class TestSeek extends SwiftFileSystemBaseTest {
     }
     try {
       byte[] buffer = new byte[1];
-      int result = instream.read(buffer, 0, 1);
+      instream.read(buffer, 0, 1);
     } catch (IOException e) {
       // expected a closed file
     }

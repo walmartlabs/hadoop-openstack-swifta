@@ -144,10 +144,10 @@ public final class RestClientBindings {
 
   /**
    * Copy a (trimmed) property from the configuration file to the properties file.
-   * <p/>
+   * <p>
    * If marked as required and not found in the configuration, an exception is raised. If not
    * required -and missing- then the property will not be set. In this case, if the property is
-   * already in the Properties instance, it will remain untouched.
+   * already in the Properties instance, it will remain untouched.</p>
    *
    * @param conf source configuration
    * @param confKey key in the configuration file

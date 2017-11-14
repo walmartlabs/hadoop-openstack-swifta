@@ -1,4 +1,5 @@
 /*
+ * 
  * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
  * agreements. See the NOTICE file distributed with this work for additional information regarding
  * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
@@ -596,6 +597,8 @@ public final class SwiftRestClient {
    * Find objects in a directory.
    *
    * @param path path prefix
+   * @param marker returns a list of results greater than the marker value
+   * @param listDeep list all sub-folders
    * @param requestHeaders optional request headers
    * @return byte[] file data or null if the object was not found
    * @throws IOException on IO Faults
@@ -747,6 +750,7 @@ public final class SwiftRestClient {
    *
    * @param path path to file
    * @param requestHeaders http headers
+   * @return if delete succeed
    * @throws IOException on IO Faults
    */
   public boolean delete(SwiftObjectPath path, final Header... requestHeaders) throws IOException {
@@ -824,12 +828,13 @@ public final class SwiftRestClient {
   /**
    * Authenticate to Openstack Keystone As well as returning the access token, the member fields
    * {@link #token}, {@link #endpointUri} and {@link #objectLocationUri} are set up for re-use.
-   * <p/>
+   * <p>
    * This method is re-entrant -if more than one thread attempts to authenticate neither will block
    * -but the field values with have those of the last caller.
-   * <p/>
+   * </p>
    *
    * @return authenticated access token
+   * @throws IOException the exception
    */
   public synchronized AccessToken authenticate() throws IOException {
     final AuthenticationRequest authenticationRequest;
@@ -1004,6 +1009,7 @@ public final class SwiftRestClient {
    *
    * @param containerName the container name
    * @return true if the container exists
+   * @throws IOException the exception
    */
   public boolean doesExistContainer(String containerName) throws IOException {
     SwiftObjectPath objectPath = new SwiftObjectPath(containerName, "");
@@ -1288,6 +1294,7 @@ public final class SwiftRestClient {
    *
    * @param path path to object
    * @param endpointUri damain url e.g. http://domain.com
+   * @throws SwiftException the exception
    * @return valid URI for object
    */
   public static URI pathToUri(SwiftObjectPath path, URI endpointUri) throws SwiftException {

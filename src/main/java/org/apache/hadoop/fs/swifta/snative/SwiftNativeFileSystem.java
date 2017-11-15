@@ -89,6 +89,7 @@ public class SwiftNativeFileSystem extends FileSystem {
 
   /**
    * This constructor is used for testing purposes.
+   * @param store instance
    */
   public SwiftNativeFileSystem(SwiftNativeFileSystemStore store) {
     this.store = store;
@@ -240,10 +241,10 @@ public class SwiftNativeFileSystem extends FileSystem {
   /**
    * Return an array containing hostnames, offset and size of portions of the given file. For a
    * nonexistent file or regions, null will be returned.
-   * <p/>
+   * <p>
    * This call is most helpful with DFS, where it returns hostnames of machines that contain the
    * given file.
-   * <p/>
+   * </p>
    * The FileSystem will simply return an elt containing 'localhost'.
    */
   @Override

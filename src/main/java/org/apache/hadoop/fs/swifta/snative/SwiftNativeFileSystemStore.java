@@ -634,7 +634,8 @@ public class SwiftNativeFileSystemStore {
    *
    * @param path path to work with
    * @param recursive do a recursive get
-   * @param newest ask for the newest, or can some out of date data work?
+   * @param newest ask for the newest
+   * @param marker for pagination
    * @return the file statuses, or an empty array if there are no children
    * @throws IOException on IO problems
    * @throws FileNotFoundException if the path is nonexistent
@@ -873,8 +874,8 @@ public class SwiftNativeFileSystemStore {
   /**
    * Rename through copy-and-delete. this is a consequence of the Swift filesystem using the path as
    * the hash into the Distributed Hash Table, "the ring" of filenames.
-   * <p/>
-   * Because of the nature of the operation, it is not atomic.
+   * <p>
+   * Because of the nature of the operation, it is not atomic.</p>
    *
    * @param src source file/dir
    * @param dst destination
@@ -1295,10 +1296,11 @@ public class SwiftNativeFileSystemStore {
   }
 
   /**
-   * Insert a throttled wait if the throttle delay >0.
+   * Insert a throttled wait if the throttle delay greate than 0.
    * 
    * @throws InterruptedIOException if interrupted during sleep
    */
+  @Deprecated
   public void throttle() throws InterruptedIOException {
     int throttleDelay = getThrottleDelay();
     if (throttleDelay > 0) {
@@ -1326,12 +1328,12 @@ public class SwiftNativeFileSystemStore {
    * is missing, a {@link FileNotFoundException} is raised. This lets the caller distinguish a file
    * not found with other reasons for failure, so handles race conditions in recursive directory
    * deletes better.
-   * <p/>
+   * <p>
    * The problem being addressed is: caller A requests a recursive directory of directory /dir ;
    * caller B requests a delete of a file /dir/file, between caller A enumerating the files
    * contents, and requesting a delete of /dir/file. We want to recognise the special case "directed
    * file is no longer there" and not convert that into a failure
-   *
+   * </p>
    * @param absolutePath the path to delete.
    * @param recursive if path is a directory and set to true, the directory is deleted else throws
    *        an exception if the directory is not empty case of a file the recursive can be set to

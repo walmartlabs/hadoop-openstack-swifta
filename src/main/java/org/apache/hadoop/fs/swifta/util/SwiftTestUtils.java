@@ -46,6 +46,7 @@ public class SwiftTestUtils extends org.junit.Assert {
    * Get the test URI.
    * 
    * @param conf configuration
+   * @return uri
    * @throws SwiftConfigurationException missing parameter or bad URI
    */
   public static URI getServiceUri(Configuration conf) throws SwiftConfigurationException {
@@ -106,7 +107,9 @@ public class SwiftTestUtils extends org.junit.Assert {
    * </p>
    * @param fs filesystem
    * @param path path to write to
+   * @param src source
    * @param len length of data
+   * @param blocksize block size
    * @param overwrite should the create option allow overwrites?
    * @param delete should the file be deleted afterwards? -with a verification that it worked.
    *        Deletion is not attempted if an assertion has failed earlier -it is not in a
@@ -135,7 +138,9 @@ public class SwiftTestUtils extends org.junit.Assert {
    * 
    * @param fs filesystem
    * @param path path to write to
+   * @param src source 
    * @param len length of data
+   * @param blocksize block size 
    * @param overwrite should the create option allow overwrites?
    * @throws IOException IO problems
    */
@@ -212,7 +217,7 @@ public class SwiftTestUtils extends org.junit.Assert {
   }
 
   /**
-   * Convert a byte to a character for printing. If the byte value is < 32 -and hence unprintable-
+   * Convert a byte to a character for printing. If the byte value is less than 32 and hence unprintable
    * the byte is returned as a two digit hex value.
    * 
    * @param bb byte

@@ -150,6 +150,7 @@ public final class SwiftObjectPath {
    * @param uri uri to start from
    * @param path path underneath
    * @param addTrailingSlash should a trailing slash be added if there isn't one.
+   * @param removeTrailingSlash remove trailing slash 
    * @return a new instance.
    * @throws SwiftConfigurationException if the URI host doesn't parse into container.service
    */

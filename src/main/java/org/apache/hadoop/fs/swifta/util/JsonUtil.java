@@ -54,11 +54,12 @@ public class JsonUtil {
   }
 
   /**
-   * Convert string representation to object. If errors appears throw Exception runtime exception.
+   * @param <T> Convert string representation to object. If errors appears throw Exception runtime exception.
    *
    * @param value The JSON string.
    * @param klazz The class to convert.
    * @return The Object of the given class.
+   * @throws IOException io exception
    */
   public static <T> T toObject(String value, Class<T> klazz) throws IOException {
     try {
@@ -77,6 +78,7 @@ public class JsonUtil {
    * @param typeReference class type reference
    * @param <T> type
    * @return deserialized T object
+   * @throws IOException io exception
    */
   public static <T> T toObject(String value, final TypeReference<T> typeReference)
       throws IOException {
@@ -96,6 +98,7 @@ public class JsonUtil {
    * @param collectionType class describing how to deserialize collection of objects
    * @param <T> type
    * @return deserialized T object
+   * @throws IOException io exception
    */
   public static <T> T toObject(String value, final CollectionType collectionType)
       throws IOException {

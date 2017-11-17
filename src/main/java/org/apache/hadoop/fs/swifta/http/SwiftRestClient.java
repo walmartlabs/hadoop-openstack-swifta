@@ -1294,8 +1294,8 @@ public final class SwiftRestClient {
    *
    * @param path path to object
    * @param endpointUri damain url e.g. http://domain.com
-   * @throws SwiftException the exception
    * @return valid URI for object
+   * @throws SwiftException the exception
    */
   public static URI pathToUri(SwiftObjectPath path, URI endpointUri) throws SwiftException {
     checkNotNull(endpointUri, "Null Endpoint -client is not authenticated");

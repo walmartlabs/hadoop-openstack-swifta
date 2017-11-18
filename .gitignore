@@ -6,3 +6,4 @@ target/
 src/test/resources/
 .idea/
 *.iml
+bin/

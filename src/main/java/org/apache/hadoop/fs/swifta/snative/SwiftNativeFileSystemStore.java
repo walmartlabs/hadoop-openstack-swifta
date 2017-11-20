@@ -20,7 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -1293,24 +1292,6 @@ public class SwiftNativeFileSystemStore {
       }
     }
     return result;
-  }
-
-  /**
-   * Insert a throttled wait if the throttle delay greate than 0.
-   * 
-   * @throws InterruptedIOException if interrupted during sleep
-   */
-  @Deprecated
-  public void throttle() throws InterruptedIOException {
-    int throttleDelay = getThrottleDelay();
-    if (throttleDelay > 0) {
-      try {
-        Thread.sleep(throttleDelay);
-      } catch (InterruptedException e) {
-        // convert to an IOE
-        throw (InterruptedIOException) new InterruptedIOException(e.toString()).initCause(e);
-      }
-    }
   }
 
   /**

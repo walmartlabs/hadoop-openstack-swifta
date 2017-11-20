@@ -18,7 +18,6 @@ package org.apache.hadoop.fs.swifta.util;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.apache.commons.logging.Log;
@@ -32,7 +31,6 @@ import org.apache.hadoop.fs.swifta.exceptions.SwiftException;
  */
 public final class SwiftUtils {
 
-  private static final String PATTERN = ".*\\s+.*";
   private static final String ENCODE = "UTF-8";
   private static final String SLASH = "/";
   private static final String COLON = ":";
@@ -40,7 +38,6 @@ public final class SwiftUtils {
   private static final String PERCENT = "%";
   private static final String PERCENT_ENCODE = "%25";
   private static final String COLON_ENCODE = "%3A";
-  private static final String SLASH_ENCODE = "%2F";
   private static final String SPACE_ENCODE = "%20";
   public static final String READ = "read(buffer, offset, length)";
 
@@ -97,28 +94,6 @@ public final class SwiftUtils {
    */
   public static boolean isRootDir(SwiftObjectPath swiftObject) {
     return swiftObject.objectMatches("") || swiftObject.objectMatches(SLASH);
-  }
-
-  /**
-   * Encode the URL. This extends {@link URLEncoder#encode(String, String)} with a replacement of +
-   * with %20.
-   * 
-   * @param url URL string
-   * @return an encoded string
-   * @throws SwiftException if the URL cannot be encoded
-   */
-  @Deprecated
-  public static String encodeUrlOld(String url) throws SwiftException {
-    if (url.matches(PATTERN)) {
-      try {
-        url = URLEncoder.encode(url, ENCODE);
-        url = url.replace(PLUS, SPACE_ENCODE).replace(SLASH_ENCODE, SLASH).replace(COLON_ENCODE,
-            COLON);
-      } catch (UnsupportedEncodingException e) {
-        throw new SwiftException("failed to encode URI", e);
-      }
-    }
-    return url;
   }
 
   public static String decodeUrl(String url) throws SwiftException, UnsupportedEncodingException {

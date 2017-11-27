@@ -358,9 +358,8 @@ public class SwiftTestUtils extends org.junit.Assert {
    * 
    * @param fileStatus stats to check
    */
-  @SuppressWarnings("deprecation")
   public static void assertIsDirectory(FileStatus fileStatus) {
-    assertTrue("Should be a dir -but isn't: " + fileStatus, fileStatus.isDir());
+    assertTrue("Should be a dir -but isn't: " + fileStatus, fileStatus.isDirectory());
   }
 
   /**
@@ -453,12 +452,11 @@ public class SwiftTestUtils extends org.junit.Assert {
    * @param filename name of the file
    * @throws IOException IO problems during file operations
    */
-  @SuppressWarnings("deprecation")
   public static void assertIsFile(FileSystem fileSystem, Path filename) throws IOException {
     assertPathExists(fileSystem, "Expected file", filename);
     FileStatus status = fileSystem.getFileStatus(filename);
     String fileInfo = filename + "  " + status;
-    assertFalse("File claims to be a directory " + fileInfo, status.isDir());
+    assertFalse("File claims to be a directory " + fileInfo, status.isDirectory());
     /*
      * disabled for Hadoop v1 compatibility assertFalse("File claims to be a symlink " + fileInfo,
      * status.isSymlink());

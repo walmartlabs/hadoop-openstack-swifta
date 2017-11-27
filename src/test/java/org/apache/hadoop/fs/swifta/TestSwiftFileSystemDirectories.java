@@ -80,7 +80,7 @@ public class TestSwiftFileSystemDirectories extends SwiftFileSystemBaseTest {
     statusString = statusToString(test.toString(), statuses);
     assertEquals("Wrong number of elements in file status " + statusString, 1, statuses.length);
     SwiftFileStatus stat = (SwiftFileStatus) statuses[0];
-    assertTrue("isDir(): Not a directory: " + stat, stat.isDirectory());
+    assertTrue("isDirectory(): Not a directory: " + stat, stat.isDirectory());
     extraStatusAssertions(stat);
   }
 

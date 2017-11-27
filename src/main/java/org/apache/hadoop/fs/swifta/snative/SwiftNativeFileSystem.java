@@ -535,7 +535,6 @@ public class SwiftNativeFileSystem extends FileSystem {
    * 
    * @param permission Currently ignored.
    */
-  @SuppressWarnings("deprecation")
   @Override
   public FSDataOutputStream create(Path file, FsPermission permission, boolean overwrite,
       int bufferSize, short replication, long blockSize, Progressable progress) throws IOException {
@@ -557,7 +556,7 @@ public class SwiftNativeFileSystem extends FileSystem {
 
       // What is clear at this point is that if the entry exists, there's
       // no need to bother creating any parent entries
-      if (fileStatus.isDir()) {
+      if (fileStatus.isDirectory()) {
         // here someone is trying to create a file over a directory
 
         /*

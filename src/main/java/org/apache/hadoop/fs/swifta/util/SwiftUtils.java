@@ -71,9 +71,8 @@ public final class SwiftUtils {
    * @param fileStatus status to examine
    * @return true if we consider this status to be representative of a directory.
    */
-  @SuppressWarnings("deprecation")
   public static boolean isDirectory(FileStatus fileStatus) {
-    return fileStatus.isDir() || isFilePretendingToBeDirectory(fileStatus);
+    return fileStatus.isDirectory() || isFilePretendingToBeDirectory(fileStatus);
   }
 
   /**

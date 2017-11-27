@@ -203,7 +203,7 @@ public class TestSwiftFileSystemPartitionedUploads extends SwiftFileSystemBaseTe
     assertEquals("Length of written file " + qualifiedPath + " from status check " + status
         + " in dir " + listing, len, status.getLen());
     String fileInfo = qualifiedPath + "  " + status;
-    assertFalse("File claims to be a directory " + fileInfo, status.isDir());
+    assertFalse("File claims to be a directory " + fileInfo, status.isDirectory());
 
     FileStatus listedFileStat = resolveChild(parentDirListing, qualifiedPath);
     assertNotNull("Did not find " + path + " in " + parentDirLS, listedFileStat);

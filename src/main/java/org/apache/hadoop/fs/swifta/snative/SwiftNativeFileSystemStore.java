@@ -524,7 +524,6 @@ public class SwiftNativeFileSystemStore {
    * @throws IOException IO problems
    * @throws FileNotFoundException if the path does not exist
    */
-  @SuppressWarnings("deprecation")
   public ObjectsList listDirectory(SwiftObjectPath path, boolean listDeep, boolean newest,
       String marker) throws IOException {
     final ObjectsList objects = new ObjectsList();
@@ -561,7 +560,7 @@ public class SwiftNativeFileSystemStore {
           // depending on whether the entry exists.
           FileStatus stat = getObjectMetadata(correctSwiftPath, newest);
 
-          if (stat.isDir()) {
+          if (stat.isDirectory()) {
             // it's an empty directory. state that
             return null;
           } else {
@@ -874,7 +873,8 @@ public class SwiftNativeFileSystemStore {
    * Rename through copy-and-delete. this is a consequence of the Swift filesystem using the path as
    * the hash into the Distributed Hash Table, "the ring" of filenames.
    * <p>
-   * Because of the nature of the operation, it is not atomic.</p>
+   * Because of the nature of the operation, it is not atomic.
+   * </p>
    *
    * @param src source file/dir
    * @param dst destination
@@ -944,7 +944,7 @@ public class SwiftNativeFileSystemStore {
     while (ite.hasNext()) {
       ObjectsList object = ite.next();
       List<FileStatus> childStats = object.getFiles();
-      boolean srcIsFile = !srcMetadata.isDir();
+      boolean srcIsFile = !srcMetadata.isDirectory();
       if (LOG.isDebugEnabled() && isPartFile) {
         LOG.debug("Found partition file!" + src + ";len:" + srcMetadata.getLen());
       }
@@ -1315,6 +1315,7 @@ public class SwiftNativeFileSystemStore {
    * contents, and requesting a delete of /dir/file. We want to recognise the special case "directed
    * file is no longer there" and not convert that into a failure
    * </p>
+   * 
    * @param absolutePath the path to delete.
    * @param recursive if path is a directory and set to true, the directory is deleted else throws
    *        an exception if the directory is not empty case of a file the recursive can be set to
@@ -1374,7 +1375,7 @@ public class SwiftNativeFileSystemStore {
         // >1 entry implies directory with children. Run through them,
         // but first check for the recursive flag and reject it *unless it looks
         // like a partitioned file (len > 0 && has children)
-        if (!fileStatus.isDir()) {
+        if (!fileStatus.isDirectory()) {
           LOG.debug("Multiple child entries but entry has data: assume partitioned");
         } else if (!recursive) {
           // if there are children, unless this is a recursive operation, fail immediately

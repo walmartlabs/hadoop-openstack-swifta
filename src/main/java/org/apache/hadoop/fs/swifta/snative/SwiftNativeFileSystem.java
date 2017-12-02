@@ -413,9 +413,6 @@ public class SwiftNativeFileSystem extends FileSystem {
 
     // if directory is already the container root, create the container
     if (isRoot(directory)) {
-      // if (directory.getName().endsWith("/")) {
-      // directory = directory.suffix("/");
-      //// }
       if (store.doesExistContainer(directory)) {
         return false;
       } else {

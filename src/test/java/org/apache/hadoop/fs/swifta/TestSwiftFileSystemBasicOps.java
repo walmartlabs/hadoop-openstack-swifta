@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.swifta.exceptions.SwiftBadRequestException;
 import org.apache.hadoop.fs.swifta.exceptions.SwiftNotDirectoryException;
 import org.apache.hadoop.fs.swifta.snative.SwiftNativeFileSystem;
 import org.apache.hadoop.fs.swifta.util.SwiftTestUtils;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -269,5 +270,11 @@ public class TestSwiftFileSystemBasicOps extends SwiftFileSystemBaseTest {
       // expected
     }
   }
+
+  @Test(timeout = SWIFT_TEST_TIMEOUT)
+  public void testCanonicalName() throws Exception {
+    Assert.assertNull(fs.getCanonicalServiceName());
+  }
+
 
 }

@@ -217,6 +217,12 @@ public class SwiftNativeFileSystem extends FileSystem {
   }
 
   @Override
+  public String getCanonicalServiceName() {
+    // Does not support Token
+    return null;
+  }
+
+  @Override
   public boolean isFile(Path file) throws IOException {
     try {
       FileStatus fileStatus = getFileStatus(file);

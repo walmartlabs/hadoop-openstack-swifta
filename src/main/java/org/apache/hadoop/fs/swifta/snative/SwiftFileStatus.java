@@ -57,7 +57,7 @@ public class SwiftFileStatus extends FileStatus {
   @SuppressWarnings("deprecation")
   @Override
   public boolean isDir() {
-    return super.isDir() || getLen() == 0;
+    return super.isDir();
   }
 
   /**

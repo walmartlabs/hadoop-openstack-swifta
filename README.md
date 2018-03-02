@@ -10,6 +10,5 @@ A new CEPH swift driver that based on Sahara-extra.
 4) You are ready to go, make sure to use the same swift:// protocol.
 
 
-This is a rough draft version, which still needs effort to do a full test, bug fixes, to extend the functionality, and to improve the performance.
-
+This branch adds a content-type to all dummy folders. For all files, even 0-byte one stays empty for the content_type.
 #### This project only supports for Java 7 and above.

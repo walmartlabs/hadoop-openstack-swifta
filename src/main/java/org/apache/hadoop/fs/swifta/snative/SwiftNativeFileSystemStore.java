@@ -74,6 +74,9 @@ import org.codehaus.jackson.map.type.CollectionType;
  * File system store implementation. Makes REST requests, parses data from responses.
  */
 public class SwiftNativeFileSystemStore {
+
+  private static final Header I_DIRECTORY = new Header(SwiftProtocolConstants.CONTENT_TYPE,
+      SwiftProtocolConstants.CONTENT_TYPE_DIRECTORY);
   private static final Pattern URI_PATTERN = Pattern.compile("\"\\S+?\"");
   private static final String PATTERN = "EEE, d MMM yyyy hh:mm:ss zzz";
   private static final Log LOG = LogFactory.getLog(SwiftNativeFileSystemStore.class);
@@ -322,6 +325,10 @@ public class SwiftNativeFileSystemStore {
     SwiftObjectPath objectManifest = null;
     for (Header header : headers) {
       String headerName = header.getName();
+      if (SwiftProtocolConstants.CONTENT_TYPE.equals(headerName)) {
+        isDir = SwiftProtocolConstants.CONTENT_TYPE_DIRECTORY.equals(header.getValue())
+            ? Boolean.TRUE : Boolean.FALSE;
+      }
       if (headerName.equals(SwiftProtocolConstants.X_CONTAINER_OBJECT_COUNT)
           || headerName.equals(SwiftProtocolConstants.X_CONTAINER_BYTES_USED)) {
         length = 0;
@@ -611,9 +618,8 @@ public class SwiftNativeFileSystemStore {
       if (status.getName() != null) {
         fileLen = status.getFileLen() == null ? 0L : Long.parseLong(status.getFileLen());
         if (fileLen < 1) {
-          files.add(new SwiftFileStatus(status.getBytes(), status.getBytes() == 0, 1,
-              getBlocksize(), status.getLastModified().getTime(),
-              getCorrectSwiftPath(new Path(status.getName()))));
+          files.add(new SwiftFileStatus(status.getBytes(), status.isDir(), 1, getBlocksize(),
+              status.getLastModified().getTime(), getCorrectSwiftPath(new Path(status.getName()))));
         } else {
           files.add(new SwiftFileStatus(fileLen, Boolean.FALSE, 1, getBlocksize(),
               status.getLastModified().getTime(), getCorrectSwiftPath(new Path(status.getName()))));
@@ -689,7 +695,7 @@ public class SwiftNativeFileSystemStore {
    * @throws IOException IO problems
    */
   private void innerCreateDirectory(SwiftObjectPath swiftObjectPath) throws IOException {
-    swiftRestClient.putRequest(swiftObjectPath);
+    swiftRestClient.putRequest(swiftObjectPath, I_DIRECTORY);
   }
 
   public SwiftObjectPath toDirPath(Path path) throws SwiftConfigurationException {
@@ -933,7 +939,7 @@ public class SwiftNativeFileSystemStore {
     }
 
     boolean destExists = dstMetadata != null;
-    boolean destIsDir = destExists && SwiftUtils.isDirectory(dstMetadata);
+    boolean destIsDir = destExists && dstMetadata.isDir();
     // calculate the destination
     SwiftObjectPath destPath;
 

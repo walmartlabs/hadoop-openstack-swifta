@@ -64,6 +64,16 @@ public class SwiftProtocolConstants {
   public static final String HEADER_CONTENT_RANGE = "Content-Range";
 
   /**
+   * Swift-specific header: the type of content the object contains: {@value}.
+   */
+  public static final String CONTENT_TYPE = "Content-Type";
+
+  /**
+   * Zero-byte dummy folder.
+   */
+  public static final String CONTENT_TYPE_DIRECTORY = "application/directory";
+
+  /**
    * Pattern for range headers.
    */
   public static final String SWIFT_RANGE_HEADER_FORMAT_PATTERN = "bytes=%d-%d";

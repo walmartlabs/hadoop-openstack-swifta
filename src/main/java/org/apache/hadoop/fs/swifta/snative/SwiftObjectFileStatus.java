@@ -16,6 +16,8 @@
 package org.apache.hadoop.fs.swifta.snative;
 
 import java.util.Date;
+
+import org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -124,5 +126,9 @@ class SwiftObjectFileStatus {
 
   public void setFileLen(String fileLen) {
     this.fileLen = fileLen;
+  }
+
+  public boolean isDir() {
+    return SwiftProtocolConstants.CONTENT_TYPE_DIRECTORY.equals(contentType);
   }
 }

@@ -656,8 +656,6 @@ public class SwiftNativeFileSystemStore {
    * @param path path
    * @throws IOException IOException
    */
-  // TODO: Use trailing slash to distinct from the dummy dir and zero byte file. Need swift server
-  // side support.
   public void createDirectory(Path path) throws IOException {
     innerCreateDirectory(toDirPathCreate(path));
   }

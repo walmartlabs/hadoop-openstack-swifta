@@ -16,32 +16,6 @@
 
 package org.apache.hadoop.fs.swifta.snative;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.net.InetAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
@@ -69,6 +43,33 @@ import org.apache.hadoop.net.DNSToSwitchMapping;
 import org.apache.hadoop.net.ScriptBasedMapping;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.codehaus.jackson.map.type.CollectionType;
+
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * File system store implementation. Makes REST requests, parses data from responses.
@@ -355,42 +356,20 @@ public class SwiftNativeFileSystemStore {
     if (lastModified == 0) {
       lastModified = System.currentTimeMillis();
     }
-
+    if (SwiftUtils.isRootDir(objectPath)) {
+      isDir = Boolean.TRUE;
+    }
     return new SwiftFileStatus(length, isDir, 1, getBlocksize(), lastModified,
         getCorrectSwiftPath(path), objectManifest);
-  }
-
-  private Header[] handleCache(LFUCache<Header[]> lru, String path) {
-    if (!swiftRestClient.getClientConfig().isUseHeaderCache()) {
-      return null;
-    }
-    if (LOG.isDebugEnabled() && lru.get(path) != null) {
-      LOG.debug("[stat:newest]Found cache for " + path + "; cache size is " + cache1.getSize());
-    }
-    return lru.get(path);
-  }
-
-  private void setCache(LFUCache<Header[]> lru, String path, Header[] headers) {
-    if (swiftRestClient.getClientConfig().isUseHeaderCache() && headers != null) {
-      lru.set(path, headers);
-    }
   }
 
   private Header[] stat(SwiftObjectPath objectPath, boolean newest) throws IOException {
     Header[] headers = null;
     if (newest) {
-      headers = this.handleCache(cache1, objectPath.toUriPath());
-      if (headers == null) {
-        headers = swiftRestClient.headRequest("getObjectMetadata-newest", objectPath,
-            SwiftRestClient.NEWEST);
-        this.setCache(cache1, objectPath.toUriPath(), headers);
-      }
+      headers = swiftRestClient.headRequest("getObjectMetadata-newest", objectPath,
+          SwiftRestClient.NEWEST);
     } else {
-      headers = this.handleCache(cache2, objectPath.toUriPath());
-      if (headers == null) {
-        headers = swiftRestClient.headRequest("getObjectMetadata", objectPath);
-        this.setCache(cache2, objectPath.toUriPath(), headers);
-      }
+      headers = swiftRestClient.headRequest("getObjectMetadata", objectPath);
     }
     return headers;
   }

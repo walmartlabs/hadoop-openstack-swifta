@@ -15,10 +15,10 @@
 
 package org.apache.hadoop.fs.swifta.snative;
 
-import java.util.Date;
-
 import org.apache.hadoop.fs.swifta.http.SwiftProtocolConstants;
 import org.codehaus.jackson.annotate.JsonProperty;
+
+import java.util.Date;
 
 /**
  * Java mapping of Swift JSON file status. THIS FILE IS MAPPED BY JACKSON TO AND FROM JSON. DO NOT
@@ -26,7 +26,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 
 class SwiftObjectFileStatus {
-
   private static final String SLASH = "/";
   private long bytes;
   @JsonProperty("content_type")

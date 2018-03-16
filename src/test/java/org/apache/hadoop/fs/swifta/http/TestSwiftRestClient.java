@@ -59,7 +59,7 @@ public class TestSwiftRestClient implements SwiftTestConstants {
   @Test(timeout = SWIFT_TEST_TIMEOUT)
   public void testCreate() throws Throwable {
     assumeEnabled();
-    SwiftRestClient client = createClient();
+    createClient();
   }
 
   private SwiftRestClient createClient() throws IOException {
@@ -97,7 +97,7 @@ public class TestSwiftRestClient implements SwiftTestConstants {
     client.delete(sobject);
     // check file is gone
     try {
-      Header[] headers = client.headRequest("expect fail", sobject, SwiftRestClient.NEWEST);
+      client.headRequest("expect fail", sobject, SwiftRestClient.NEWEST);
       Assert.fail("Expected deleted file, but object is still present: " + sobject);
     } catch (FileNotFoundException e) {
       // expected

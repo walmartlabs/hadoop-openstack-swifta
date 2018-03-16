@@ -54,10 +54,9 @@ public class SwiftFileStatus extends FileStatus {
    *
    * @return true if the status is considered to be a file
    */
-  @SuppressWarnings("deprecation")
   @Override
-  public boolean isDir() {
-    return super.isDir();
+  public boolean isDirectory() {
+    return super.isDirectory() || getLen() == 0;
   }
 
   /**
@@ -67,16 +66,7 @@ public class SwiftFileStatus extends FileStatus {
    * @return the opposite value to {@link #isDir()}
    */
   public boolean isFile() {
-    return !isDir();
-  }
-
-  /**
-   * Directory test.
-   * 
-   * @return true if the file is considered to be a directory
-   */
-  public boolean isDirectory() {
-    return isDir();
+    return !this.isDirectory();
   }
 
   @Override
@@ -85,7 +75,7 @@ public class SwiftFileStatus extends FileStatus {
     sb.append(getClass().getSimpleName());
     sb.append("{ ");
     sb.append("path=").append(getPath());
-    sb.append("; isDirectory=").append(isDir());
+    sb.append("; isDirectory=").append(isDirectory());
     sb.append("; length=").append(getLen());
     sb.append("; blocksize=").append(getBlockSize());
     sb.append("; modification_time=").append(getModificationTime());

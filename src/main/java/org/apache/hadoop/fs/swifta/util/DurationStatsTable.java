@@ -32,6 +32,7 @@ public class DurationStatsTable {
    * 
    * @param operation operation name
    * @param duration duration
+   * @param success flag
    */
   public void add(String operation, Duration duration, boolean success) {
     DurationStats durationStats;

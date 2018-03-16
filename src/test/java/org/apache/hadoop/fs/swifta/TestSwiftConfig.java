@@ -148,7 +148,7 @@ public class TestSwiftConfig extends Assert {
   public void testNegativePartsize() throws Exception {
     final Configuration configuration = createCoreConfig();
     configuration.set(SWIFT_PARTITION_SIZE, "-1");
-    SwiftRestClient restClient = mkInstance(configuration);
+    mkInstance(configuration);
   }
 
   @Test

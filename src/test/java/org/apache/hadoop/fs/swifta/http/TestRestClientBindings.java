@@ -49,7 +49,6 @@ public class TestRestClientBindings extends Assert implements SwiftTestConstants
   private static final String AUTH_URL = "http://localhost:8080/auth";
   private static final String USER = "user";
   private static final String PASS = "pass";
-  private static final String TENANT = "tenant";
   private URI filesysURI;
   private Configuration conf;
 
@@ -70,7 +69,7 @@ public class TestRestClientBindings extends Assert implements SwiftTestConstants
 
   public void testPrefixBuilder() throws Throwable {
     String built = RestClientBindings.buildSwiftInstancePrefix(SERVICE);
-    assertEquals("fs.swift.service." + SERVICE, built);
+    assertEquals("fs.swifta.service." + SERVICE, built);
   }
 
   public void testBindAgainstConf() throws Exception {

@@ -20,27 +20,24 @@
 
 <html>
 <head>
-    <title>Swift Filesystem Client for Apache Hadoop</title>
+    <title>Swifta Filesystem Client for Apache Hadoop</title>
 </head>
 <body>
 
 <h1>
-    Swift Filesystem Client for Apache Hadoop
+    Swifta Filesystem Client for Apache Hadoop
 </h1>
 
 <h2>Introduction</h2>
 
-<div>This package provides support in Apache Hadoop for the OpenStack Swift
+<div>This package provides support in Apache Hadoop for the Ceph Swift
     Key-Value store, allowing client applications -including MR Jobs- to
-    read and write data in Swift.
+    read and write data in Ceph Cloud.
 </div>
 
 <div>Design Goals</div>
 <ol>
-    <li>Give clients access to SwiftFS files, similar to S3n:</li>
-    <li>maybe: support a Swift Block store -- at least until Swift's
-        support for &gt;5GB files has stabilized.
-    </li>
+    <li>Give clients access to SwiftFS files, similar to S3a:</li>
     <li>Support for data-locality if the Swift FS provides file location information</li>
     <li>Support access to multiple Swift filesystems in the same client/task.</li>
     <li>Authenticate using the Keystone APIs.</li>
@@ -48,7 +45,7 @@
 </ol>
 
 
-<h2>Supporting multiple Swift Filesystems</h2>
+<h2>Supporting multiple Swifta Filesystems</h2>
 
 The goal of supporting multiple swift filesystems simultaneously changes how
 clusters are named and authenticated. In Hadoop's S3 and S3N filesystems, the "bucket" into
@@ -62,7 +59,7 @@ to use to authenticate with it -and which URL to use for authentication.
 
 This has led to a different design pattern from S3, as instead of simple bucket names,
 the hostname of an S3 container is two-level, the name of the service provider
-being the second path: <code>swift://bucket.service/</code>
+being the second path: <code>swifta://bucket.service/</code>
 
 The <code>service</code> portion of this domainame is used as a reference into
 the client settings -and so identify the service provider of that container.

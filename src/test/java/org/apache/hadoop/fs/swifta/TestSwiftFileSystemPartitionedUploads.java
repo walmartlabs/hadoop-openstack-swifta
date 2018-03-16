@@ -69,6 +69,7 @@ public class TestSwiftFileSystemPartitionedUploads extends SwiftFileSystemBaseTe
   /**
    * tests functionality for big files ( > 5Gb) upload
    */
+  @SuppressWarnings("deprecation")
   @Test(timeout = SWIFT_BULK_IO_TEST_TIMEOUT)
   public void testFilePartUpload() throws Throwable {
 
@@ -191,6 +192,7 @@ public class TestSwiftFileSystemPartitionedUploads extends SwiftFileSystemBaseTe
     }
   }
 
+  @SuppressWarnings("deprecation")
   private FileStatus validatePathLen(Path path, int len) throws IOException {
     // verify that the length is what was written in a direct status check
     final Path qualifiedPath = path.makeQualified(fs);
@@ -201,7 +203,7 @@ public class TestSwiftFileSystemPartitionedUploads extends SwiftFileSystemBaseTe
     assertEquals("Length of written file " + qualifiedPath + " from status check " + status
         + " in dir " + listing, len, status.getLen());
     String fileInfo = qualifiedPath + "  " + status;
-    assertFalse("File claims to be a directory " + fileInfo, status.isDir());
+    assertFalse("File claims to be a directory " + fileInfo, status.isDirectory());
 
     FileStatus listedFileStat = resolveChild(parentDirListing, qualifiedPath);
     assertNotNull("Did not find " + path + " in " + parentDirLS, listedFileStat);

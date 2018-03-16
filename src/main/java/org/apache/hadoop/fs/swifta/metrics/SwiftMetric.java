@@ -36,6 +36,7 @@ public interface SwiftMetric {
    * 
    * @param objects the Objects
    * @return the instance number
+   * @throws SwiftMetricWrongParametersException exception
    */
   public int increase(Object... objects) throws SwiftMetricWrongParametersException;
 
@@ -44,6 +45,7 @@ public interface SwiftMetric {
    * 
    * @param objects the objects
    * @return the removed instance number
+   * @throws SwiftMetricWrongParametersException exception
    */
   public int remove(Object... objects) throws SwiftMetricWrongParametersException;
 

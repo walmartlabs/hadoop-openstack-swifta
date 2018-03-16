@@ -192,7 +192,7 @@ public class TestSwiftFileSystemRename extends SwiftFileSystemBaseTest {
     rename(filePath, newFilePath, true, false, true);
     byte[] dest = readDataset(fs, newFilePath, len);
     compareByteArrays(dataset, dest, len);
-    String reread = readBytesToString(fs, newFilePath, 20);
+    readBytesToString(fs, newFilePath, 20);
   }
 
 
@@ -254,7 +254,7 @@ public class TestSwiftFileSystemRename extends SwiftFileSystemBaseTest {
     SwiftTestUtils.writeAndRead(fs, filePath, dataset2, len, len, false, true);
     byte[] dest = readDataset(fs, newFilePath, len);
     compareByteArrays(dataset, dest, len);
-    String reread = readBytesToString(fs, newFilePath, 20);
+    readBytesToString(fs, newFilePath, 20);
   }
 
   @Test(timeout = SWIFT_TEST_TIMEOUT)

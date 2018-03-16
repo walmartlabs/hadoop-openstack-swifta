@@ -155,6 +155,7 @@ public class SwiftFileSystemBaseTest extends Assert implements SwiftTestConstant
    * @param pathString Source path.
    * @return A qualified path instance.
    */
+  @SuppressWarnings("deprecation")
   protected Path path(String pathString) {
     return new Path(pathString).makeQualified(fs);
   }

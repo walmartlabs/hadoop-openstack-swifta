@@ -99,6 +99,7 @@ public class SwiftNativeOutputStreamMultipartWithSplitBlock extends SwiftOutputS
    * @param nativeStore native store to write through
    * @param key the key to write
    * @param partSizeKB the partition size
+   * @param outputBufferSize buffer size
    * @throws IOException IOException
    */
   @SuppressWarnings("rawtypes")

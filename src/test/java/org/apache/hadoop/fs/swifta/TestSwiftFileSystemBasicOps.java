@@ -47,7 +47,7 @@ public class TestSwiftFileSystemBasicOps extends SwiftFileSystemBaseTest {
   @Test(timeout = SWIFT_TEST_TIMEOUT)
   public void testLsRoot() throws Throwable {
     Path path = new Path("/");
-    FileStatus[] statuses = fs.listStatus(path);
+    fs.listStatus(path);
   }
 
   @Test(timeout = SWIFT_TEST_TIMEOUT)
@@ -67,7 +67,6 @@ public class TestSwiftFileSystemBasicOps extends SwiftFileSystemBaseTest {
   @Test(timeout = SWIFT_TEST_TIMEOUT)
   public void testPutFile() throws Throwable {
     Path path = new Path("/test/PutFile");
-    Exception caught = null;
     writeTextFile(fs, path, "Testing a put to a file", false);
     assertDeleted(path, false);
   }

@@ -54,7 +54,7 @@ public class SwiftNativeFileSystem extends FileSystem {
   /**
    * Filesystem prefix: {@value}.
    */
-  public static final String SWIFT = "swift";
+  public static final String SWIFT = "swifta";
   private static final Log LOG = LogFactory.getLog(SwiftNativeFileSystem.class);
 
   /**
@@ -89,6 +89,7 @@ public class SwiftNativeFileSystem extends FileSystem {
 
   /**
    * This constructor is used for testing purposes.
+   * @param store instance
    */
   public SwiftNativeFileSystem(SwiftNativeFileSystemStore store) {
     this.store = store;
@@ -246,10 +247,10 @@ public class SwiftNativeFileSystem extends FileSystem {
   /**
    * Return an array containing hostnames, offset and size of portions of the given file. For a
    * nonexistent file or regions, null will be returned.
-   * <p/>
+   * <p>
    * This call is most helpful with DFS, where it returns hostnames of machines that contain the
    * given file.
-   * <p/>
+   * </p>
    * The FileSystem will simply return an elt containing 'localhost'.
    */
   @Override
@@ -418,9 +419,6 @@ public class SwiftNativeFileSystem extends FileSystem {
 
     // if directory is already the container root, create the container
     if (isRoot(directory)) {
-      // if (directory.getName().endsWith("/")) {
-      // directory = directory.suffix("/");
-      //// }
       if (store.doesExistContainer(directory)) {
         return false;
       } else {
@@ -540,7 +538,6 @@ public class SwiftNativeFileSystem extends FileSystem {
    * 
    * @param permission Currently ignored.
    */
-  @SuppressWarnings("deprecation")
   @Override
   public FSDataOutputStream create(Path file, FsPermission permission, boolean overwrite,
       int bufferSize, short replication, long blockSize, Progressable progress) throws IOException {
@@ -562,7 +559,7 @@ public class SwiftNativeFileSystem extends FileSystem {
 
       // What is clear at this point is that if the entry exists, there's
       // no need to bother creating any parent entries
-      if (fileStatus.isDir()) {
+      if (fileStatus.isDirectory()) {
         // here someone is trying to create a file over a directory
 
         /*

@@ -39,7 +39,7 @@ public class TestSwiftFileSystemDirectories extends SwiftFileSystemBaseTest {
     Path src = path("/test/testZeroByteFilesAreFiles");
     // create a zero byte file
     SwiftTestUtils.touch(fs, src);
-    SwiftTestUtils.assertIsDirectory(fs, src);
+    SwiftTestUtils.assertIsFile(fs, src);
   }
 
   @Test(timeout = SWIFT_TEST_TIMEOUT)
@@ -80,7 +80,7 @@ public class TestSwiftFileSystemDirectories extends SwiftFileSystemBaseTest {
     statusString = statusToString(test.toString(), statuses);
     assertEquals("Wrong number of elements in file status " + statusString, 1, statuses.length);
     SwiftFileStatus stat = (SwiftFileStatus) statuses[0];
-    assertTrue("isDirectory(): Not a directory: " + stat, stat.isDirectory());
+    assertFalse("isDirectory(): Not a directory: " + stat, stat.isDirectory());
     extraStatusAssertions(stat);
   }
 

@@ -23,20 +23,18 @@ Next set the property test.fs.swifta.name to the URL of a swift container to tes
     
 Build swifta package:
 
-   mvn clean install -DskipTests
+     mvn clean install -DskipTests
    
 This builds a set of Hadoop JARs consistent with the hadoop-openstack module that is about to be tested.
 
-   mvn test -Dtest=TestSwiftRestClient
+     mvn test -Dtest=TestSwiftRestClient
    
 This runs some simple tests which include authenticating against the remote swift service. If these tests fail, so will all the rest. If it does fail: check your authentication.
 
 Once this test succeeds, you can run the full test suite:
-   
-   mvn test
-   
-Be advised that these tests can take an hour or more, especially against a remote Swift service -or one that throttles bulk operations.
 
+     mvn test
+  
 
 ## How to configurae a hadoop cluster with swifta:
 

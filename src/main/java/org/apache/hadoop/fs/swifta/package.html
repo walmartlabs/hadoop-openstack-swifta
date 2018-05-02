@@ -30,14 +30,15 @@
 
 <h2>Introduction</h2>
 
-<div>This package provides support in Apache Hadoop for the Ceph Swift
+<div>This package provides support in Apache Hadoop for the OpenStack-compatible Swift
     Key-Value store, allowing client applications -including MR Jobs- to
-    read and write data in Ceph Cloud.
+    read and write data in Swift. 
 </div>
 
 <div>Design Goals</div>
 <ol>
     <li>Give clients access to SwiftFS files, similar to S3a:</li>
+    <li>Support multi-part uploads that overcome Swift's limitation of 5GB files
     <li>Support for data-locality if the Swift FS provides file location information</li>
     <li>Support access to multiple Swift filesystems in the same client/task.</li>
     <li>Authenticate using the Keystone APIs.</li>
@@ -45,7 +46,7 @@
 </ol>
 
 
-<h2>Supporting multiple Swifta Filesystems</h2>
+<h2>Supporting multiple Swift Filesystems</h2>
 
 The goal of supporting multiple swift filesystems simultaneously changes how
 clusters are named and authenticated. In Hadoop's S3 and S3N filesystems, the "bucket" into

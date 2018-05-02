@@ -1,4 +1,4 @@
-# bfd-ceph-swifta
+# hadoop-openstack-swifta
 
 This module enables Apache Hadoop applications -including MapReduce jobs, read and write data to and from instances of the OpenStack Swift object store. It significantly enhances the existing swift protocol: https://hadoop.apache.org/docs/current/hadoop-openstack/index.html, and https://github.com/openstack/sahara-extra, just as the huge improvements s3a brought over s3n. This codebase is tested against Swift-API compatible Ceph object storage Jewel 10.2.5 version. 
 

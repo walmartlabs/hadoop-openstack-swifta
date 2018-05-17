@@ -441,6 +441,82 @@ If the client can only access the Swift filesystem via a web proxy server, the c
 
 If the host is declared, the proxy port must be set to a valid integer value.
 
+### Multi-part Upload Configuration Options
+
+#### Upload policy fs.swifta.write.policy
+
+There are four policies regarding uploading multi-part files to the object storage. The size of each part is determined by fs.swifta.partsize.  
+
+MULTIPART_SINGLE_THREAD: When uploading a large file, split into multiple small parts, cache each part to local disk and upload each part sequentially in a single thread. After each part is uploaded, delete the local backup part.  
+
+MULTIPART_NO_SPLIT: When uploading a large file, continuously cache to a single local file and upload the entire file once. This policy requires the most disk space locally.  
+
+MULTIPART_SPLIT: When uploading a large file, split into multiple small parts, write them to local disk while simultaneously upload them in batches. When a batched upload has been finished, delete the local backup parts. 
+
+MULTIPART_SPLIT_BLOCK: When uploading a large file, split into multiple small parts, write them to local disk while simulatenously upload them in batches. When the number of parts being uploaded is larger than a default number, it would block writing to the local disk. This policy might be useful in the scenario where the network bandwidth for upload is extremeley small, but might be less performant in normal scenarios than the MULTIPART_SPLIT policy.
+
+By default it uses the MULTIPART_SPLIT policy. 
+
+        <property>
+          <name>fs.swifta.write.policy</name>
+          <value>MULTIPART_SPLIT</value>
+        </property>
+         
+#### Total HTTP connections Per JVM fs.swifta.connections.max.total
+
+The configuration, fs.swifta.connections.max.total, determines the maximum number of HTTP connections a single JVM would open (this value is being passed to the httpclient library), and it should be a multiplier of fs.swifta.connections.max.host. 
+
+The default value is 12 * number of cores available on the VM. If the number of cores is 10, it would be 120. 
+
+        <property>
+          <name>fs.swifta.connections.max.total</name>
+          <value>120</value>
+        </property>
+
+#### Total HTTP Connections Per JVM To a Destination Host fs.swifta.connections.max.host
+
+The configuration, fs.swifta.connections.max.host, determines the maximum number of HTTP connections a single JVM would open to a destination host. 
+
+The default value is 12 * number of cores available on the VM. If the number of cores is 10, it would be 120.
+
+        <property>
+          <name>fs.swifta.connections.max.host</name>
+          <value>120</value>
+        </property>
+
+#### Maximum Background Threads For Delete Operations fs.swifta.connections.max.delete
+
+The configuration, fs.swifta.connections.max.delete, determines the maxinum number of background threads in parallel used to complete delete operations. 
+
+The default value is 6 * number of cores available on the VM. If the number of cores is 10, it would be 60. 
+
+        <property>
+          <name>fs.swifta.connections.max.delete</name>
+          <value>60</value>
+        </property>
+
+#### Maximum Background Threads for copy operations fs.swifta.connections.max.copy
+
+The configuration, fs.swifta.connections.max.copy, determines the maximum number of background threads in parallel used to complete copy operations. 
+
+The default value is 6 * number of cores available on the VM. If the number of cores is 10, it would be 60.
+
+        <property>
+          <name>fs.swifta.connections.max.copy</name>
+          <value>60</value>
+        </property>
+
+#### Maximum parallel threads for multi-part upload operations fs.swifta.connections.max.upload
+
+The configuration, fs.swifta.connections.max.upload, determines the maximum number of background threads in parallel used to complete multi-part upload operations. This value would only affect MULTIPART_SPLIT and MULTIPART_SPLIT_BLOCK policies. 
+
+The default is the minimum of the total number of parts to upload and 20, whichever is smaller. 
+
+        <property>
+          <name>fs.swifta.connections.max.upload</name>
+          <value>20</value>
+        </property>
+
 ### Troubleshooting
 
 #### ClassNotFoundException

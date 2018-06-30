@@ -1,10 +1,10 @@
 # hadoop-openstack-swifta
 
-This module enables Apache Hadoop applications including MapReduce jobs, read and write data to and from instances of the OpenStack Swift object store. It significantly enhances the existing hadoop-openstack swift driver: https://hadoop.apache.org/docs/current/hadoop-openstack/index.html, and https://github.com/openstack/sahara-extra, just as the huge improvements s3a brought over s3n. This codebase has been tested against Swift-API compatible Ceph Jewel 10.2.7 object storage. 
+This module enables Apache Hadoop applications including MapReduce jobs, read and write data to and from instances of the OpenStack Swift object store. It significantly rewrites the existing hadoop-openstack swift driver over the icehouse release of openstack sahara-extra project: https://github.com/openstack/sahara-extra/tree/icehouse-eol. It can be embedded into the the hadoop-openstack submodule of the hadoop codebase: https://github.com/apache/hadoop/tree/trunk/hadoop-tools/hadoop-openstack, in a way very similar to the huge efforts of the hadoop-aws s3a over s3n enhancements: https://hadoop.apache.org/docs/stable/hadoop-aws/tools/hadoop-aws/index.html. This codebase has been tested extensively against Swift-API compatible Ceph Jewel 10.2.7 object storage. 
 
 ## How to build and test
 
-The hadoop-openstack can be remotely tested against any public or private cloud infrastructure which supports the OpenStack Keystone authentication mechanism. It can also be tested against private OpenStack clusters. OpenStack Development teams are strongly encouraged to test the Hadoop swift filesystem client against any version of Swift that they are developing or deploying, to stress their cluster and to identify bugs early.
+The hadoop-openstack-swifta codebase can be remotely tested against any public or private cloud infrastructure which supports the OpenStack Keystone authentication mechanism. It can also be tested against private OpenStack clusters. OpenStack Development teams are strongly encouraged to test the Hadoop swift filesystem client against any version of Swift that they are developing or deploying, to stress their cluster and to identify bugs early.
 
 The module comes with a large suite of JUnit tests -tests that are only executed if the source tree includes credentials to test against a specific cluster.
 
@@ -44,5 +44,5 @@ Once this test succeeds, you can run the full test suite:
 
 3) Copy hadoop-openstack-*.jar to $HADOOP_HOME/share/hadoop/tools/lib/ and link the same jar to $HADOOP_HOME/share/hadoop/common/lib/
 
-4) You are ready to go, make sure to use the same swifta:// protocol, e.g.: hadoop fs -ls swifta://test.myswift/
+4) You are ready to go, make sure to use the swifta:// protocol, e.g.: hadoop fs -ls swifta://test.myswift/
 

@@ -14,16 +14,16 @@ Create the file:
      
 Into this file, insert the credentials needed to bond to the test filesystem, as decribed above.
 
-Next set the property test.fs.swifta.name to the URL of a swift container to test against. The tests expect exclusive access to this container -do not keep any other data on it, or expect it to be preserved.
+Next set the property test.fs.swifta.name to the URL of a swift container to test against. The tests expect exclusive access to this container do not keep any other data on it, or expect it to be preserved.
 
     <property>
       <name>test.fs.swifta.name</name>
-      <value>swifta://test.myswift/</value>
+      <value>swifta://test-container.test-region/</value>
     </property>
     
 Build swifta package:
 
-     mvn clean install -DskipTests
+     mvn clean package -DskipTests
    
 This builds a set of Hadoop JARs consistent with the hadoop-openstack module that is about to be tested.
 
@@ -38,11 +38,16 @@ Once this test succeeds, you can run the full test suite:
 
 ## How to configurae a hadoop cluster with swifta:
 
-1) Build swifta: mvn clean install -DskipTests
+1) Build swifta: mvn clean package -DskipTests
 
-2) Add the value of "fs.swifta.impl" in core-site.xml to "org.apache.hadoop.fs.swifta.snative.SwiftNativeFileSystem".
+2) Add the following snippet to core-site.xml:
+
+    <property>
+      <name>fs.swifta.impl</name>
+      <value>org.apache.hadoop.fs.swifta.snative.SwiftNativeFileSystem</value>
+    </property>
 
 3) Copy hadoop-openstack-*.jar to $HADOOP_HOME/share/hadoop/tools/lib/ and link the same jar to $HADOOP_HOME/share/hadoop/common/lib/
 
-4) You are ready to go, make sure to use the swifta:// protocol, e.g.: hadoop fs -ls swifta://test.myswift/
+4) You are ready to go, make sure to use the swifta:// protocol, e.g.: hadoop fs -ls swifta://test-container.test-region/. 
 

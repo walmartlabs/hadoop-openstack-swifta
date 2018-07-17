@@ -1,0 +1,95 @@
+Compared to sahara-extra's icehouse branch https://github.com/openstack/sahara-extra/tree/icehouse-eol (where the majority of the code is not much different from the latest hadoop-openstack codebase in https://hadoop.apache.org/docs/r3.1.0/hadoop-openstack/index.html). This project has the following improvements of features:
+
+1. Multi-threaded parallel deletes
+2. Multi-threaded parallel copies
+3. Multi-threaded parallel renames
+4. Fixed thread management in existing code and re-designed new custom thread management in general
+5. Support large dynamic object partitioning (DLOs) and multi-part uploads to overcome limitations in object size in object storage
+6. Added pagination for latge number of object listing
+7. Re-designed the range seek
+8. Added lazy seek to hugely improve read performance 
+9. Introduced four upload policies: MULTIPART_SPLIT (default), MULTIPART_NO_SPLIT, MULTIPART_SINGLE_THREAD and MULTIPART_SPLIT_BLOCK
+10. Added metrics and logging and monitoring for better trouble shooting
+
+
+Newly Added:
+src/main/java/org/apache/hadoop/fs/swifta/exceptions: SwiftMetricWrongParametersException.java
+src/main/java/org/apache/hadoop/fs/swifta/http: DaemonThreadFactory.java
+src/main/java/org/apache/hadoop/fs/swifta/http: HttpClientManager.java
+src/main/java/org/apache/hadoop/fs/swifta/http: IdleConnectionMonitorThread.java
+src/main/java/org/apache/hadoop/fs/swifta/http: SwiftClientConfig.java
+src/main/java/org/apache/hadoop/fs/swifta/http: SwiftClientConfigFactory.java
+src/main/java/org/apache/hadoop/fs/swifta/metrics: InputstreamMetrics.java
+src/main/java/org/apache/hadoop/fs/swifta/metrics: MetricsFactory.java
+src/main/java/org/apache/hadoop/fs/swifta/metrics: OutputstreamMetrics.java
+src/main/java/org/apache/hadoop/fs/swifta/metrics: SwiftMetric.java
+src/main/java/org/apache/hadoop/fs/swifta/metrics: SwiftRestClientMetrics.java
+src/main/java/org/apache/hadoop/fs/swifta/metrics: SwiftaFileSystemMetrics.java
+src/main/java/org/apache/hadoop/fs/swifta/metrics: SwiftaFileSystemStoreMetrics.java
+src/main/java/org/apache/hadoop/fs/swifta/model: ListObjectsRequest.java
+src/main/java/org/apache/hadoop/fs/swifta/model: ObjectsList.java
+src/main/java/org/apache/hadoop/fs/swifta/snative: AsynchronousUpload.java
+src/main/java/org/apache/hadoop/fs/swifta/snative: BackupFile.java
+src/main/java/org/apache/hadoop/fs/swifta/snative: RangeInputStream.java
+src/main/java/org/apache/hadoop/fs/swifta/snative: SwiftNativeOutputStreamMultiPartSingleThread.java
+src/main/java/org/apache/hadoop/fs/swifta/snative: SwiftNativeOutputStreamMultipartNoSplit.java
+src/main/java/org/apache/hadoop/fs/swifta/snative: SwiftNativeOutputStreamMultipartWithSplit.java
+src/main/java/org/apache/hadoop/fs/swifta/snative: SwiftNativeOutputStreamMultipartWithSplitBlock.java
+src/main/java/org/apache/hadoop/fs/swifta/snative: SwiftOutputStream.java
+src/main/java/org/apache/hadoop/fs/swifta/util: JsonUtil.java
+src/main/java/org/apache/hadoop/fs/swifta/util: PriorityThreadFactory.java
+src/main/java/org/apache/hadoop/fs/swifta/util: ThreadManager.java
+src/main/java/org/apache/hadoop/fs/swifta/util: ThreadUtils.java
+
+Changes:
+src/main/java/org/apache/hadoop/fs/swifta/auth/ApiKeyAuthenticationRequest.java
+src/main/java/org/apache/hadoop/fs/swifta/auth/ApiKeyCredentials.java
+src/main/java/org/apache/hadoop/fs/swifta/auth/AuthenticationRequest.java
+src/main/java/org/apache/hadoop/fs/swifta/auth/AuthenticationRequestWrapper.java
+src/main/java/org/apache/hadoop/fs/swifta/auth/AuthenticationResponse.java
+src/main/java/org/apache/hadoop/fs/swifta/auth/AuthenticationWrapper.java
+src/main/java/org/apache/hadoop/fs/swifta/auth/KeyStoneAuthRequest.java
+src/main/java/org/apache/hadoop/fs/swifta/auth/KeystoneApiKeyCredentials.java
+src/main/java/org/apache/hadoop/fs/swifta/auth/PasswordAuthenticationRequest.java
+src/main/java/org/apache/hadoop/fs/swifta/auth/PasswordCredentials.java
+src/main/java/org/apache/hadoop/fs/swifta/auth/Roles.java
+src/main/java/org/apache/hadoop/fs/swifta/auth/entities/AccessToken.java
+src/main/java/org/apache/hadoop/fs/swifta/auth/entities/Catalog.java
+src/main/java/org/apache/hadoop/fs/swifta/auth/entities/Endpoint.java
+src/main/java/org/apache/hadoop/fs/swifta/auth/entities/Tenant.java
+src/main/java/org/apache/hadoop/fs/swifta/auth/entities/User.java
+src/main/java/org/apache/hadoop/fs/swifta/exceptions/SwiftAuthenticationFailedException.java
+src/main/java/org/apache/hadoop/fs/swifta/exceptions/SwiftBadRequestException.java
+src/main/java/org/apache/hadoop/fs/swifta/exceptions/SwiftConfigurationException.java
+src/main/java/org/apache/hadoop/fs/swifta/exceptions/SwiftConnectionClosedException.java
+src/main/java/org/apache/hadoop/fs/swifta/exceptions/SwiftConnectionException.java
+src/main/java/org/apache/hadoop/fs/swifta/exceptions/SwiftException.java
+src/main/java/org/apache/hadoop/fs/swifta/exceptions/SwiftInternalStateException.java
+src/main/java/org/apache/hadoop/fs/swifta/exceptions/SwiftInvalidResponseException.java
+src/main/java/org/apache/hadoop/fs/swifta/exceptions/SwiftJsonMarshallingException.java
+src/main/java/org/apache/hadoop/fs/swifta/exceptions/SwiftNotDirectoryException.java
+src/main/java/org/apache/hadoop/fs/swifta/exceptions/SwiftOperationFailedException.java
+src/main/java/org/apache/hadoop/fs/swifta/exceptions/SwiftPathExistsException.java
+src/main/java/org/apache/hadoop/fs/swifta/exceptions/SwiftThrottledRequestException.java
+src/main/java/org/apache/hadoop/fs/swifta/exceptions/SwiftUnsupportedFeatureException.java
+src/main/java/org/apache/hadoop/fs/swifta/http/CopyMethod.java
+src/main/java/org/apache/hadoop/fs/swifta/http/ExceptionDiags.java
+src/main/java/org/apache/hadoop/fs/swifta/http/HttpBodyContent.java
+src/main/java/org/apache/hadoop/fs/swifta/http/HttpInputStreamWithRelease.java
+src/main/java/org/apache/hadoop/fs/swifta/http/RestClientBindings.java
+src/main/java/org/apache/hadoop/fs/swifta/http/SwiftProtocolConstants.java
+src/main/java/org/apache/hadoop/fs/swifta/http/SwiftRestClient.java
+src/main/java/org/apache/hadoop/fs/swifta/snative/SwiftFileStatus.java
+src/main/java/org/apache/hadoop/fs/swifta/snative/SwiftNativeFileSystem.java
+src/main/java/org/apache/hadoop/fs/swifta/snative/SwiftNativeFileSystemStore.java
+src/main/java/org/apache/hadoop/fs/swifta/snative/SwiftNativeInputStream.java
+src/main/java/org/apache/hadoop/fs/swifta/snative/SwiftObjectFileStatus.java
+src/main/java/org/apache/hadoop/fs/swifta/util/Duration.java
+src/main/java/org/apache/hadoop/fs/swifta/util/DurationStats.java
+src/main/java/org/apache/hadoop/fs/swifta/util/DurationStatsTable.java
+src/main/java/org/apache/hadoop/fs/swifta/util/SwiftObjectPath.java
+src/main/java/org/apache/hadoop/fs/swifta/util/SwiftTestUtils.java
+src/main/java/org/apache/hadoop/fs/swifta/util/SwiftUtils.java
+
+Unchanged:
+src/main/java/org/apache/hadoop/fs/swifta/snative/StrictBufferedFSInputStream.java

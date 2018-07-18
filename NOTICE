@@ -5,7 +5,7 @@ Compared to sahara-extra's icehouse branch https://github.com/openstack/sahara-e
 3. Multi-threaded parallel renames
 4. Fixed thread management in existing code and re-designed new custom thread management in general
 5. Support large dynamic object partitioning (DLOs) and multi-part uploads to overcome limitations in object size in object storage
-6. Added pagination for latge number of object listing
+6. Added pagination for large number of object listing
 7. Re-designed the range seek
 8. Added lazy seek to hugely improve read performance 
 9. Introduced four upload policies: MULTIPART_SPLIT (default), MULTIPART_NO_SPLIT, MULTIPART_SINGLE_THREAD and MULTIPART_SPLIT_BLOCK

@@ -3,7 +3,7 @@ envs:
     variables:
       component: "" # set inside main flows
       packaging: "jar"
-      proximityBaseURL: "https://repository.walmart.com/content/repositories"
+      proximityBaseURL: ""
       snapshotProximityRepoID: "pangaea_snapshots"
       snapshotProximityRepoURL: "${proximityBaseURL}/${snapshotProximityRepoID}"
 
